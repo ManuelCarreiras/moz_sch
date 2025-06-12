@@ -26,5 +26,13 @@ services:
     depends_on:
       - db
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    command: npm run dev -- --host
+
 volumes:
   postgres_data: 
