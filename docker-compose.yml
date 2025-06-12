@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: ./api
+    command: python app.py
+    volumes:
+      - ./api:/app
+    ports:
+      - "5000:5000"
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://app_user:app_password@db:5432/app_db
+      SQLALCHEMY_TRACK_MODIFICATIONS: 'False'
+    depends_on:
+      - db
+
+volumes:
+  postgres_data: 
