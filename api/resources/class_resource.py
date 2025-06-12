@@ -1,6 +1,6 @@
 from flask import request, g
 from flask_restful import Resource
-from api.models.class_model import Class as ClassModel
+from models.class_model import Class as ClassModel
 
 class ClassResource(Resource):
     def post(self):

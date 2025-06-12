@@ -1,6 +1,6 @@
 from flask import request, g
 from flask_restful import Resource
-from api.models.mensality import Mensality
+from models.mensality import Mensality
 
 class MensalityResource(Resource):
     def post(self):

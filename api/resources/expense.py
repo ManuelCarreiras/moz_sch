@@ -1,6 +1,6 @@
 from flask import request, g
 from flask_restful import Resource
-from api.models.expense import Expense
+from models.expense import Expense
 
 class ExpenseResource(Resource):
     def post(self):
