@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID, JSON
 from api.db import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -15,7 +16,10 @@ class User(db.Model):
     def __init__(self, data=None):
         self.username = data['username'] if data and 'username' in data else None
         self.email = data['email'] if data and 'email' in data else None
-        self.password = data['password'] if data and 'password' in data else None
+        if data and 'password' in data:
+            self.password = generate_password_hash(data['password'])
+        else:
+            self.password = None
 
     def json(self):
         return {
@@ -44,7 +48,7 @@ class User(db.Model):
         if data.get('email') is not None:
             self.email = data['email']
         if data.get('password') is not None:
-            self.password = data['password']
+            self.password = generate_password_hash(data['password'])
         self.updated_at = datetime.now()
         self.save_to_db()
 
@@ -52,4 +56,7 @@ class User(db.Model):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()
+
+    def verify_password(self, password):
+        return check_password_hash(self.password, password) 
