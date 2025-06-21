@@ -44,4 +44,6 @@ services:
       - db
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  - ./frontend:/app
+  - /app/node_modules
