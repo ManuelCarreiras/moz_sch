@@ -5,3 +5,5 @@ Flask-SQLAlchemy
 Flask-JWT-Extended
 PyJWT
 psycopg2-binary
+flask-cors
+werkzeug
