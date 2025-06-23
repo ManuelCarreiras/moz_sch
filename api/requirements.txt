@@ -3,4 +3,5 @@ Flask-RESTful
 SQLAlchemy
 Flask-SQLAlchemy
 Flask-JWT-Extended
-PyJWT 
+PyJWT
+psycopg2-binary

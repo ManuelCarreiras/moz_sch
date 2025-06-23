@@ -10,8 +10,7 @@ from db import init_db
 import jwt
 from flask_jwt_extended import JWTManager, create_access_token, verify_jwt_in_request, get_jwt, jwt_required
 from resources.login import LoginResource
-from functools import wraps
-from flask import abort
+from utils.auth import role_required
 import os
 
 app = Flask(__name__)
@@ -29,18 +28,6 @@ api.add_resource(ProfessorResource, '/professors')
 api.add_resource(MensalityResource, '/mensalities')
 api.add_resource(ExpenseResource, '/expenses')
 api.add_resource(LoginResource, '/login')
-
-def role_required(*roles):
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            verify_jwt_in_request()
-            claims = get_jwt()
-            if claims.get("role") not in roles:
-                abort(403, description="Forbidden: insufficient permissions")
-            return fn(*args, **kwargs)
-        return decorator
-    return wrapper
 
 # To use role-based access control in your resource classes:
 # from flask_jwt_extended import jwt_required

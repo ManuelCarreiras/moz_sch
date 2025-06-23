@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import role_required   
+from utils.auth import role_required   
 
 class UserResource(Resource):
     @jwt_required()

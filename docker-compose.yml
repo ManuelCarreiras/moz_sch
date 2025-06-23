@@ -15,7 +15,7 @@ services:
 
   api:
     build: ./api
-    command: python app.py
+    command: ["/wait-for-it.sh", "db:5432", "--", "python", "app.py"]
     volumes:
       - ./api:/app/api
     ports:
