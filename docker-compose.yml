@@ -1,30 +1,43 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
+  postgres-db:
+    container_name: postgres-db
+    build:
+      context: .
+      dockerfile: ./Dockerfile.postgres
+    ports:
+      - 5432:5432
+    volumes:
+        - postgres-db:/var/lib/postgresql/data
+    environment:
+        - POSTGRES_DB: app_db
+        - POSTGRES_USER: app_user
+        - POSTGRES_PASSWORD: app_password
     restart: always
-    environment:
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
   api:
-    build: ./api
-    command: ["/wait-for-it.sh", "db:5432", "--", "python", "web_app.py"]
-    volumes:
-      - ./api:/web_app/api
-    ports:
-      - "5000:5000"
-    environment:
-      SQLALCHEMY_DATABASE_URI: postgresql://app_user:app_password@db:5432/app_db
-      SQLALCHEMY_TRACK_MODIFICATIONS: 'False'
-    depends_on:
-      - db
+    image: api
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: ./Dockerfile
+    ports:  
+      - 5000:5000
+    restart: always
+    environment: 
+      # - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
+      - POSTGRES_DB: app_db
+      - POSTGRES_USER: app_user
+      - POSTGRES_PASSWORD: app_password
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4048M
 
   frontend:
     build: ./frontend
@@ -35,13 +48,17 @@ services:
       - /app/node_modules
     command: npm run dev -- --host
 
-  adminer:
+  postgres-adminer:
     image: adminer
+    container_name: db-postgres-adminer
     restart: always
     ports:
       - 8080:8080
-    depends_on:
-      - db
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128M
 
 volumes:
   postgres_data:

@@ -16,7 +16,11 @@ from flask_cors import CORS
 from db import db
 
 DEBUG = os.getenv("DEBUG", True)
-
+POSTGRES_USER = os.getenv("POSTGRES_USER","app_user")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD","app_password")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_DB = os.getenv("POSTGRES_DB","app_db")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST","localhost")
 
 
 class Webapi:
@@ -29,23 +33,20 @@ class Webapi:
 app = Flask(__name__)
 CORS(app)
 
-
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
-
+app.config['SQLALCHEMY_DATABASE_URI'] = \
+    "postgresql://{}:{}@{}:{}/{}".format(POSTGRES_USER,
+                                         POSTGRES_PASSWORD,
+                                         POSTGRES_HOST,
+                                         POSTGRES_PORT,
+                                         POSTGRES_DB)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
-
 api = Api(app)
 
 db.init_app(app)
-
-
-# Create postgres tables
-def create_tables():
-    db.create_all(bind_key=[None, "timescale"])
+with app.app_context():
+    db.create_all()
 
 api = Api(app)
 api.add_resource(UserResource, '/users')
@@ -56,14 +57,6 @@ api.add_resource(MensalityResource, '/mensalities')
 api.add_resource(ExpenseResource, '/expenses')
 api.add_resource(LoginResource, '/login')
 
-# To use role-based access control in your resource classes:
-# from flask_jwt_extended import jwt_required
-# from app import role_required
-# class SomeResource(Resource):
-#     @jwt_required()
-#     @role_required('admin')
-#     def get(self):
-#         ...
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True) 

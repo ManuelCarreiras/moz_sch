@@ -5,27 +5,23 @@ from api.db import db
 
 class Student(db.Model):
     __tablename__ = 'student'
-    _id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    _id = db.Column(db.String(36), primary_key=True, default = uuid.uuid4)
+    class_id = db.Column(db.String(36), db.ForeignKey('class._id'), nullable=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    class_id = db.Column(db.String(36), db.ForeignKey('class._id'), nullable=False)
-    enrollment_date = db.Column(db.DateTime, default=datetime.now)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(self, data=None):
-        self.name = data['name'] if data and 'name' in data else None
-        self.email = data['email'] if data and 'email' in data else None
-        self.class_id = data['class_id'] if data and 'class_id' in data else None
-        self.enrollment_date = data['enrollment_date'] if data and 'enrollment_date' in data else datetime.now()
-
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+        
     def json(self):
         return {
             '_id': str(self._id),
             'name': self.name,
             'email': self.email,
             'class_id': self.class_id,
-            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

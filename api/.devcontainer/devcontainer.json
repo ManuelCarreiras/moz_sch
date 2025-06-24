@@ -1,0 +1,68 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "api",
+	//  To deploy just run flask run --host 0.0.0.0
+	//  To deploy just run flask run --host 0.0.0.0
+	//  To deploy just run flask run --host 0.0.0.0
+	//  To deploy just run flask run --host 0.0.0.0
+	//  To deploy just run flask run --host 0.0.0.0
+
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// "image": "mcr.microsoft.com/devcontainers/python:0-3.9",
+	"build": {
+		"dockerfile": "${localWorkspaceFolder}/Dockerfile"
+	},
+	"runArgs": [
+		"--name", "api",
+		"--network=api-test_default",
+		"-p", "5000:5000"	
+	],
+	"containerEnv": {
+		// "FLASK_APP": "wsgi.py"
+	},
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			"settings": {
+				"python.defaultInterpreterPath": "/usr/local/bin/python"
+			},
+			"extensions": [
+				"github.copilot",
+				"streetsidesoftware.code-spell-checker",
+				"ms-python.python",
+				"ms-python.debugpy",
+				"ms-python.flake8",
+				"donjayamanne.python-extension-pack"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5000,5000],
+
+	// "mounts": [
+	// 	"source=~/.doppler,target=~/.doppler,type=bind,consistency=cached"
+	//   ],
+
+	// Use 'portsAttributes' to set default properties for specific forwarded ports. 
+	// More info: https://containers.dev/implementors/json_reference/#port-attributes
+	"portsAttributes": {
+		"5000": {
+			"label": "API PORT",
+			"onAutoForward": "notify"
+		}
+	},
+	// This prepares the env vars for all unittests
+	"initializeCommand": "doppler secrets download --no-file --format env > .env",
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "",
+	
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "root"
+    
+}

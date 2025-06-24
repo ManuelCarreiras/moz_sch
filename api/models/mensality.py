@@ -1,10 +1,12 @@
+from db import db
 import uuid
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
-from api.db import db
+from sqlalchemy.dialects.postgresql import JSON
 
 class Mensality(db.Model):
     __tablename__ = 'mensality'
-    _id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    _id = db.Column(db.String(36), primary_key=True,default=uuid.uuid4)
     student_id = db.Column(db.String(36), db.ForeignKey('student._id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     due_date = db.Column(db.DateTime, nullable=False)
@@ -12,21 +14,21 @@ class Mensality(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(self, data=None):
-        self.student_id = data['student_id'] if data and 'student_id' in data else None
-        self.amount = data['amount'] if data and 'amount' in data else 0.0
-        self.due_date = data['due_date'] if data and 'due_date' in data else datetime.now()
-        self.paid = data['paid'] if data and 'paid' in data else False
-
+    def __init__(self, amount, due_date, paid):
+        self._id = str(uuid.uuid4())
+        self.amount = amount
+        self.due_date = due_date
+        self.paid = paid
+        
     def json(self):
         return {
             '_id': str(self._id),
             'student_id': self.student_id,
             'amount': self.amount,
-            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'due_date': self.due_date.isoformat(),
             'paid': self.paid,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
     @classmethod

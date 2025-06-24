@@ -1,26 +1,36 @@
+from db import db
 import uuid
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
-from api.db import db
+from sqlalchemy.dialects.postgresql import JSON
 
 class Class(db.Model):
     __tablename__ = 'class'
-    _id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(100), nullable=False)
+    _id = db.Column(db.String(36), primary_key=True, default=uuid.uuid4)
+    class_name = db.Column(db.String(100), nullable=False)
+    class_subject = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.now,
+        onupdate=datetime.now
+    )
 
-    def __init__(self, data=None):
-        self.name = data['name'] if data and 'name' in data else None
-        self.description = data['description'] if data and 'description' in data else None
-
+    def __init__(self, class_name, class_subject, description):
+        self._id = str(uuid.uuid4())
+        self.class_name = class_name
+        self.class_subject = class_subject
+        self.description = description
+        
     def json(self):
         return {
             '_id': str(self._id),
-            'name': self.name,
+            'class_name': self.class_name,
+            'class_subject': self.class_subject,
             'description': self.description,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
     @classmethod
@@ -36,8 +46,8 @@ class Class(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('name') is not None:
-            self.name = data['name']
+        if data.get('class_name') is not None:
+            self.name = data['class_name']
         if data.get('description') is not None:
             self.description = data['description']
         self.updated_at = datetime.now()
