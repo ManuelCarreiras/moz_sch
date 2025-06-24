@@ -11,9 +11,9 @@ services:
     volumes:
         - postgres-db:/var/lib/postgresql/data
     environment:
-        - POSTGRES_DB: app_db
-        - POSTGRES_USER: app_user
-        - POSTGRES_PASSWORD: app_password
+        POSTGRES_DB: app_db
+        POSTGRES_USER: app_user
+        POSTGRES_PASSWORD: app_password
     restart: always
     deploy:
       resources:
@@ -30,9 +30,9 @@ services:
     restart: always
     environment: 
       # - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
-      - POSTGRES_DB: app_db
-      - POSTGRES_USER: app_user
-      - POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
     deploy:
       resources:
         limits:
@@ -61,4 +61,4 @@ services:
           memory: 128M
 
 volumes:
-  postgres_data:
+  postgres-db:
