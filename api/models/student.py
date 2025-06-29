@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
-from api.db import db
+from db import db
 
 class Student(db.Model):
     __tablename__ = 'student'
-    _id = db.Column(db.String(36), primary_key=True, default = uuid.uuid4)
-    class_id = db.Column(db.String(36), db.ForeignKey('class._id'), nullable=True)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
+    class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'), nullable=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)

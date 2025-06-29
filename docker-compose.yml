@@ -82,7 +82,7 @@ services:
           cpus: '2'
           memory: 6086M
 volumes:
-  db-postgres:
+  postgres-db:
     driver: local
   db-timescale:
     driver: local

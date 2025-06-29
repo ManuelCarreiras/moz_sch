@@ -6,8 +6,8 @@ from sqlalchemy.dialects.postgresql import JSON
 
 class Mensality(db.Model):
     __tablename__ = 'mensality'
-    _id = db.Column(db.String(36), primary_key=True,default=uuid.uuid4)
-    student_id = db.Column(db.String(36), db.ForeignKey('student._id'), nullable=False)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('student._id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     due_date = db.Column(db.DateTime, nullable=False)
     paid = db.Column(db.Boolean, default=False)

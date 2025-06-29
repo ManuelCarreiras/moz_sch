@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
-from api.db import db
+from db import db
 
 class GradesModel(db.Model):
     __tablename__ = 'grade'
-    _id = db.Column(db.String(36), primary_key=True, default=uuid.uuid4)
-    student_id = db.Column(db.String(36), db.ForeignKey('student._id'), nullable=False)
-    professor_id = db.Column(db.String(36), db.ForeignKey('professor._id'), nullable=False)
-    class_id = db.Column(db.String(36), db.ForeignKey('class._id'), nullable=False)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('student._id'), nullable=False)
+    professor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'), nullable=False)
+    class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'), nullable=False)
     grade_value = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)

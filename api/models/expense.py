@@ -8,7 +8,7 @@ from flask import g
 
 class Expense(db.Model):
     __tablename__ = 'expense'
-    _id = db.Column(db.String(36), primary_key=True,default=uuid.uuid4)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True,default=uuid.uuid4)
     professor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'), nullable=True)
     description = db.Column(db.String(255), nullable=False)
     amount = db.Column(db.Float, nullable=False)
