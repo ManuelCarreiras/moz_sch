@@ -7,3 +7,4 @@ PyJWT
 psycopg2-binary
 flask-cors
 werkzeug
+gunicorn==21.2.0

@@ -11,9 +11,10 @@ services:
     volumes:
         - postgres-db:/var/lib/postgresql/data
     environment:
-        POSTGRES_DB: app_db
-        POSTGRES_USER: app_user
-        POSTGRES_PASSWORD: app_password
+        - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        - POSTGRES_DB=${POSTGRES_DB}
     restart: always
     deploy:
       resources:
@@ -29,10 +30,8 @@ services:
       - 5000:5000
     restart: always
     environment: 
-      # - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
+
     deploy:
       resources:
         limits:
@@ -60,5 +59,30 @@ services:
           cpus: '0.1'
           memory: 128M
 
+  db-timescale:
+    image: db-timescale
+    build:
+      context: .
+      dockerfile: ./Dockerfile.timescale
+    container_name: db-timescale
+
+    volumes:
+        - db-timescale:/var/lib/postgresql/data
+    ports:
+        - 4321:5432
+    environment:
+        - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
+        - POSTGRES_USER=${TIMESCALE_USER}
+        - POSTGRES_PASSWORD=${TIMESCALE_PASSWORD}
+        - POSTGRES_DB=${TIMESCALE_DB}
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6086M
 volumes:
-  postgres-db:
+  db-postgres:
+    driver: local
+  db-timescale:
+    driver: local
