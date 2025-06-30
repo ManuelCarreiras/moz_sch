@@ -99,16 +99,16 @@
         <mxCell id="d1g-8U-fYo1eyLPwnb_f-3" value="?" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="400" y="140" width="100" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="d1g-8U-fYo1eyLPwnb_f-4" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+        <mxCell id="d1g-8U-fYo1eyLPwnb_f-4" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="80" y="230" width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="d1g-8U-fYo1eyLPwnb_f-5" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+        <mxCell id="d1g-8U-fYo1eyLPwnb_f-5" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="680" y="230" width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="d1g-8U-fYo1eyLPwnb_f-6" value="Dockerfile.&lt;div&gt;postgres&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+        <mxCell id="d1g-8U-fYo1eyLPwnb_f-6" value="Dockerfile.&lt;div&gt;postgres&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="240" y="230" width="80" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="d1g-8U-fYo1eyLPwnb_f-7" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+        <mxCell id="d1g-8U-fYo1eyLPwnb_f-7" value="Dockerfile" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
           <mxGeometry x="400" y="230" width="80" height="80" as="geometry" />
         </mxCell>
         <mxCell id="d1g-8U-fYo1eyLPwnb_f-8" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.19;exitY=0.967;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="d1g-8U-fYo1eyLPwnb_f-1" target="d1g-8U-fYo1eyLPwnb_f-4" edge="1">
@@ -144,7 +144,7 @@
         <mxCell id="y-F9UAM5kPfjd5I5bMuF-2" value="Docker compose yaml" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry y="30" width="300" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="y-F9UAM5kPfjd5I5bMuF-4" value="Makefile&amp;nbsp;" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+        <mxCell id="y-F9UAM5kPfjd5I5bMuF-4" value="Makefile&amp;nbsp;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fff2cc;gradientColor=#ffd966;strokeColor=#d6b656;" parent="1" vertex="1">
           <mxGeometry x="120" y="410" width="150" height="150" as="geometry" />
         </mxCell>
         <mxCell id="y-F9UAM5kPfjd5I5bMuF-7" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.182;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="y-F9UAM5kPfjd5I5bMuF-4" target="d1g-8U-fYo1eyLPwnb_f-15" edge="1">
@@ -153,7 +153,7 @@
             <mxPoint x="210" y="560" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="y-F9UAM5kPfjd5I5bMuF-8" value="Doppler&lt;div&gt;Get Env var&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="y-F9UAM5kPfjd5I5bMuF-8" value="Doppler&lt;div&gt;Get Env var&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#dae8fc;gradientColor=#7ea6e0;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="365" y="400" width="240" height="130" as="geometry" />
         </mxCell>
         <mxCell id="y-F9UAM5kPfjd5I5bMuF-9" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.16;exitY=0.55;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="y-F9UAM5kPfjd5I5bMuF-8" target="y-F9UAM5kPfjd5I5bMuF-4" edge="1">
