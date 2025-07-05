@@ -1,6 +1,6 @@
 from flask import request, g
 from flask_restful import Resource
-from models.professor import Professor
+from api.models.teacher import Professor
 
 class ProfessorResource(Resource):
     def post(self):
