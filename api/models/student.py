@@ -6,48 +6,54 @@ from db import db
 class Student(db.Model):
     __tablename__ = 'student'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
-    class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'), nullable=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    given_name = db.Column(db.String(100), nullable=False)
+    middle_name = db.Column(db.String(100), nullable=True)
+    surname = db.Column(db.String(100), nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    enrollment_date = db.Column(db.Date, nullable=False)
 
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
+    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date):
+        self.given_name = given_name
+        self.middle_name = middle_name
+        self.surname = surname
+        self.date_of_birth = date_of_birth
+        self.gender = gender
+        self.enrollment_date = enrollment_date
         
     def json(self):
         return {
             '_id': str(self._id),
-            'name': self.name,
-            'email': self.email,
-            'class_id': self.class_id,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'given_name': self.given_name,
+            'middle_name': self.middle_name,
+            'surname': self.surname,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
+            'gender': self.gender,
+            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,
+            'class_id': self.class_id
         }
 
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
 
-    @classmethod
-    def find_by_email(cls, email):
-        return cls.query.filter_by(email=email).first()
-
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('name') is not None:
-            self.name = data['name']
-        if data.get('email') is not None:
-            self.email = data['email']
-        if data.get('class_id') is not None:
-            self.class_id = data['class_id']
+        if data.get('given_name') is not None:
+            self.given_name = data['given_name']
+        if data.get('middle_name') is not None:
+            self.middle_name = data['middle_name']
+        if data.get('surname') is not None:
+            self.surname = data['surname']
+        if data.get('date_of_birth') is not None:
+            self.date_of_birth = data['date_of_birth']
+        if data.get('gender') is not None:
+            self.gender = data['gender']
         if data.get('enrollment_date') is not None:
             self.enrollment_date = data['enrollment_date']
-        self.updated_at = datetime.now()
         self.save_to_db()
 
     def delete_by_id(self, record_id):
