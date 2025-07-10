@@ -29,8 +29,7 @@ class Student(db.Model):
             'surname': self.surname,
             'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
             'gender': self.gender,
-            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,
-            'class_id': self.class_id
+            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None
         }
 
     @classmethod
