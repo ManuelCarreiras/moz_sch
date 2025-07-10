@@ -24,13 +24,10 @@ class Professor(db.Model):
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
 
 
-    class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'), nullable=True)
-    name = db.Column(db.String(100), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-
-    def __init__(self, given_name, email_address, phone_number):
-        self.given_namename = given_name
+    def __init__(self, given_name, surname, gender, email_address, phone_number):
+        self.given_name = given_name
+        self.surname = surname
+        self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
 
