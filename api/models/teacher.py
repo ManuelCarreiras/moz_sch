@@ -14,7 +14,7 @@ class Gender(Enum):
     PREFER_NOT_TO_SAY = 'Prefer not to say'
 
 
-class Professor(db.Model):
+class ProfessorModel(db.Model):
     __tablename__ = 'professor'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     given_name = db.Column(db.String(120), nullable = False)
