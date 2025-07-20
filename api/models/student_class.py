@@ -9,9 +9,7 @@ class StudentClassModel(db.Model):
     class_id = db.Column(UUID(as_uuid=True), foreign_key='class._id')
     score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, student_id, class_id, score):
-        self.student_id = student_id
-        self.class_id = class_id
+    def __init__(self, score):
         self.score = score
 
         
@@ -35,10 +33,6 @@ class StudentClassModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('student_id') is not None:
-            self.student_id = data['student_id']
-        if data.get('class_id') is not None:
-            self.class_id = data['class_id']
         if data.get('score') is not None:
             self.score = data['score']
        

@@ -8,13 +8,10 @@ class StudentYearLevelModel(db.Model):
     student_id = db.Column(UUID(as_uuid=True), foreign_key='student._id')
     level_id = db.Column(UUID(as_uuid=True), foreign_key='year_level._id')
     year_id = db.Column(UUID(as_uuid=True), foreign_key='school_year._id')
+    score = db.Column(db.Float, nullable=False)
 
-
-    def __init__(self, student_id, level_id, year_id):
-        self.student_id = student_id
-        self.level_id = level_id
-        self.year_id = year_id
-
+    def __init__(self, score):
+        self.score = score
         
     def json(self):
         return {
@@ -44,12 +41,8 @@ class StudentYearLevelModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('student_id') is not None:
-            self.student_id = data['student_id']
-        if data.get('level_id') is not None:
-            self.level_id = data['level_id']
-        if data.get('year_id') is not None:
-            self.year_id = data['year_id']
+        if data.get('score') is not None:
+            self.score = data['score']
        
         self.save_to_db()
 

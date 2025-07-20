@@ -12,8 +12,7 @@ class PeriodModel(db.Model):
     end_time = db.Column(db.Time, nullable=False)
 
 
-    def __init__(self, year_id, name, start_time, end_time):
-        self.year_id = year_id
+    def __init__(self, name, start_time, end_time):
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
@@ -41,8 +40,6 @@ class PeriodModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('year_id') is not None:
-            self.year_id = data['year_id']
         if data.get('name') is not None:
             self.name = data['name']
         if data.get('start_time') is not None:

@@ -12,8 +12,7 @@ class TermModel(db.Model):
     end_date = db.Column(db.Date, nullable=False)
 
 
-    def __init__(self, year_id, term_number, start_date, end_date):
-        self.year_id = year_id
+    def __init__(self, term_number, start_date, end_date):
         self.term_number = term_number
         self.start_date = start_date
         self.end_date = end_date
@@ -41,8 +40,7 @@ class TermModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('year_id') is not None:
-            self.year_id = data['year_id']
+
         if data.get('term_number') is not None:
             self.term_number = data['term_number']
         if data.get('start_date') is not None:
