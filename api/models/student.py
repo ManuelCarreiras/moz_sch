@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
-class Student(db.Model):
+class StudentModel(db.Model):
     __tablename__ = 'student'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
     given_name = db.Column(db.String(100), nullable=False)
