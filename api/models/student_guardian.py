@@ -8,7 +8,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class class with its values
-class student_guardian(db.Model):
+class StudentGuardianModel(db.Model):
     __tablename__ = 'student_guardian'
     student_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
     guardian_type_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'), nullable=False)
@@ -40,9 +40,9 @@ class student_guardian(db.Model):
 #        return cls.query.filter_by(guardian_id=guardian_id).first()
     
 
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
+    # def save_to_db(self):
+    #     db.session.add(self)
+    #     db.session.commit()
 
 #    def update_entry(self, data=None):
 #       if data.get('class_name') is not None:
@@ -50,11 +50,11 @@ class student_guardian(db.Model):
 #        self.save_to_db()
 
 
-    def delete_by_id(self, record_id):
-        obj = self.query.filter_by(_id=record_id).first()
-        if obj:
-            db.session.delete(obj)
-            db.session.commit() 
+    # def delete_by_id(self, record_id):
+    #     obj = self.query.filter_by(_id=record_id).first()
+    #     if obj:
+    #         db.session.delete(obj)
+    #         db.session.commit() 
 
 
 

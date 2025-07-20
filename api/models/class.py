@@ -8,14 +8,14 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class class with its values
-class Class(db.Model):
+class ClassModel(db.Model):
     __tablename__ = 'class'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     subject_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
-    tearcher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'), nullable=False)
+    tearcher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher._id'), nullable=False)
     term_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
     start_period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
-    end_period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period.year_id'), nullable=False)
+    end_period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
     classroom_id = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom._id'), nullable=False)
     class_name = db.Column(db.String(100), nullable=False)
 

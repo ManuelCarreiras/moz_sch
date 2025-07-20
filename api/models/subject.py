@@ -8,7 +8,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class class with its values
-class subject(db.Model):
+class SubjectModel(db.Model):
     __tablename__ = 'subject'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     department_id = db.column(UUID(as_uuid=True), db.ForeignKey('department._id'), nullable=False)

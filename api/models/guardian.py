@@ -8,7 +8,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class guardian
-class Guardian(db.Model):
+class GuardianModel(db.Model):
     __tablename__ = 'guardian'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     given_name = db.Column(db.String(120), nullable = False)
@@ -17,8 +17,9 @@ class Guardian(db.Model):
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
 
 
-    def __init__(self, given_name, email_address, phone_number):
+    def __init__(self, given_name, surname, email_address, phone_number):
         self.given_name = given_name
+        self.surname = surname
         self.email_address = email_address
         self.phone_number = phone_number
 

@@ -8,7 +8,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class gender with its values
-class classroom_types(db.Model):
+class ClassroomTypesModel(db.Model):
     __tablename__ = 'classroom_types'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(120), nullable = False)

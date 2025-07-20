@@ -8,23 +8,23 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class class with its values
-class guardian_type(db.Model):
+class GuardianTypeModel(db.Model):
     __tablename__ = 'guadian_type'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    guardian_type_name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     
 
 
     
-    def __init__(self, guardian_type_name):
-        self.guardian_type_name = guardian_type_name
+    def __init__(self, name):
+        self.name = name
 
 
 
     def json(self):
         return {
             '_id': str(self._id),
-            'guardian_type_name': self.guardian_type_name
+            'name': self.name
         }
     
     @classmethod
@@ -32,8 +32,8 @@ class guardian_type(db.Model):
         return cls.query.filter_by(_id=_id).first()
     
     @classmethod
-    def find_by_guardian_type_name(cls, guardian_type_name):
-        return cls.query.filter_by(guardian_type_namee=guardian_type_name).first()
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
   
 
     def save_to_db(self):
@@ -41,8 +41,8 @@ class guardian_type(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
-        if data.get('guardian_type_name') is not None:
-            self.guardian_type_name = data['guardian_type_name']
+        if data.get('name') is not None:
+            self.name = data['name']
 
         self.save_to_db()
 
