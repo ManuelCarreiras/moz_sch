@@ -7,6 +7,11 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 
+<<<<<<< HEAD:api/models/guardian.py
+# Initializing the class guardian
+class GuardianModel(db.Model):
+    __tablename__ = 'guardian'
+=======
 # Initializing the class gender with its values
 class Gender(Enum):
     MALE = 'Male'
@@ -16,18 +21,17 @@ class Gender(Enum):
 
 class TeacherModel(db.Model):
     __tablename__ = 'professor'
+>>>>>>> dev_moz:api/models/teacher.py
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     given_name = db.Column(db.String(120), nullable = False)
     surname = db.Column(db.String(100), nullable = False)
-    gender = db.Column(SQLAlchemyEnum(Gender), nullable=False)
     email_address = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
 
 
-    def __init__(self, given_name, surname, gender, email_address, phone_number):
+    def __init__(self, given_name, surname, email_address, phone_number):
         self.given_name = given_name
         self.surname = surname
-        self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
 
@@ -37,7 +41,6 @@ class TeacherModel(db.Model):
             '_id': str(self._id),
             'given_name': self.given_name,
             'surname': self.surname,
-            'gender': self.gender,
             'email_address': self.email_address,
             'phone_number': self.phone_number
         }
@@ -59,6 +62,10 @@ class TeacherModel(db.Model):
     def find_by_email(cls, email_address):
         return cls.query.filter_by(email_address=email_address).first()
     
+    @classmethod
+    def find_by_phone_number(cls, phone_number):
+        return cls.query.filter_by(phone_number=phone_number).first()
+    
 
     def save_to_db(self):
         db.session.add(self)
@@ -68,7 +75,7 @@ class TeacherModel(db.Model):
         if data.get('given_name') is not None:
             self.given_name = data['given_name']
         if data.get('email_address') is not None:
-            self.email = data['email_address']
+            self.email_adress = data['email_address']
         if data.get('surname') is not None:
             self.surname = data['surname']
         if data.get('phone_number') is not None:
