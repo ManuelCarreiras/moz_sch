@@ -3,10 +3,6 @@ from flask import Flask, g, request
 from flask_restful import Api
 
 from resources.student import StudentResource
-from resources.class_resource import ClassResource
-from resources.professor import ProfessorResource
-from resources.mensality import MensalityResource
-from resources.expense import ExpenseResource
 
 import jwt
 from flask_jwt_extended import JWTManager, create_access_token, verify_jwt_in_request, get_jwt, jwt_required
@@ -96,12 +92,7 @@ if __name__ != '__main__':
 
 
 
-api.add_resource(StudentResource, '/students')
-api.add_resource(ClassResource, '/classes')
-api.add_resource(ProfessorResource, '/professors')
-api.add_resource(MensalityResource, '/mensalities')
-api.add_resource(ExpenseResource, '/expenses')
-
+api.add_resource(StudentResource, 'sta_isabel/students')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0') 
