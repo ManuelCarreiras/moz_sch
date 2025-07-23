@@ -30,8 +30,8 @@ class SchoolYearModel(db.Model):
         return cls.query.filter_by(_id=_id).first()
     
     @classmethod
-    def find_by_year_name(cls, year_name):
-        return cls.query.filter_by(year_name=year_name).first()
+    def find_by_dates(cls, start_date, end_date):
+        return cls.query.filter_by(start_date=start_date, end_date=end_date).first()
 
     def save_to_db(self):
         db.session.add(self)
