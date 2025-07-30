@@ -1,5 +1,4 @@
 from flask import request, g, Response
-from matplotlib.hatch import Stars
 from flask_restful import Resource
 from models.period import PeriodModel
 from models.school_year import SchoolYearModel
@@ -10,6 +9,7 @@ class PeriodResource(Resource):
         data = request.get_json()
 
         if (
+            not data.get('year_id') or
             not data.get('name') or 
             not data.get('start_time') or 
             not data.get('end_time')
@@ -29,34 +29,34 @@ class PeriodResource(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_term = PeriodModel(
+        new_period = PeriodModel(
             year_id = year_id._id,
             term_number = data['term_number'],
             start_date = data['start_date'],
             end_date = data['end_date']
             )
         
-        new_term.save_to_db()
+        new_period.save_to_db()
 
         response = {
             'success': True,
-            'message': new_term
+            'message': new_period
         }
         return Response(json.dumps(response), 201)
     
     def get(self, id):
-        term: PeriodModel = PeriodModel.find_by_id(id)
+        period: PeriodModel = PeriodModel.find_by_id(id)
 
-        if term is None:
+        if period is None:
             response = {
                 'success': False,
-                'message': 'Term not found'
+                'message': 'Period not found'
             }
             return Response(json.dumps(response), 404)
         
         response =  {
             'success': True,
-            'message': term.json()
+            'message': period.json()
         }
         return Response(json.dumps(response), 200)
 
@@ -66,43 +66,43 @@ class PeriodResource(Resource):
         if '_id' not in data:
             response = {
                 'success': False,
-                'message': 'Term does not exist'
+                'message': 'period does not exist'
             }
             return Response(json.dumps(response), 404)
         
-        term: PeriodModel = PeriodModel.find_by_id(data['_id'])
+        period: PeriodModel = PeriodModel.find_by_id(data['_id'])
 
-        if term is None:
+        if period is None:
             response = {
                 'success': False,
-                'message': 'Term does not exist'
+                'message': 'period does not exist'
             }
             return Response(json.dumps(response), 404)
         
-        term.update_entry(data)
+        period.update_entry(data)
 
         response = {
             'success': True,
-            'message': term.json()
+            'message': period.json()
         }
 
         return Response(json.dumps(response), 200)
 
     def delete(self, id):
-        term: PeriodModel = PeriodModel.find_by_id(id)
+        period: PeriodModel = PeriodModel.find_by_id(id)
 
-        if term is None:
+        if period is None:
             response = {
                 'success': False,
-                'message': 'Term does not exist'
+                'message': 'Period does not exist'
             }
             return Response(json.dumps(response), 404)
         
-        term.delete_by_id(id)
+        period.delete_by_id(id)
 
         response = {
                 'success': True,
-                'message': 'Term record deleted'
+                'message': 'Period record deleted'
             }
 
         return Response(json.dumps(response), 200)
