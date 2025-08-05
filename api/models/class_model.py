@@ -14,8 +14,7 @@ class ClassModel(db.Model):
     subject_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
     tearcher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher._id'), nullable=False)
     term_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
-    start_period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
-    end_period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
+    period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
     classroom_id = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom._id'), nullable=False)
     class_name = db.Column(db.String(100), nullable=False)
 
@@ -31,8 +30,7 @@ class ClassModel(db.Model):
             'subject_id': self.subject_id,
             'tearcher_id': self.tearcher_id,
             'term_id': self.term_id,
-            'start_period_id': self.start_period_id,
-            'end_period_id': self.end_period_id,
+            'period_id': self.period_id,
             'classroom_id': self.classroom_id,
             'class_name': self.class_name
         }
@@ -55,12 +53,8 @@ class ClassModel(db.Model):
         return cls.query.filter_by(term_id=term_id).first()
     
     @classmethod
-    def find_by_start_period_id(cls, start_period_id):
+    def find_by_period_id(cls, start_period_id):
         return cls.query.filter_by(start_period_id=start_period_id).first()
-    
-    @classmethod
-    def find_by_end_period_id(cls, end_period_id):
-        return cls.query.filter_by(end_period_id=end_period_id).first()
     
 
     @classmethod

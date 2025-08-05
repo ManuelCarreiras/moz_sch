@@ -9,7 +9,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 # Initializing the class class with its values
 class GuardianTypeModel(db.Model):
-    __tablename__ = 'guadian_type'
+    __tablename__ = 'guardian_type'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(100), nullable=False)
     
