@@ -19,10 +19,6 @@ class StudentYearLevelModel(db.Model):
             'level_id': self.level_id,
             'year_id': self.year_id
         }
-
-    @classmethod
-    def find_by_id(cls, _id):
-        return cls.query.filter_by(_id=_id).first()
     
     @classmethod
     def find_by_student_id(cls, student_id):
@@ -46,7 +42,7 @@ class StudentYearLevelModel(db.Model):
        
         self.save_to_db()
 
-    def delete_by_id(self, record_id):
+    def delete_by_level_id(self, record_id):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)

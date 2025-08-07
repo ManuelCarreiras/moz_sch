@@ -2,7 +2,7 @@ from flask import request, g
 from flask_restful import Resource
 from models.teacher import TeacherModel
 
-class TeacherrResource(Resource):
+class TeacherResource(Resource):
     def post(self):
         data = request.get_json()
         new_professor = TeacherModel(_id=g.professor, **data)

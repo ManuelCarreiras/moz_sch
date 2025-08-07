@@ -38,8 +38,14 @@ class StudentClassModel(db.Model):
        
         self.save_to_db()
 
-    def delete_by_id(self, record_id):
-        obj = self.query.filter_by(_id=record_id).first()
+    def delete_by_student_id(self, student_id):
+        obj = self.query.filter_by(student_id=student_id).first()
+        if obj:
+            db.session.delete(obj)
+            db.session.commit() 
+
+    def delete_by_class_id(self, class_id):
+        obj = self.query.filter_by(class_id=class_id).first()
         if obj:
             db.session.delete(obj)
             db.session.commit() 
