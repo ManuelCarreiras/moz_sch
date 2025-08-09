@@ -31,12 +31,7 @@ class StudentYearLevelResourceLevel(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_school_year_level = StudentYearLevelModel(
-            student_id = data['student_id'],
-            level_id = data['level_id'],
-            year_id = data['year_id'],
-            score = data['score']
-            )
+        new_school_year_level = StudentYearLevelModel(**data)
         
         new_school_year_level.save_to_db()
 

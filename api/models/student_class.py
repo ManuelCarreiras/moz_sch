@@ -24,10 +24,6 @@ class StudentClassModel(db.Model):
     def find_by_student_id(cls, student_id):
         return cls.query.filter_by(student_id=student_id).first()
     
-    @classmethod
-    def find_by_class_id(cls, class_id):
-        return cls.query.filter_by(class_id=class_id).first()
-
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

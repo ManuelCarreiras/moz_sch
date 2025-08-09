@@ -18,11 +18,7 @@ class SchoolYearResource(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_school_year = SchoolYearModel(
-            year_name = data['year_name'],
-            start_date = data['start_date'],
-            end_date = data['end_date']
-            )
+        new_school_year = SchoolYearModel(**data)
         
         new_school_year.save_to_db()
 

@@ -1,6 +1,7 @@
-from flask import request, g
+from flask import request, g, Response
 from flask_restful import Resource
 from models.guardian_type import GuardianTypeModel
+import json
 
 
 
@@ -8,37 +9,79 @@ class GuardianTypeResource(Resource):
 
    def post(self):
         data = request.get_json()
-        new_guardian_type = GuardianTypeModel(_id=g.guardian_type, **data)
 
-        if GuardianTypeModel.find_by_id(g.guardian_type):
-            return {'message': 'The guardian type already exists'}, 400
+        if (
+            not data.get('guardian_type_name')
+        ):
+            response = {
+                'success': False,
+                'message':'Missing required field'
+            }
+            return Response(json.dumps(response), status=400)
 
+        new_guardian_type = GuardianTypeModel(**data)
         new_guardian_type.save_to_db()
-        return new_guardian_type.json(), 201
+
+        response = {
+            'success': True,
+            'message': new_guardian_type.json()
+        }
+        return Response(json.dumps(response), 201)
    
-   def get(self):
-        guardian_type = GuardianTypeModel.find_by_id(g.guardian_type)
+   def get(self,id):
+        guardian_type = GuardianTypeModel.find_by_id(id)
 
         if guardian_type is None:
-            return {'message': 'Guardian type not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian type not found'
+            }
+            return Response(json.dumps(response), 404)
 
-        return guardian_type.json(), 200
+        response = {
+            'success': True,
+            'message': guardian_type.json()
+        }
+        return Response(json.dumps(response), 200)
 
    def put(self):
         data = request.get_json()
-        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(g.guardian_type)
+
+        if '_id' not in data:
+            response = {
+                'success': False,
+                'message': 'Guardian type does not exist'
+            }
+            return Response(json.dumps(response), 404)          
+        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(data['_id'])
 
         if guardian_type is None:
-            return {'message': 'Guardian type not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian type not found'
+            }
+            return Response(json.dumps(response), 404)
 
         guardian_type.update_entry(data)
-        return guardian_type.json(), 200
+        response = {
+            'success': True,
+            'message': guardian_type.json()
+        }
+        return Response(json.dumps(response), 200)
 
-   def delete(self):
-        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(g.guardian_type)
+   def delete(self,id):
+        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(id)
 
         if guardian_type is None:
-            return {'message': 'Guardian type not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian type not found'
+            }
+            return Response(json.dumps(response), 404)
 
-        guardian_type.delete_by_id(g.guardian_type)
-        return {'message': 'Guardian type deleted'}, 200
+        guardian_type.delete_by_id(id)
+        response = {
+            'success': True,
+            'message': 'Guardian type record deleted'
+        }
+        return Response(json.dumps(response), 200)

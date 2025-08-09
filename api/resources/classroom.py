@@ -27,16 +27,12 @@ class ClassroomResource(Resource):
         if not roomtype_id:
             response = {
                 'success': False,
-                'message': 'Room type does not exist in the database'
+                'message': 'Classroom type does not exist in the database'
             }
             return Response(json.dumps(response), 400)
         
         
-        new_classroom = ClassroomModel(
-            room_type= data['room_type'],
-            room_name = data['room_name'],
-            capacity = data['capacity']
-            )
+        new_classroom = ClassroomModel(data*)
         
         new_classroom.save_to_db()
 

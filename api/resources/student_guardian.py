@@ -54,11 +54,7 @@ class StudentGuardianResource(Resource):
             return Response(json.dumps(response), 400)
         
         
-        new_student_guardian = StudentGuardianModel(
-            student_id = data['student_id'],
-            guardian_type_id = data['guardian_type_id'],
-            guardian_id = data['guardian_id']
-            )
+        new_student_guardian = StudentGuardianModel(**data)
         
         new_student_guardian.save_to_db()
 
@@ -67,4 +63,62 @@ class StudentGuardianResource(Resource):
             'message': new_student_guardian
         }
         return Response(json.dumps(response), 201)
+    
+    def get(self, id):
+        student_guardian: StudentGuardianModel = StudentGuardianModel.find_by_id(id)
 
+        if student_guardian is None:
+            response = {
+                'success': False,
+                'message': 'Student guardian does not exist'
+            }
+            return Response(json.dumps(response), 404)
+
+        response = {
+            'success': True,
+            'message': student_guardian.json()
+        }
+        return Response(json.dumps(response), 200)
+    
+    def put(self):
+        data = request.get_json()
+        
+        if '_id' not in data:
+            response = {
+                'success': False,
+                'message': 'Student guardian does not exist'
+            } 
+            return Response(json.dumps(response), 404)
+
+        student_guardian = StudentGuardianModel.find_by_id(data['_id'])
+
+        if student_guardian is None:
+            response = {
+                'success': False,
+                'message': 'Student guardian does not exist'
+            }
+            return Response(json.dumps(response), 404)
+
+        student_guardian.update_entry(data)
+        response = {
+            'success': True,
+            'message': student_guardian.json()
+        }
+        return Response(json.dumps(response), 200)        
+        
+    def delete(self, id):
+        student_guardian: StudentGuardianModel = StudentGuardianModel.find_by_id(id)
+
+        if student_guardian is None:
+            response = {
+                'success': False,
+                'message': 'Student guardian does not exist'
+            }
+            return Response(json.dumps(response), 404)
+        
+        student_guardian.delete_by_id(id)
+        response = {
+            'success': True,
+            'message': 'Student guardian record deleted'
+        }
+        return Response(json.dumps(response), 200)

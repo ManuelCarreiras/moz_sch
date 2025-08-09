@@ -1,5 +1,4 @@
 from flask import request, g, Response
-from matplotlib.hatch import Stars
 from flask_restful import Resource
 from models.term import TermModel
 from models.school_year import SchoolYearModel
@@ -29,12 +28,7 @@ class TermResource(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_term = TermModel(
-            year_id = year_id._id,
-            term_number = data['term_number'],
-            start_date = data['start_date'],
-            end_date = data['end_date']
-            )
+        new_term = TermModel(**data)
         
         new_term.save_to_db()
 

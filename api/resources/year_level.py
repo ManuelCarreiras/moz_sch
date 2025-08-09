@@ -17,10 +17,7 @@ class YearLevelResource(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_year_level = YearLevelModel(
-            level_name = data['level_name'],
-            level_order = data['level_order']
-            )
+        new_year_level = YearLevelModel(**data)
         
         new_year_level.save_to_db()
 

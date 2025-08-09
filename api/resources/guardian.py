@@ -1,6 +1,7 @@
-from flask import request, g
+from flask import request, g, Response
 from flask_restful import Resource
 from models.guardian import GuardianModel
+import json
 
 
 
@@ -8,37 +9,79 @@ class GuardianResource(Resource):
 
    def post(self):
         data = request.get_json()
-        new_guardian = GuardianModel(_id=g.guardian, **data)
 
-        if GuardianModel.find_by_id(g.guardian):
-            return {'message': 'The guardian already exists'}, 400
+        if (
+            not data.get('guardian_name')
+        ):
+            response = {
+                'success': False,
+                'message':'Missing required field'
+            }
+            return Response(json.dumps(response), status=400)
 
+        new_guardian = GuardianModel(**data)
         new_guardian.save_to_db()
-        return new_guardian.json(), 201
+
+        response = {
+            'success': True,
+            'message': new_guardian.json()
+        }
+        return Response(json.dumps(response), 201)
    
-   def get(self):
-        guardian = GuardianModel.find_by_id(g.guardian)
+   def get(self,id):
+        guardian = GuardianModel.find_by_id(id)
 
         if guardian is None:
-            return {'message': 'Guardian not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian not found'
+            }
+            return Response(json.dumps(response), 404)
 
-        return guardian.json(), 200
+        response = {
+            'success': True,
+            'message': guardian.json()
+        }
+        return Response(json.dumps(response), 200)
 
    def put(self):
         data = request.get_json()
-        guardian = GuardianModel.find_by_id(g.guardian)
+
+        if '_id' not in data:
+            response = {
+                'success': False,
+                'message': 'Guardian does not exist'
+            }
+            return Response(json.dumps(response), 404)
+        guardian = GuardianModel.find_by_id(data['_id'])
 
         if guardian is None:
-            return {'message': 'Guardian not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian not found'
+            }
+            return Response(json.dumps(response), 404)
 
         guardian.update_entry(data)
-        return guardian.json(), 200
+        response = {
+            'success': True,
+            'message': guardian.json()
+        }
+        return Response(json.dumps(response), 200)
 
-   def delete(self):
-        guardian = GuardianModel.find_by_id(g.guardian)
+   def delete(self,id):
+        guardian = GuardianModel.find_by_id(id)
 
         if guardian is None:
-            return {'message': 'Guardian not found'}, 404
+            response = {
+                'success': False,
+                'message': 'Guardian not found'
+            }
+            return Response(json.dumps(response), 404)
 
-        guardian.delete_by_id(g.guardiane)
-        return {'message': 'guardian deleted'}, 200
+        guardian.delete_by_id(id)
+        response = {
+            'success': True,
+            'message': 'Guardian record deleted'
+        }
+        return Response(json.dumps(response), 200)

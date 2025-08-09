@@ -18,11 +18,7 @@ class ScoreRangeResource(Resource):
             }
             return Response(json.dumps(response), 400)
         
-        new_score_range = ScoreRangeModel(
-            min_score = data['min_score'],
-            max_score = data['max_score'],
-            grade = data['grade']
-            )
+        new_score_range = ScoreRangeModel(**data)
         
         new_score_range.save_to_db()
 
