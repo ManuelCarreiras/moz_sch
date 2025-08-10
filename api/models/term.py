@@ -8,11 +8,12 @@ class TermModel(db.Model):
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
     year_id = db.Column(UUID(as_uuid=True), nullable=False, foreign_key='school_year._id')
     term_number = db.Column(db.Integer, nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
 
 
-    def __init__(self, term_number, start_date, end_date):
+    def __init__(self, year_id, term_number, start_date, end_date):
+        self.year_id = year_id
         self.term_number = term_number
         self.start_date = start_date
         self.end_date = end_date
@@ -23,8 +24,8 @@ class TermModel(db.Model):
             '_id': str(self._id),
             'year_id': self.year_id,
             'term_number': self.term_number,
-            'start_date': self.start_date,
-            'end_date': self.end_date
+            'start_date': self.start_date.isoformat(),
+            'end_date': self.end_date.isoformat()
         }
 
     @classmethod

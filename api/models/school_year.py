@@ -7,8 +7,8 @@ class SchoolYearModel(db.Model):
     __tablename__ = 'school_year'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
     year_name = db.Column(db.String(100), nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
 
 
     def __init__(self, year_name, start_date, end_date):
@@ -21,8 +21,8 @@ class SchoolYearModel(db.Model):
         return {
             '_id': str(self._id),
             'year_name': self.year_name,
-            'start_date': self.start_date,
-            'end_date': self.end_date
+            'start_date': self.start_date.isoformat(),
+            'end_date': self.end_date.isoformat()
         }
 
     @classmethod

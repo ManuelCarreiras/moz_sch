@@ -14,8 +14,6 @@ class DepartmentModel(db.Model):
     department_name = db.Column(db.String(100), nullable=False)
     
 
-
-    
     def __init__(self, department_name):
         self.department_name = department_name
 

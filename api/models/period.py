@@ -8,11 +8,12 @@ class PeriodModel(db.Model):
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
     year_id = db.Column(UUID(as_uuid=True), nullable=False, foreign_key='school_year._id')
     name = db.Column(db.String(100), nullable=False)
-    start_time = db.Column(db.Time, nullable=False)
-    end_time = db.Column(db.Time, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
 
 
-    def __init__(self, name, start_time, end_time):
+    def __init__(self, year_id, name, start_time, end_time):
+        self.year_id = year_id
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
@@ -23,8 +24,8 @@ class PeriodModel(db.Model):
             '_id': str(self._id),
             'year_id': self.year_id,
             'name': self.name,
-            'start_time': self.start_time,
-            'end_time': self.end_time
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat()
         }
 
     @classmethod

@@ -12,7 +12,7 @@ class ClassModel(db.Model):
     __tablename__ = 'class'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     subject_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
-    tearcher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher._id'), nullable=False)
+    teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher._id'), nullable=False)
     term_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
     period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
     classroom_id = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom._id'), nullable=False)
@@ -20,7 +20,12 @@ class ClassModel(db.Model):
 
 
     
-    def __init__(self, class_name):
+    def __init__(self, subject_id, teacher_id, term_id, period_id, classroom_id, class_name):
+        self.subject_id = subject_id
+        self.teacher_id = teacher_id
+        self.term_id = term_id
+        self.period_id = period_id
+        self.classroom_id = classroom_id
         self.class_name = class_name
 
 

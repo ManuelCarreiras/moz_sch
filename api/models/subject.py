@@ -14,13 +14,10 @@ class SubjectModel(db.Model):
     department_id = db.column(UUID(as_uuid=True), db.ForeignKey('department._id'), nullable=False)
     subject_name = db.Column(db.String(100), nullable=False)
 
-
-    
-    def __init__(self, subject_name):
+    def __init__(self, subject_name, department_id):
         self.subject_name = subject_name
-
-
-
+        self.department_id = department_id
+ 
     def json(self):
         return {
             '_id': str(self._id),

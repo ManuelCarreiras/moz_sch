@@ -10,13 +10,15 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 # Initializing the class class with its values
 class StudentGuardianModel(db.Model):
     __tablename__ = 'student_guardian'
-    student_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
-    guardian_type_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'), nullable=False)
+    student_id = db.column(UUID(as_uuid=True), db.ForeignKey('student._id'), nullable=False)
+    guardian_type_id = db.Column(UUID(as_uuid=True), db.ForeignKey('guardian_type._id'), nullable=False)
     guardian_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
 
     
-#    def __init__(self, class_name):
-#        self.class_name = class_name
+    def __init__(self, student_id, guardian_type_id, class_name):
+        self.student_id = student_id
+        self.guardian_type_id = guardian_type_id
+        self.class_name = class_name
 
 
     def json(self):
@@ -25,36 +27,36 @@ class StudentGuardianModel(db.Model):
             'guardian_type_id': self.guardian_type_id,
             'guardian_id': self.guardian_id
         }
-    
-#    @classmethod
-#    def find_by_student_id(cls, student_id):
-#        return cls.query.filter_by(student_id=student_id).first()
-    
-#    @classmethod
-#    def find_by_guardian_type_id(cls, guardian_type_id):
-#        return cls.query.filter_by(guardian_type_id=guardian_type_id).first()
 
-    
-#    @classmethod
-#    def find_by_guardian_id(cls, guardian_id):
-#        return cls.query.filter_by(guardian_id=guardian_id).first()
-    
+    @classmethod
+    def find_by_student_id(cls, student_id):
+        return cls.query.filter_by(student_id=student_id).first()
 
-    # def save_to_db(self):
-    #     db.session.add(self)
-    #     db.session.commit()
-
-#    def update_entry(self, data=None):
-#       if data.get('class_name') is not None:
-#            self.class_name = data['class_name']
-#        self.save_to_db()
+    @classmethod
+    def find_by_guardian_type_id(cls, guardian_type_id):
+        return cls.query.filter_by(guardian_type_id=guardian_type_id).first()
 
 
-    # def delete_by_id(self, record_id):
-    #     obj = self.query.filter_by(_id=record_id).first()
-    #     if obj:
-    #         db.session.delete(obj)
-    #         db.session.commit() 
+    @classmethod
+    def find_by_guardian_id(cls, guardian_id):
+        return cls.query.filter_by(guardian_id=guardian_id).first()
+
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update_entry(self, data=None):
+        if data.get('class_name') is not None:
+            self.class_name = data['class_name']
+        self.save_to_db()
+
+
+    def delete_by_id(self, record_id):
+        obj = self.query.filter_by(_id=record_id).first()
+        if obj:
+            db.session.delete(obj)
+            db.session.commit() 
 
 
 

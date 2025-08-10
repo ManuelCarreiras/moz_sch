@@ -9,7 +9,9 @@ class StudentClassModel(db.Model):
     class_id = db.Column(UUID(as_uuid=True), foreign_key='class._id')
     score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, score):
+    def __init__(self, student_id, class_id, score):
+        self.student_id
+        self.class_id
         self.score = score
 
         

@@ -10,7 +10,10 @@ class StudentYearLevelModel(db.Model):
     year_id = db.Column(UUID(as_uuid=True), foreign_key='school_year._id')
     score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, score):
+    def __init__(self, student_id, level_id, year_id, score):
+        self.student_id = student_id
+        self.level_id = level_id
+        self.year_id = year_id
         self.score = score
         
     def json(self):
