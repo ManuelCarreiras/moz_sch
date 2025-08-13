@@ -1,4 +1,4 @@
-from web_app import Webapi, app
+from webPlatform_api import Webapi, app
 
 
 # Start terminal for requests

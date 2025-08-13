@@ -9,7 +9,7 @@ class StudentModel(db.Model):
     given_name = db.Column(db.String(100), nullable=False)
     middle_name = db.Column(db.String(100), nullable=True)
     surname = db.Column(db.String(100), nullable=False)
-    date_of_birth = db.Column(db.Date, nullable=False)
+    date_of_birth = db.Column(db.DateTime, nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     enrollment_date = db.Column(db.Date, nullable=False)
 

@@ -8,10 +8,10 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 
 
 # Initializing the class gender with its values
-class Gender(Enum):
-    MALE = 'Male'
-    FEMALE = 'Female'
-    PREFER_NOT_TO_SAY = 'Prefer not to say'
+# class Gender(Enum):
+#     MALE = 'Male'
+#     FEMALE = 'Female'
+#     PREFER_NOT_TO_SAY = 'Prefer not to say'
 
 
 class TeacherModel(db.Model):
@@ -19,7 +19,7 @@ class TeacherModel(db.Model):
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     given_name = db.Column(db.String(120), nullable = False)
     surname = db.Column(db.String(100), nullable = False)
-    gender = db.Column(SQLAlchemyEnum(Gender), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
     email_address = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
 

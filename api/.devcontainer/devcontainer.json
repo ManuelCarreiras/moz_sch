@@ -15,7 +15,7 @@
 	},
 	"runArgs": [
 		"--name", "api",
-		"--network=api-test_default",
+		"--network=moz_sch_default",
 		"-p", "5000:5000"	
 	],
 	"containerEnv": {
@@ -27,7 +27,7 @@
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
-		"vscode": {
+		"cursor": {
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python"
 			},
