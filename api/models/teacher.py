@@ -5,8 +5,6 @@ from db import db
 from enum import Enum
 from sqlalchemy import Enum as SQLAlchemyEnum
 
-
-
 # Initializing the class gender with its values
 # class Gender(Enum):
 #     MALE = 'Male'
@@ -23,14 +21,12 @@ class TeacherModel(db.Model):
     email_address = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
 
-
     def __init__(self, given_name, surname, gender, email_address, phone_number):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
-
 
     def json(self):
         return {
@@ -41,16 +37,15 @@ class TeacherModel(db.Model):
             'email_address': self.email_address,
             'phone_number': self.phone_number
         }
-        
 
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
-    
+
     @classmethod
     def find_by_given_name(cls, given_name):
         return cls.query.filter_by(given_name=given_name).first()
-    
+
     @classmethod
     def find_by_surname(cls, surname):
         return cls.query.filter_by(surname=surname).first()
@@ -58,7 +53,6 @@ class TeacherModel(db.Model):
     @classmethod
     def find_by_email(cls, email_address):
         return cls.query.filter_by(email_address=email_address).first()
-    
 
     def save_to_db(self):
         db.session.add(self)
@@ -80,4 +74,8 @@ class TeacherModel(db.Model):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()

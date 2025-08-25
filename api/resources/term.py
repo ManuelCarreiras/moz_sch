@@ -4,6 +4,7 @@ from models.term import TermModel
 from models.school_year import SchoolYearModel
 import json
 
+
 class TermResource(Resource):
     def post(self):
         data = request.get_json()
@@ -15,10 +16,10 @@ class TermResource(Resource):
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), 400)
-        year_id : SchoolYearModel = SchoolYearModel.find_by_dates(
+        year_id: SchoolYearModel = SchoolYearModel.find_by_dates(
             start_date=data.get('start_date'),
             end_date=data.get('end_date'))
         if not year_id:
