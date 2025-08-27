@@ -154,7 +154,8 @@ api.add_resource(Home, "/")
 
 api.add_resource(StudentResource, "/student")
 
-api.add_resource(TeacherResource, "/teacher")
+api.add_resource(TeacherResource, "/teacher",
+                                  "/teacher/<id>")
 
 
 if __name__ != '__main__':

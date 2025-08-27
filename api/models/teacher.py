@@ -1,9 +1,6 @@
 import uuid
-from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
-from enum import Enum
-from sqlalchemy import Enum as SQLAlchemyEnum
 
 # Initializing the class gender with its values
 # class Gender(Enum):
@@ -15,13 +12,14 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 class TeacherModel(db.Model):
     __tablename__ = 'professor'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    given_name = db.Column(db.String(120), nullable = False)
-    surname = db.Column(db.String(100), nullable = False)
+    given_name = db.Column(db.String(120), nullable=False)
+    surname = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String(10), nullable=False)
-    email_address = db.Column(db.String(120), unique=True, nullable=False)
-    phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
+    email_address = db.Column(db.String(120), nullable=False)
+    phone_number = db.Column(db.VARCHAR(20), nullable=False)
 
-    def __init__(self, given_name, surname, gender, email_address, phone_number):
+    def __init__(self, given_name, surname, gender, email_address,
+                 phone_number):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
@@ -62,7 +60,7 @@ class TeacherModel(db.Model):
         if data.get('given_name') is not None:
             self.given_name = data['given_name']
         if data.get('email_address') is not None:
-            self.email = data['email_address']
+            self.email_address = data['email_address']
         if data.get('surname') is not None:
             self.surname = data['surname']
         if data.get('phone_number') is not None:
@@ -76,6 +74,7 @@ class TeacherModel(db.Model):
             db.session.delete(obj)
             db.session.commit()
 
+    @classmethod
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()

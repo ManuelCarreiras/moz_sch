@@ -2,6 +2,7 @@ from flask import request, g, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
 import json
+from uuid import UUID
 
 
 class TeacherResource(Resource):
@@ -33,7 +34,7 @@ class TeacherResource(Resource):
         return Response(json.dumps(response), 201)
 
     def get(self, id):
-        professor = TeacherModel.find_by_id(id)
+        professor = TeacherModel.find_by_id(UUID(id))
 
         if professor is None:
             return {'message': 'Professor not found'}, 404
@@ -46,7 +47,7 @@ class TeacherResource(Resource):
 
     def put(self):
         data = request.get_json()
-        id = data.get('id')
+        id = data.get('_id')
 
         professor = TeacherModel.find_by_id(id)
 
