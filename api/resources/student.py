@@ -3,10 +3,10 @@ from flask_restful import Resource
 from models.student import StudentModel
 import json
 
+
 class StudentResource(Resource):
     def post(self):
         data = request.get_json()
-
 
         # if StudentModel.find_by_id(g.student):
         #     return {'message': 'Student already exists'}, 400
@@ -23,29 +23,41 @@ class StudentResource(Resource):
                 'message': 'Missing required fields'
             }
             return Response(json.dumps(response), 400)
-            
+
         new_student = StudentModel(**data)
         new_student.save_to_db()
-        return new_student.json(), 201
+
+        response = {
+            'success': True,
+            'message': new_student.json()
+        }
+        return Response(json.dumps(response), 201)
 
     def get(self, id):
         student = StudentModel.find_by_id(id)
 
         if student is None:
             return {'message': 'Student not found'}, 404
-
-        return student.json(), 200
+        response = {
+            'success': True,
+            'message': student.json()
+        }
+        return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()
-        id = data.get('id')
+        id = data.get('_id')
         student = StudentModel.find_by_id(id)
 
         if student is None:
             return {'message': 'Student not found'}, 404
 
         student.update_entry(data)
-        return student.json(), 200
+        response = {
+            'success': True,
+            'message': student.json()
+        }
+        return Response(json.dumps(response), 200)
 
     def delete(self, id):
         student = StudentModel.find_by_id(id)
@@ -53,5 +65,5 @@ class StudentResource(Resource):
         if student is None:
             return {'message': 'Student not found'}, 404
 
-        StudentModel.delete_by_id(id)
-        return {'message': 'Student deleted'}, 200 
+        student.delete_by_id(id)
+        return {'message': 'Student deleted'}, 200

@@ -152,7 +152,8 @@ with app.app_context():
 
 api.add_resource(Home, "/")
 
-api.add_resource(StudentResource, "/student")
+api.add_resource(StudentResource, "/student",
+                                  "/student/<id>")
 
 api.add_resource(TeacherResource, "/teacher",
                                   "/teacher/<id>")

@@ -16,3 +16,6 @@ dev-api-container:
 		echo "Please run with: make dev-api IDE=cursor  or  make dev-api IDE=vscode"; \
 		exit 1; \
 	fi
+
+test-unittests:
+	sh .scripts/test-unittest.sh

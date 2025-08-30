@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
+
 class StudentModel(db.Model):
     __tablename__ = 'student'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
@@ -20,7 +21,7 @@ class StudentModel(db.Model):
         self.date_of_birth = date_of_birth
         self.gender = gender
         self.enrollment_date = enrollment_date
-        
+
     def json(self):
         return {
             '_id': str(self._id),
@@ -59,4 +60,4 @@ class StudentModel(db.Model):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()
