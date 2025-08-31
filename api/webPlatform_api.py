@@ -10,6 +10,7 @@ from flask import Flask, Response
 from flask_cors import CORS
 from flask_restful import Api, Resource
 
+from resources.school_year import SchoolYearResource
 from resources.student import StudentResource
 from resources.teacher import TeacherResource
 
@@ -157,6 +158,9 @@ api.add_resource(StudentResource, "/student",
 
 api.add_resource(TeacherResource, "/teacher",
                                   "/teacher/<id>")
+
+api.add_resource(SchoolYearResource, "/school_year",
+                                  "/school_year/<id>")
 
 
 if __name__ != '__main__':
