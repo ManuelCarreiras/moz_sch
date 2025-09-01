@@ -5,8 +5,8 @@ from db import db
 
 class StudentClassModel(db.Model):
     __tablename__ = 'student_class'
-    student_id = db.Column(UUID(as_uuid=True), foreign_key='student._id')
-    class_id = db.Column(UUID(as_uuid=True), foreign_key='class._id')
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('student._id'))
+    class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'))
     score = db.Column(db.Float, nullable=False)
 
     def __init__(self, student_id, class_id, score):

@@ -13,7 +13,8 @@ from flask_restful import Api, Resource
 from resources.school_year import SchoolYearResource
 from resources.student import StudentResource
 from resources.teacher import TeacherResource
-
+from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear
+from resources.year_level import YearLevelResource
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -160,8 +161,15 @@ api.add_resource(TeacherResource, "/teacher",
                                   "/teacher/<id>")
 
 api.add_resource(SchoolYearResource, "/school_year",
-                                  "/school_year/<id>")
+                                     "/school_year/<id>")
 
+api.add_resource(YearLevelResource, "/year_level",
+                                    "/year_level/<id>")
+
+api.add_resource(StudentYearLevelResourceLevel, "/student_year_level",
+                                                "/student_year_level/level/<id>")  # noqa
+api.add_resource(StudentYearLevelResourceYear, "/student_year_level/year/<id>")
+api.add_resource(StudentYearLevelResourceStudent, "/student_year_level/student/<id>")  # noqa
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

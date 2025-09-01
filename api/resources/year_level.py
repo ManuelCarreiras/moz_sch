@@ -3,32 +3,33 @@ from flask_restful import Resource
 from models.year_level import YearLevelModel
 import json
 
+
 class YearLevelResource(Resource):
     def post(self):
         data = request.get_json()
 
         if (
-            not data.get('level_name') or 
-            not data.get('level_order') 
+            not data.get('level_name') or
+            not data.get('level_order')
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required fields'
             }
             return Response(json.dumps(response), 400)
-        
+
         new_year_level = YearLevelModel(**data)
-        
+
         new_year_level.save_to_db()
 
         response = {
             'success': True,
-            'message': new_year_level
+            'message': new_year_level.json()
         }
-        return Response(json.dumps(response), 200)
-    
+        return Response(json.dumps(response), 201)
+
     def get(self, id):
-        year_level: YearLevelModel = YearLevelModel.find_by_id(id)
+        year_level = YearLevelModel.find_by_id(id)
 
         if year_level is None:
             response = {
@@ -36,8 +37,8 @@ class YearLevelResource(Resource):
                 'message': 'Year level not found'
             }
             return Response(json.dumps(response), 404)
-        
-        response =  {
+
+        response = {
             'success': True,
             'message': year_level.json()
         }
@@ -45,23 +46,23 @@ class YearLevelResource(Resource):
 
     def put(self):
         data = request.get_json()
-        
+
         if '_id' not in data:
             response = {
                 'success': False,
-                'message': 'Year level does not exist'
+                'message': 'Year level not found'
             }
             return Response(json.dumps(response), 404)
-        
-        year_level: YearLevelModel = YearLevelModel.find_by_id(data['_id'])
+
+        year_level = YearLevelModel.find_by_id(data['_id'])
 
         if year_level is None:
             response = {
                 'success': False,
-                'message': 'Year level does not exist'
+                'message': 'Year level not found'
             }
             return Response(json.dumps(response), 404)
-        
+
         year_level.update_entry(data)
 
         response = {
@@ -72,15 +73,15 @@ class YearLevelResource(Resource):
         return Response(json.dumps(response), 200)
 
     def delete(self, id):
-        year_level: YearLevelModel = YearLevelModel.find_by_id(id)
+        year_level = YearLevelModel.find_by_id(id)
 
         if year_level is None:
             response = {
                 'success': False,
-                'message': 'Year level does not exist'
+                'message': 'Year level not found'
             }
             return Response(json.dumps(response), 404)
-        
+
         year_level.delete_by_id(id)
 
         response = {

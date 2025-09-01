@@ -6,7 +6,7 @@ from db import db
 class TermModel(db.Model):
     __tablename__ = 'term'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
-    year_id = db.Column(UUID(as_uuid=True), nullable=False, foreign_key='school_year._id')
+    year_id = db.Column(UUID(as_uuid=True), nullable=False, db.ForeignKey('school_year._id'))
     term_number = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
