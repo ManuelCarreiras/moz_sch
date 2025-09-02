@@ -11,11 +11,11 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 class ClassModel(db.Model):
     __tablename__ = 'class'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    subject_id = db.column(UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
-    teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('teacher._id'), nullable=False)
-    term_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
-    period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'), nullable=False)
-    classroom_id = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom._id'), nullable=False)
+    subject_id = db.Column(UUID(as_uuid=True), db.ForeignKey('subject._id'))
+    teacher_id = db.Column(UUID(as_uuid=True), db.ForeignKey('professor._id'))
+    term_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'))
+    period_id = db.Column(UUID(as_uuid=True), db.ForeignKey('period._id'))
+    classroom_id = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom._id'))
     class_name = db.Column(db.String(100), nullable=False)
 
 

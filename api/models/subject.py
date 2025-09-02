@@ -11,7 +11,7 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 class SubjectModel(db.Model):
     __tablename__ = 'subject'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    department_id = db.column(UUID(as_uuid=True), db.ForeignKey('department._id'), nullable=False)
+    department_id = db.Column(UUID(as_uuid=True), db.ForeignKey('department._id'))
     subject_name = db.Column(db.String(100), nullable=False)
 
     def __init__(self, subject_name, department_id):

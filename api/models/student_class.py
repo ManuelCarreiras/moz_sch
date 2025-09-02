@@ -5,18 +5,20 @@ from db import db
 
 class StudentClassModel(db.Model):
     __tablename__ = 'student_class'
+    _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('student._id'))
     class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'))
     score = db.Column(db.Float, nullable=False)
 
     def __init__(self, student_id, class_id, score):
-        self.student_id
-        self.class_id
+        self.student_id = student_id
+        self.class_id = class_id
         self.score = score
 
         
     def json(self):
         return {
+            '_id': str(self._id),
             'student_id': self.student_id,
             'class_id': self.class_id,
             'score': self.score

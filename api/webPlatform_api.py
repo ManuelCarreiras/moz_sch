@@ -15,6 +15,12 @@ from resources.student import StudentResource
 from resources.teacher import TeacherResource
 from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear
 from resources.year_level import YearLevelResource
+from resources.student_class import StudentClassResourceStudent, StudentClassResourceClass
+from resources.class_model import ClassModelResource
+from resources.classroom_types import ClassroomTypesResource
+from resources.department import DepartmentResource
+from resources.subject import SubjectResource
+
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -170,6 +176,23 @@ api.add_resource(StudentYearLevelResourceLevel, "/student_year_level",
                                                 "/student_year_level/level/<id>")  # noqa
 api.add_resource(StudentYearLevelResourceYear, "/student_year_level/year/<id>")
 api.add_resource(StudentYearLevelResourceStudent, "/student_year_level/student/<id>")  # noqa
+
+api.add_resource(StudentClassResourceStudent, "/student_class",
+                                              "/student_class/student/<id>")
+
+api.add_resource(StudentClassResourceClass, "/student_class/class/<id>")
+
+api.add_resource(ClassroomTypesResource, "/classroom_types",
+                                         "/classroom_types/<id>")
+
+api.add_resource(DepartmentResource, "/department",
+                                     "/department/<id>")
+
+api.add_resource(SubjectResource, "/subject",
+                                     "/subject/<id>")
+
+api.add_resource(ClassModelResource, "/class",
+                                     "/class/<id>")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

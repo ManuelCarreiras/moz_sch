@@ -11,9 +11,9 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 class ClassroomModel(db.Model):
     __tablename__ = 'classroom'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    room_type = db.column(UUID(as_uuid=True), db.ForeignKey('classroom_types._id'), nullable=False)
+    room_type = db.Column(UUID(as_uuid=True), db.ForeignKey('classroom_types._id'))
     room_name = db.Column(db.String(100), nullable=False)
-    capacity = db.Column(db.integer(3), nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
 
 
     

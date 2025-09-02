@@ -42,8 +42,8 @@ class StudentYearLevelResourceLevel(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, level_id):
-        student_year_level = StudentYearLevelModel.find_by_level_id(level_id)
+    def get(self, id):
+        student_year_level = StudentYearLevelModel.find_by_level_id(id)
 
         if student_year_level is None:
             response = {
@@ -61,26 +61,27 @@ class StudentYearLevelResourceLevel(Resource):
     def put(self):
         data = request.get_json()
 
-        student_year_level = StudentYearLevelModel.find_by_student_id(data['student_id'])
+        student_year_level = StudentYearLevelModel.find_by_student_id(
+                                                   data['student_id'])
 
         if student_year_level is None:
             response = {
                 'success': False,
-                'message': 'Student year level does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
 
         if StudentYearLevelModel.find_by_level_id(data['level_id']) is None:
             response = {
                 'success': False,
-                'message': 'Student year level does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
 
         if StudentYearLevelModel.find_by_year_id(data['year_id']) is None:
             response = {
                 'success': False,
-                'message': 'Student year level does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
         student_year_level.update_entry(data)
@@ -92,21 +93,21 @@ class StudentYearLevelResourceLevel(Resource):
 
         return Response(json.dumps(response), 200)
 
-    def delete(self, level_id):
-        student_year_level = StudentYearLevelModel.find_by_level_id(level_id)
+    def delete(self, id):
+        student_year_level = StudentYearLevelModel.find_by_level_id(id)
 
         if student_year_level is None:
             response = {
                 'success': False,
-                'message': 'School year does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
 
-        student_year_level.delete_by_level_id(level_id)
+        student_year_level.delete_by_level_id(id)
 
         response = {
                 'success': True,
-                'message': 'School year record deleted'
+                'message': 'Student year level record deleted'
             }
 
         return Response(json.dumps(response), 200)
@@ -114,9 +115,9 @@ class StudentYearLevelResourceLevel(Resource):
 
 class StudentYearLevelResourceStudent(Resource):
 
-    def get(self, student_id):
+    def get(self, id):
         student_year_level = StudentYearLevelModel.find_by_student_id(
-            student_id)
+            id)
 
         if student_year_level is None:
             response = {
@@ -138,7 +139,7 @@ class StudentYearLevelResourceStudent(Resource):
         if student_year_level is None:
             response = {
                 'success': False,
-                'message': 'School year does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
 
@@ -146,7 +147,7 @@ class StudentYearLevelResourceStudent(Resource):
 
         response = {
                 'success': True,
-                'message': 'School year record deleted'
+                'message': 'Student year level record deleted'
             }
 
         return Response(json.dumps(response), 200)
@@ -154,8 +155,8 @@ class StudentYearLevelResourceStudent(Resource):
 
 class StudentYearLevelResourceYear(Resource):
 
-    def get(self, year_id):
-        student_year_level = StudentYearLevelModel.find_by_year_id(year_id)
+    def get(self, id):
+        student_year_level = StudentYearLevelModel.find_by_year_id(id)
 
         if student_year_level is None:
             response = {
@@ -164,27 +165,27 @@ class StudentYearLevelResourceYear(Resource):
             }
             return Response(json.dumps(response), 404)
 
-        response =  {
+        response = {
             'success': True,
             'message': student_year_level.json()
         }
         return Response(json.dumps(response), 200)
 
-    def delete(self, year_id):
-        student_year_level = StudentYearLevelModel.find_by_level_id(year_id)
+    def delete(self, id):
+        student_year_level = StudentYearLevelModel.find_by_level_id(id)
 
         if student_year_level is None:
             response = {
                 'success': False,
-                'message': 'School year does not exist'
+                'message': 'Student year level not found'
             }
             return Response(json.dumps(response), 404)
 
-        student_year_level.delete_by_year_id(year_id)
+        student_year_level.delete_by_year_id(id)
 
         response = {
                 'success': True,
-                'message': 'School year record deleted'
+                'message': 'Student year level record deleted'
             }
 
         return Response(json.dumps(response), 200)

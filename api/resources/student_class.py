@@ -102,40 +102,39 @@ class StudentClassResourceStudent(Resource):
         return Response(json.dumps(response), 200)
     
 
-    class StudentClassResourceClass(Resource):
+class StudentClassResourceClass(Resource):
 
-        def get(self, class_id):
-            student_class: StudentClassModel = StudentClassModel.find_by_class_id(class_id)
+    def get(self, class_id):
+        student_class: StudentClassModel = StudentClassModel.find_by_class_id(class_id)
 
-            if student_class is None:
-                response = {
-                    'success': False,
-                    'message': 'Student Class not found'
-                }
-                return Response(json.dumps(response), 404)
-            
-            response =  {
-                'success': True,
-                'message': student_class.json()
-            }
-            return Response(json.dumps(response), 200)
-        
-        def delete(self, class_id):
-            student_class: StudentClassModel = StudentClassModel.find_by_class_id(class_id)
-
-            if student_class is None:
-                response = {
-                    'success': False,
-                    'message': 'Student Class does not exist'
-                }
-                return Response(json.dumps(response), 404)
-            
-            student_class.delete_by_class_id(id)
-
+        if student_class is None:
             response = {
-                    'success': True,
-                    'message': 'Student Class record deleted'
-                }
-
-            return Response(json.dumps(response), 200)
+                'success': False,
+                'message': 'Student Class not found'
+            }
+            return Response(json.dumps(response), 404)
+        
+        response =  {
+            'success': True,
+            'message': student_class.json()
+        }
+        return Response(json.dumps(response), 200)
     
+    def delete(self, class_id):
+        student_class: StudentClassModel = StudentClassModel.find_by_class_id(class_id)
+
+        if student_class is None:
+            response = {
+                'success': False,
+                'message': 'Student Class does not exist'
+            }
+            return Response(json.dumps(response), 404)
+        
+        student_class.delete_by_class_id(id)
+
+        response = {
+                'success': True,
+                'message': 'Student Class record deleted'
+            }
+
+        return Response(json.dumps(response), 200)
