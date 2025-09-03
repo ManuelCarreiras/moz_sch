@@ -1,12 +1,11 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.department import DepartmentModel
 import json
 
 
 class DepartmentResource(Resource):
-
-   def post(self):
+    def post(self):
         data = request.get_json()
 
         if (
@@ -14,10 +13,10 @@ class DepartmentResource(Resource):
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), status=400)
-        
+
         new_department = DepartmentModel(**data)
         new_department.save_to_db()
 
@@ -26,9 +25,9 @@ class DepartmentResource(Resource):
             'message': new_department.json()
         }
         return Response(json.dumps(response), 201)
-   
-   def get(self,id):
-        
+
+    def get(self, id):
+
         departpament = DepartmentModel.find_by_id(id)
 
         if departpament is None:
@@ -44,7 +43,7 @@ class DepartmentResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def put(self):
+    def put(self):
         data = request.get_json()
 
         if '_id' not in data:
@@ -69,8 +68,8 @@ class DepartmentResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def delete(self,id):
-        department: DepartmentModel = DepartmentModel.find_by_id(id)
+    def delete(self, id):
+        department = DepartmentModel.find_by_id(id)
 
         if department is None:
             response = {

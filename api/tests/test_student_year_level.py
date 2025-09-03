@@ -447,7 +447,8 @@ class TestStudent_year_level(unittest.TestCase):
                                       headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
-        self.assertEqual(res_answer["message"], "Student year level record deleted")
+        self.assertEqual(res_answer["message"],
+                         "Student year level record deleted")
 
     def test_delete_student_year_level_by_level_id_wrong(self):
         wrong_id = uuid.uuid4()
@@ -462,7 +463,7 @@ class TestStudent_year_level(unittest.TestCase):
         self.student_id = None
         self.year_level_id = None
         self.school_year_id = None
-        
+
     def test_delete_student_year_level_by_student_id(self):
         response = self.client.post('/year_level',
                                     headers={"Authorization": API_KEY},
@@ -501,7 +502,8 @@ class TestStudent_year_level(unittest.TestCase):
                                       headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
-        self.assertEqual(res_answer["message"], "Student year level record deleted")
+        self.assertEqual(res_answer["message"],
+                         "Student year level record deleted")
 
     def test_delete_student_year_level_by_student_id_wrong(self):
         wrong_id = uuid.uuid4()
@@ -566,7 +568,7 @@ class TestStudent_year_level(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"], "Student year level not found")
-        
+
         self.student_year_level_id = None
         self.student_id = None
         self.year_level_id = None

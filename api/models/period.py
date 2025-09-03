@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
+
 
 class PeriodModel(db.Model):
     __tablename__ = 'period'
@@ -11,14 +11,12 @@ class PeriodModel(db.Model):
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
 
-
     def __init__(self, year_id, name, start_time, end_time):
         self.year_id = year_id
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
 
-        
     def json(self):
         return {
             '_id': str(self._id),
@@ -31,7 +29,7 @@ class PeriodModel(db.Model):
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
-    
+
     @classmethod
     def find_by_year_id(cls, year_id):
         return cls.query.filter_by(year_id=year_id).first()
@@ -47,11 +45,11 @@ class PeriodModel(db.Model):
             self.start_time = data['start_time']
         if data.get('end_time') is not None:
             self.end_time = data['end_time']
-       
+
         self.save_to_db()
 
     def delete_by_id(self, record_id):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()

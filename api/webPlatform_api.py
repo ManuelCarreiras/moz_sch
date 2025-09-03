@@ -13,14 +13,15 @@ from flask_restful import Api, Resource
 from resources.school_year import SchoolYearResource
 from resources.student import StudentResource
 from resources.teacher import TeacherResource
-from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear
+from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear  # noqa
 from resources.year_level import YearLevelResource
-from resources.student_class import StudentClassResourceStudent, StudentClassResourceClass
-from resources.class_model import ClassModelResource
+from resources.student_class import StudentClassResourceStudent, StudentClassResourceClass  # noqa
+from resources.class_model import ClassModelResource, ClassResourceSubjectList, ClassResourceTeacherList, ClassResourceTermList, ClassResourcePeriodList, ClassResourceClassroomList  # noqa
 from resources.classroom_types import ClassroomTypesResource
+from resources.classroom import ClassroomResource
 from resources.department import DepartmentResource
 from resources.subject import SubjectResource
-
+from resources.term import TermResource
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -185,14 +186,31 @@ api.add_resource(StudentClassResourceClass, "/student_class/class/<id>")
 api.add_resource(ClassroomTypesResource, "/classroom_types",
                                          "/classroom_types/<id>")
 
+api.add_resource(ClassroomResource, "/classroom",
+                                    "/classroom/<id>")
+
 api.add_resource(DepartmentResource, "/department",
                                      "/department/<id>")
 
 api.add_resource(SubjectResource, "/subject",
-                                     "/subject/<id>")
+                                  "/subject/<id>")
+
+api.add_resource(TermResource, "/term",
+                               "/term/<id>")
 
 api.add_resource(ClassModelResource, "/class",
                                      "/class/<id>")
+api.add_resource(ClassResourceSubjectList, "/class",
+                                           "/class/list/subject/<id>")
+api.add_resource(ClassResourceTeacherList, "/class",
+                                           "/class/list/teacher/<id>")
+api.add_resource(ClassResourceTermList, "/class",
+                                        "/class/list/term/<id>")
+api.add_resource(ClassResourcePeriodList, "/class",
+                                          "/class/list/period/<id>")
+api.add_resource(ClassResourceClassroomList, "/class",
+                                             "/class/list/classroom/<id>")
+
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

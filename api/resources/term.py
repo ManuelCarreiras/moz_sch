@@ -1,4 +1,4 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.term import TermModel
 from models.school_year import SchoolYearModel
@@ -10,8 +10,8 @@ class TermResource(Resource):
         data = request.get_json()
 
         if (
-            not data.get('term_number') or 
-            not data.get('start_date') or 
+            not data.get('term_number') or
+            not data.get('start_date') or
             not data.get('end_date')
         ):
             response = {
@@ -28,9 +28,8 @@ class TermResource(Resource):
                 'message': 'Start and end dates do not correspond to a school year'
             }
             return Response(json.dumps(response), 400)
-        
         new_term = TermModel(**data)
-        
+
         new_term.save_to_db()
 
         response = {
@@ -38,9 +37,9 @@ class TermResource(Resource):
             'message': new_term
         }
         return Response(json.dumps(response), 201)
-    
+
     def get(self, id):
-        term: TermModel = TermModel.find_by_id(id)
+        term = TermModel.find_by_id(id)
 
         if term is None:
             response = {
@@ -48,8 +47,8 @@ class TermResource(Resource):
                 'message': 'Term not found'
             }
             return Response(json.dumps(response), 404)
-        
-        response =  {
+
+        response = {
             'success': True,
             'message': term.json()
         }
@@ -57,15 +56,15 @@ class TermResource(Resource):
 
     def put(self):
         data = request.get_json()
-        
+
         if '_id' not in data:
             response = {
                 'success': False,
                 'message': 'Term does not exist'
             }
             return Response(json.dumps(response), 404)
-        
-        term: TermModel = TermModel.find_by_id(data['_id'])
+
+        term = TermModel.find_by_id(data['_id'])
 
         if term is None:
             response = {
@@ -73,7 +72,7 @@ class TermResource(Resource):
                 'message': 'Term does not exist'
             }
             return Response(json.dumps(response), 404)
-        
+
         term.update_entry(data)
 
         response = {
@@ -84,7 +83,7 @@ class TermResource(Resource):
         return Response(json.dumps(response), 200)
 
     def delete(self, id):
-        term: TermModel = TermModel.find_by_id(id)
+        term = TermModel.find_by_id(id)
 
         if term is None:
             response = {
@@ -92,7 +91,7 @@ class TermResource(Resource):
                 'message': 'Term does not exist'
             }
             return Response(json.dumps(response), 404)
-        
+
         term.delete_by_id(id)
 
         response = {

@@ -1,18 +1,13 @@
 import uuid
-from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
-from enum import Enum
-from sqlalchemy import Enum as SQLAlchemyEnum
-
 
 
 # Initializing the class gender with its values
 class ClassroomTypesModel(db.Model):
     __tablename__ = 'classroom_types'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = db.Column(db.String(120), nullable = False)
-
+    name = db.Column(db.String(120), nullable=False)
 
     def __init__(self, name):
         self.name = name
@@ -22,15 +17,14 @@ class ClassroomTypesModel(db.Model):
             '_id': str(self._id),
             'name': self.name,
         }
-        
+
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
-    
+
     @classmethod
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
-    
 
     def save_to_db(self):
         db.session.add(self)
@@ -46,4 +40,4 @@ class ClassroomTypesModel(db.Model):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()
