@@ -118,6 +118,7 @@ class TestStudent_year_level(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.department_id = res_answer["message"]["_id"]
 
+        self.subject['department_id'] = self.department_id
         response = self.client.post('/subject',
                                     headers={"Authorization": API_KEY},
                                     json=self.subject)
@@ -125,7 +126,6 @@ class TestStudent_year_level(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.subject_id = res_answer["message"]["_id"]
-        self.subject['department_id'] = self.subject_id
 
         response = self.client.post('/classroom_types',
                                     headers={"Authorization": API_KEY},
@@ -134,6 +134,7 @@ class TestStudent_year_level(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
 
         response = self.client.post('/classroom',
                                     headers={"Authorization": API_KEY},
@@ -141,5 +142,49 @@ class TestStudent_year_level(unittest.TestCase):
 
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
-        self.classroom = res_answer["message"]["_id"]
-        self.classroom['room_type'] = self.classroom_types_id
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        self.assertEqual(res_answer["message"]["name"], "class_test")

@@ -1,4 +1,5 @@
-from flask_restful import Resource, request, Response
+from flask_restful import Resource
+from flask import request, Response
 from models.classroom_types import ClassroomTypesModel
 import json
 

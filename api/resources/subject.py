@@ -21,7 +21,7 @@ class SubjectResource(Resource):
             return Response(json.dumps(response), status=400)
 
         department_id = DepartmentModel.find_by_id(
-                       data.get('_id'))
+                       data.get('department_id'))
         if not department_id:
             response = {
                 'success': False,
@@ -29,16 +29,13 @@ class SubjectResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        new_subject = SubjectModel(
-            departement_id=data['department_id'],
-            subject_name=data['subject_name']
-            )
+        new_subject = SubjectModel(**data)
 
         new_subject.save_to_db()
 
         response = {
             'success': True,
-            'message': new_subject
+            'message': new_subject.json()
         }
         return Response(json.dumps(response), 201)
 

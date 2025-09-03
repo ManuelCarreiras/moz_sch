@@ -32,7 +32,7 @@ class ClassroomResource(Resource):
             return Response(json.dumps(response), 400)
         
         
-        new_classroom = ClassroomModel(data*)
+        new_classroom = ClassroomModel(**data)
         
         new_classroom.save_to_db()
 
