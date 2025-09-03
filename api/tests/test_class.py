@@ -108,3 +108,38 @@ class TestStudent_year_level(unittest.TestCase):
                                headers={"Authorization": API_KEY})
         else:
             pass
+
+    def test_create_class(self):
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+        self.subject['department_id'] = self.subject_id
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
