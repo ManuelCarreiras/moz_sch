@@ -13,14 +13,15 @@ class ClassroomModel(db.Model):
     room_name = db.Column(db.String(100), nullable=False)
     capacity = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, room_name, room_type):
+    def __init__(self, room_name, room_type, capacity):
         self.room_name = room_name
         self.room_type = room_type
+        self.capacity = capacity
 
     def json(self):
         return {
             '_id': str(self._id),
-            'room_type': self.room_type,
+            'room_type': str(self.room_type),
             'room_name': self.room_name,
             'capacity': self.capacity,
         }

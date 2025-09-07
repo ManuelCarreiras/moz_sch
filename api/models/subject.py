@@ -19,7 +19,7 @@ class SubjectModel(db.Model):
     def json(self):
         return {
             '_id': str(self._id),
-            'department_id': self.department_id,
+            'department_id': str(self.department_id),
             'subject_name': self.subject_name
         }
 

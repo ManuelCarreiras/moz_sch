@@ -1,4 +1,4 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.class_model import ClassModel
 from models.teacher import TeacherModel
@@ -13,13 +13,16 @@ class ClassModelResource(Resource):
 
     def post(self):
         data = request.get_json()
-
+        teacher_id = data.get('teacher_id')
+        subject_id = data.get('subject_id')
+        period_id = data.get('period_id')
+        term_id = data.get('term_id')
+        classroom_id = data.get('classroom_id')
         if (
             not data.get('subject_id') or
-            not data.get('tearcher_id') or
+            not data.get('teacher_id') or
             not data.get('term_id') or
-            not data.get('start_period_id') or
-            not data.get('end_period_id') or
+            not data.get('period_id') or
             not data.get('classroom_id') or
             not data.get('class_name')
         ):
@@ -29,8 +32,7 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), status=400)
 
-        subject_id: SubjectModel = SubjectModel.find_by_id(
-                                   data.get('subject_id'))
+        subject_id = SubjectModel.find_by_id(subject_id)
         if not subject_id:
             response = {
                 'success': False,
@@ -38,24 +40,21 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        tearcher_id: TeacherModel = TeacherModel.find_by_id(
-                                    data.get('tearcher_id'))
-        if not tearcher_id:
+        teacher_id = TeacherModel.find_by_id(teacher_id)
+        if not teacher_id:
             response = {
                 'success': False,
                 'message': 'Teacher id does not exist in the database'
             }
             return Response(json.dumps(response), 400)
-        term_id: TermModel = TermModel.find_by_id(
-                             data.get('term_id'))
+        term_id = TermModel.find_by_id(term_id)
         if not term_id:
             response = {
                 'success': False,
                 'message': 'Term does not exist in the database'
             }
             return Response(json.dumps(response), 400)
-        period_id: PeriodModel = PeriodModel.find_by_id(
-                                 data.get('period_id'))
+        period_id = PeriodModel.find_by_id(period_id)
         if not period_id:
             response = {
                 'success': False,
@@ -63,8 +62,7 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        classroom_id: ClassroomModel = ClassroomModel.find_by_id(
-                                       data.get('classroom_id'))
+        classroom_id = ClassroomModel.find_by_id(classroom_id)
         if not classroom_id:
             response = {
                 'success': False,
@@ -72,14 +70,7 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        new_class = ClassModel(
-            subject_id=data['subject_id'],
-            tearcher_id=data['tearcher_id'],
-            term_id=term_id._id,
-            period_id=period_id._id,
-            classroom_id=classroom_id._id,
-            class_id=data['class_id']
-            )
+        new_class = ClassModel(**data)
         new_class.save_to_db()
 
         response = {
@@ -133,7 +124,7 @@ class ClassModelResource(Resource):
         return Response(json.dumps(response), 200)
 
     def delete(self, id):
-        class_id = ClassroomModel.find_by_id(id)
+        class_id = ClassModel.find_by_id(id)
 
         if class_id is None:
             response = {

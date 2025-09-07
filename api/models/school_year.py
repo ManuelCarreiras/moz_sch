@@ -6,7 +6,8 @@ from db import db
 
 class SchoolYearModel(db.Model):
     __tablename__ = 'school_year'
-    _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True,
+                    default=uuid.uuid4)
     year_name = db.Column(db.String(100), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)

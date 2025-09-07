@@ -9,6 +9,8 @@ class TermResource(Resource):
     def post(self):
         data = request.get_json()
 
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
         if (
             not data.get('term_number') or
             not data.get('start_date') or
@@ -19,13 +21,13 @@ class TermResource(Resource):
                 'message': 'Missing required field'
             }
             return Response(json.dumps(response), 400)
-        year_id: SchoolYearModel = SchoolYearModel.find_by_dates(
-            start_date=data.get('start_date'),
-            end_date=data.get('end_date'))
+        year_id = SchoolYearModel.find_by_dates(start_date,
+                                                end_date)
         if not year_id:
             response = {
                 'success': False,
-                'message': 'Start and end dates do not correspond to a school year'
+                'message':
+                'Start and end dates do not correspond to a school year'
             }
             return Response(json.dumps(response), 400)
         new_term = TermModel(**data)
@@ -34,7 +36,7 @@ class TermResource(Resource):
 
         response = {
             'success': True,
-            'message': new_term
+            'message': new_term.json()
         }
         return Response(json.dumps(response), 201)
 

@@ -28,11 +28,11 @@ class ClassModel(db.Model):
     def json(self):
         return {
             '_id': str(self._id),
-            'subject_id': self.subject_id,
-            'tearcher_id': self.tearcher_id,
-            'term_id': self.term_id,
-            'period_id': self.period_id,
-            'classroom_id': self.classroom_id,
+            'subject_id': str(self.subject_id),
+            'teacher_id': str(self.teacher_id),
+            'term_id': str(self.term_id),
+            'period_id': str(self.period_id),
+            'classroom_id': str(self.classroom_id),
             'class_name': self.class_name
         }
 

@@ -4,48 +4,44 @@ from models.period import PeriodModel
 from models.school_year import SchoolYearModel
 import json
 
+
 class PeriodResource(Resource):
     def post(self):
         data = request.get_json()
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
 
         if (
             not data.get('year_id') or
-            not data.get('name') or 
-            not data.get('start_time') or 
+            not data.get('name') or
+            not data.get('start_time') or
             not data.get('end_time')
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), 400)
-        year_id : SchoolYearModel = SchoolYearModel.find_by_dates(
-            start_date=data.get('start_date'),
-            end_date=data.get('end_date'))
+        year_id = SchoolYearModel.find_by_dates(start_time, end_time)
         if not year_id:
             response = {
                 'success': False,
-                'message': 'Start and end dates do not correspond to a school year'
+                'message':
+                'Start and end dates do not correspond to a school year'
             }
             return Response(json.dumps(response), 400)
-        
-        new_period = PeriodModel(
-            year_id = year_id._id,
-            term_number = data['term_number'],
-            start_date = data['start_date'],
-            end_date = data['end_date']
-            )
-        
+
+        new_period = PeriodModel(**data)
         new_period.save_to_db()
 
         response = {
             'success': True,
-            'message': new_period
+            'message': new_period.json()
         }
         return Response(json.dumps(response), 201)
-    
+
     def get(self, id):
-        period: PeriodModel = PeriodModel.find_by_id(id)
+        period = PeriodModel.find_by_id(id)
 
         if period is None:
             response = {
@@ -53,8 +49,8 @@ class PeriodResource(Resource):
                 'message': 'Period not found'
             }
             return Response(json.dumps(response), 404)
-        
-        response =  {
+
+        response = {
             'success': True,
             'message': period.json()
         }
@@ -62,15 +58,15 @@ class PeriodResource(Resource):
 
     def put(self):
         data = request.get_json()
-        
+
         if '_id' not in data:
             response = {
                 'success': False,
                 'message': 'period does not exist'
             }
             return Response(json.dumps(response), 404)
-        
-        period: PeriodModel = PeriodModel.find_by_id(data['_id'])
+
+        period = PeriodModel.find_by_id(data['_id'])
 
         if period is None:
             response = {
@@ -78,7 +74,7 @@ class PeriodResource(Resource):
                 'message': 'period does not exist'
             }
             return Response(json.dumps(response), 404)
-        
+
         period.update_entry(data)
 
         response = {
@@ -89,7 +85,7 @@ class PeriodResource(Resource):
         return Response(json.dumps(response), 200)
 
     def delete(self, id):
-        period: PeriodModel = PeriodModel.find_by_id(id)
+        period = PeriodModel.find_by_id(id)
 
         if period is None:
             response = {
@@ -97,7 +93,7 @@ class PeriodResource(Resource):
                 'message': 'Period does not exist'
             }
             return Response(json.dumps(response), 404)
-        
+
         period.delete_by_id(id)
 
         response = {

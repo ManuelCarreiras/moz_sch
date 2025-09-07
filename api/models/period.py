@@ -5,7 +5,8 @@ from db import db
 
 class PeriodModel(db.Model):
     __tablename__ = 'period'
-    _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True,
+                    default=uuid.uuid4)
     year_id = db.Column(UUID(as_uuid=True), db.ForeignKey('school_year._id'))
     name = db.Column(db.String(100), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
@@ -20,7 +21,7 @@ class PeriodModel(db.Model):
     def json(self):
         return {
             '_id': str(self._id),
-            'year_id': self.year_id,
+            'year_id': str(self.year_id),
             'name': self.name,
             'start_time': self.start_time.isoformat(),
             'end_time': self.end_time.isoformat()

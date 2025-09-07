@@ -20,7 +20,7 @@ class TermModel(db.Model):
     def json(self):
         return {
             '_id': str(self._id),
-            'year_id': self.year_id,
+            'year_id': str(self.year_id),
             'term_number': self.term_number,
             'start_date': self.start_date.isoformat(),
             'end_date': self.end_date.isoformat()

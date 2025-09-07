@@ -13,7 +13,8 @@ POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 API_KEY = os.getenv("API_KEY")
 
-class TestStudent_year_level(unittest.TestCase):
+
+class TestClass(unittest.TestCase):
 
     def setUp(self):
         """
@@ -72,7 +73,7 @@ class TestStudent_year_level(unittest.TestCase):
         # Delete entries from postgres
         if self.class_id is not None:
             self.client.delete("/class/{}".format(
-                               self.student_id),
+                               self.class_id),
                                headers={"Authorization": API_KEY})
         if self.subject_id is not None:
             self.client.delete("/subject/{}".format(
@@ -86,10 +87,6 @@ class TestStudent_year_level(unittest.TestCase):
             self.client.delete("/teacher/{}".format(
                                self.teacher_id),
                                headers={"Authorization": API_KEY})
-        if self.school_year_id is not None:
-            self.client.delete("/school_year/{}".format(
-                               self.school_year_id),
-                               headers={"Authorization": API_KEY})
         if self.term_id is not None:
             self.client.delete("/term/{}".format(
                                self.term_id),
@@ -97,14 +94,18 @@ class TestStudent_year_level(unittest.TestCase):
         if self.period_id is not None:
             self.client.delete("/period/{}".format(
                                self.period_id),
-                               headers={"Authorization": API_KEY})
-        if self.classroom_types_id is not None:
-            self.client.delete("/classroom_types/{}".format(
-                               self.classroom_types_id),
+                               headers={"Authorization": API_KEY})     
+        if self.school_year_id is not None:
+            self.client.delete("/school_year/{}".format(
+                               self.school_year_id),
                                headers={"Authorization": API_KEY})
         if self.classroom_id is not None:
             self.client.delete("/classroom/{}".format(
                                self.classroom_id),
+                               headers={"Authorization": API_KEY})
+        if self.classroom_types_id is not None:
+            self.client.delete("/classroom_types/{}".format(
+                               self.classroom_types_id),
                                headers={"Authorization": API_KEY})
         else:
             pass
@@ -178,6 +179,11 @@ class TestStudent_year_level(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -187,4 +193,4 @@ class TestStudent_year_level(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.class_id = res_answer['message']['_id']
 
-        self.assertEqual(res_answer["message"]["name"], "class_test")
+        self.assertEqual(res_answer["message"]["class_name"], "class_test")

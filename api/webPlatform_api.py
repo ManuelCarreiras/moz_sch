@@ -22,6 +22,7 @@ from resources.classroom import ClassroomResource
 from resources.department import DepartmentResource
 from resources.subject import SubjectResource
 from resources.term import TermResource
+from resources.period import PeriodResource
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -197,6 +198,9 @@ api.add_resource(SubjectResource, "/subject",
 
 api.add_resource(TermResource, "/term",
                                "/term/<id>")
+
+api.add_resource(PeriodResource, "/period",
+                                 "/period/<id>")
 
 api.add_resource(ClassModelResource, "/class",
                                      "/class/<id>")
