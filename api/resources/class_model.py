@@ -6,6 +6,7 @@ from models.subject import SubjectModel
 from models.period import PeriodModel
 from models.term import TermModel
 from models.classroom import ClassroomModel
+
 import json
 
 
@@ -13,24 +14,25 @@ class ClassModelResource(Resource):
 
     def post(self):
         data = request.get_json()
-        teacher_id = data.get('teacher_id')
-        subject_id = data.get('subject_id')
-        period_id = data.get('period_id')
-        term_id = data.get('term_id')
-        classroom_id = data.get('classroom_id')
+
         if (
             not data.get('subject_id') or
             not data.get('teacher_id') or
             not data.get('term_id') or
             not data.get('period_id') or
             not data.get('classroom_id') or
-            not data.get('class_name')
+            not data.get('class_name') 
         ):
             response = {
                 'success': False,
                 'message': 'Missing required field'
             }
             return Response(json.dumps(response), status=400)
+        teacher_id = data.get('teacher_id')
+        subject_id = data.get('subject_id')
+        period_id = data.get('period_id')
+        term_id = data.get('term_id')
+        classroom_id = data.get('classroom_id')
 
         subject_id = SubjectModel.find_by_id(subject_id)
         if not subject_id:
@@ -79,13 +81,13 @@ class ClassModelResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, class_name):
-        class_id = ClassModel.find_by_class_name(class_name)
+    def get(self, id):
+        class_id = ClassModel.find_by_id(id)
 
         if class_id is None:
             response = {
                 'success': False,
-                'message': 'class not found'
+                'message': 'Class not found'
             }
             return Response(json.dumps(response), 404)
 
