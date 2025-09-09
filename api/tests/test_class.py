@@ -1,7 +1,6 @@
 import unittest
 import json
 
-from werkzeug.datastructures import headers
 from db import db
 import os
 from flask import Flask
@@ -232,7 +231,7 @@ class TestClass(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer['message'],
-                         'Department id does not exist in the database')
+                         'Subject id does not exist in the database')
 
         self.subject_id = None
         self.teacher_id = None
@@ -356,3 +355,814 @@ class TestClass(unittest.TestCase):
         self.period_id = None
         self.school_year_id = None
         self.class_id = None
+
+    def test_put_class(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+        self.class_['class_name'] = "update_test"
+        self.class_['_id'] = self.class_id
+
+        response = self.client.put("/class",
+                                   headers={"Authorization": API_KEY},
+                                   json=self.class_)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"]["class_name"],
+                         "update_test")
+
+    def test_put_class_id_missing(self):
+        response = self.client.put("/class",
+                                   headers={"Authorization": API_KEY},
+                                   json=self.class_)
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_put_class_id_wrong(self):
+        wrong_id = str(uuid.uuid4())
+        self.class_['_id'] = wrong_id
+        response = self.client.put("/class",
+                                   headers={"Authorization": API_KEY},
+                                   json=self.class_)
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_delete_class(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.delete("/class/{}".format(self.class_id),
+                                      headers={"Authorization": API_KEY},
+                                      json=self.class_)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "Class record deleted")
+
+    def test_delete_class_id_missing(self):
+        wrong_id = str(uuid.uuid4())
+
+        response = self.client.delete("/class/{}".format(wrong_id),
+                                      headers={"Authorization": API_KEY},
+                                      json=self.class_)
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_get_list_class_subject_id(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.get('/class/list/subject/{}'.format(
+                                   self.subject_id),
+                                   headers={"Authorization": API_KEY})
+
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+
+        self.assertIsInstance(res_answer['message'], list)
+
+    def test_get_list_class_subject_id_missing(self):
+
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/class/list/subject/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_get_list_class_teacher_id(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.get('/class/list/teacher/{}'.format(
+                                   self.teacher_id),
+                                   headers={"Authorization": API_KEY})
+
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+
+        self.assertIsInstance(res_answer['message'], list)
+
+    def test_get_list_class_teacher_id_missing(self):
+
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/class/list/teacher/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_get_list_class_term_id(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.get('/class/list/term/{}'.format(
+                                   self.term_id),
+                                   headers={"Authorization": API_KEY})
+
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+
+        self.assertIsInstance(res_answer['message'], list)
+
+    def test_get_list_class_term_id_missing(self):
+
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/class/list/term/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_get_list_class_period_id(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.get('/class/list/period/{}'.format(
+                                   self.period_id),
+                                   headers={"Authorization": API_KEY})
+
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+
+        self.assertIsInstance(res_answer['message'], list)
+
+    def test_get_list_class_period_id_missing(self):
+
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/class/list/period/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+
+    def test_get_list_class_classroom_id(self):
+
+        response = self.client.post('/department',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.department)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.department_id = res_answer["message"]["_id"]
+
+        self.subject['department_id'] = self.department_id
+        response = self.client.post('/subject',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.subject)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.subject_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/classroom_types',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom_types)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_types_id = res_answer["message"]["_id"]
+        self.classroom['room_type'] = self.classroom_types_id
+
+        response = self.client.post('/classroom',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.classroom)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.classroom_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        self.period['year_id'] = self.school_year_id
+
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/period',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.period)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.period_id = res_answer['message']['_id']
+
+        self.class_['subject_id'] = self.subject_id
+        self.class_['teacher_id'] = self.teacher_id
+        self.class_['term_id'] = self.term_id
+        self.class_['period_id'] = self.period_id
+        self.class_['classroom_id'] = self.classroom_id
+
+        response = self.client.post('/class',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.class_)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.class_id = res_answer['message']['_id']
+
+        response = self.client.get('/class/list/classroom/{}'.format(
+                                   self.classroom_id),
+                                   headers={"Authorization": API_KEY})
+
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+
+        self.assertIsInstance(res_answer['message'], list)
+
+    def test_get_list_class_classroom_id_missing(self):
+
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/class/list/classroom/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"],
+                         "class does not exist")
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None

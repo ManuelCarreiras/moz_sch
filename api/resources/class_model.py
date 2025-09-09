@@ -21,7 +21,7 @@ class ClassModelResource(Resource):
             not data.get('term_id') or
             not data.get('period_id') or
             not data.get('classroom_id') or
-            not data.get('class_name') 
+            not data.get('class_name')
         ):
             response = {
                 'success': False,
@@ -146,9 +146,15 @@ class ClassModelResource(Resource):
 
 
 class ClassResourceSubjectList(Resource):
-    def get(self, subject_id):
-        class_subjects = ClassModel.list_by_subject_id(subject_id)
+    def get(self, id):
+        class_subjects = ClassModel.list_by_subject_id(id)
 
+        if len(class_subjects) == 0:
+            response = {
+                'success': False,
+                'message': 'class does not exist'
+            }
+            return Response(json.dumps(response), 404)
         response = {
             'success': True,
             'message': [class_.json() for class_ in class_subjects]
@@ -157,9 +163,14 @@ class ClassResourceSubjectList(Resource):
 
 
 class ClassResourceTeacherList(Resource):
-    def get(self, teacher_id):
-        class_teachers = ClassModel.list_by_teacher_id(teacher_id)
-
+    def get(self, id):
+        class_teachers = ClassModel.list_by_teacher_id(id)
+        if len(class_teachers) == 0:
+            response = {
+                'success': False,
+                'message': 'class does not exist'
+            }
+            return Response(json.dumps(response), 404)
         response = {
             'success': True,
             'message': [class_.json() for class_ in class_teachers]
@@ -168,9 +179,14 @@ class ClassResourceTeacherList(Resource):
 
 
 class ClassResourceTermList(Resource):
-    def get(self, term_id):
-        class_terms = ClassModel.list_by_term_id(term_id)
-
+    def get(self, id):
+        class_terms = ClassModel.list_by_term_id(id)
+        if len(class_terms) == 0:
+            response = {
+                'success': False,
+                'message': 'class does not exist'
+            }
+            return Response(json.dumps(response), 404)
         response = {
             'success': True,
             'message': [class_.json() for class_ in class_terms]
@@ -179,9 +195,14 @@ class ClassResourceTermList(Resource):
 
 
 class ClassResourcePeriodList(Resource):
-    def get(self, period_id):
-        class_periods = ClassModel.list_by_period_id(period_id)
-
+    def get(self, id):
+        class_periods = ClassModel.list_by_period_id(id)
+        if len(class_periods) == 0:
+            response = {
+                'success': False,
+                'message': 'class does not exist'
+            }
+            return Response(json.dumps(response), 404)
         response = {
             'success': True,
             'message': [class_.json() for class_ in class_periods]
@@ -190,9 +211,14 @@ class ClassResourcePeriodList(Resource):
 
 
 class ClassResourceClassroomList(Resource):
-    def get(self, classroom_id):
-        class_classrooms = ClassModel.list_by_classroom_id(classroom_id)
-
+    def get(self, id):
+        class_classrooms = ClassModel.list_by_classroom_id(id)
+        if len(class_classrooms) == 0:
+            response = {
+                'success': False,
+                'message': 'class does not exist'
+            }
+            return Response(json.dumps(response), 404)
         response = {
             'success': True,
             'message': [class_.json() for class_ in class_classrooms]

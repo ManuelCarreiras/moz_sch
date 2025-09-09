@@ -45,16 +45,16 @@ class ClassModel(db.Model):
         return cls.query.filter_by(subject_id=subject_id).all()
 
     @classmethod
-    def list_by_tearcher_id(cls, tearcher_id):
-        return cls.query.filter_by(tearcher_id=tearcher_id).all()
+    def list_by_teacher_id(cls, teacher_id):
+        return cls.query.filter_by(teacher_id=teacher_id).all()
 
     @classmethod
     def list_by_term_id(cls, term_id):
         return cls.query.filter_by(term_id=term_id).all()
 
     @classmethod
-    def list_by_period_id(cls, start_period_id):
-        return cls.query.filter_by(start_period_id=start_period_id).all()
+    def list_by_period_id(cls, period_id):
+        return cls.query.filter_by(period_id=period_id).all()
 
     @classmethod
     def list_by_classroom_id(cls, classroom_id):
