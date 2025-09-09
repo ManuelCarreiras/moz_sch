@@ -1,13 +1,12 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.guardian_type import GuardianTypeModel
 import json
 
 
-
 class GuardianTypeResource(Resource):
 
-   def post(self):
+    def post(self):
         data = request.get_json()
 
         if (
@@ -15,7 +14,7 @@ class GuardianTypeResource(Resource):
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), status=400)
 
@@ -27,8 +26,8 @@ class GuardianTypeResource(Resource):
             'message': new_guardian_type.json()
         }
         return Response(json.dumps(response), 201)
-   
-   def get(self,id):
+
+    def get(self, id):
         guardian_type = GuardianTypeModel.find_by_id(id)
 
         if guardian_type is None:
@@ -44,7 +43,7 @@ class GuardianTypeResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def put(self):
+    def put(self):
         data = request.get_json()
 
         if '_id' not in data:
@@ -52,8 +51,8 @@ class GuardianTypeResource(Resource):
                 'success': False,
                 'message': 'Guardian type does not exist'
             }
-            return Response(json.dumps(response), 404)          
-        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(data['_id'])
+            return Response(json.dumps(response), 404)
+        guardian_type = GuardianTypeModel.find_by_id(data['_id'])
 
         if guardian_type is None:
             response = {
@@ -69,8 +68,8 @@ class GuardianTypeResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def delete(self,id):
-        guardian_type: GuardianTypeModel = GuardianTypeModel.find_by_id(id)
+    def delete(self, id):
+        guardian_type = GuardianTypeModel.find_by_id(id)
 
         if guardian_type is None:
             response = {

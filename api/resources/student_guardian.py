@@ -1,10 +1,11 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.student_guardian import StudentGuardianModel
 from models.student import StudentModel
 from models.guardian import GuardianModel
 from models.guardian_type import GuardianTypeModel
 import json
+
 
 class StudentGuardianResource(Resource):
 
@@ -18,54 +19,46 @@ class StudentGuardianResource(Resource):
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), status=400)
-        
 
-        student_id : StudentModel = StudentModel.find_by_id(
-            _id = data.get('_id')
-        )
+        student_id = StudentModel.find_by_id(data.get('_id'))
         if not student_id:
             response = {
                 'success': False,
                 'message': 'Student does not exist in the database'
             }
             return Response(json.dumps(response), 400)
-        
-        guardian_type_id : GuardianTypeModel = GuardianTypeModel.find_by_id(
-            _id = data.get('_id')
-        )
+
+        guardian_type_id = GuardianTypeModel.find_by_id(data.get('_id'))
         if not guardian_type_id:
             response = {
                 'success': False,
                 'message': 'Guardian type does not exist in the database'
             }
             return Response(json.dumps(response), 400)
-        
-        guardian_id : GuardianModel = GuardianModel.find_by_id(
-            _id = data.get('_id')
-        )
+
+        guardian_id = GuardianModel.find_by_id(data.get('_id'))
         if not guardian_id:
             response = {
                 'success': False,
                 'message': 'Guardian does not exist in the database'
             }
             return Response(json.dumps(response), 400)
-        
-        
+
         new_student_guardian = StudentGuardianModel(**data)
-        
+
         new_student_guardian.save_to_db()
 
         response = {
             'success': True,
-            'message': new_student_guardian
+            'message': new_student_guardian.json()
         }
         return Response(json.dumps(response), 201)
-    
+
     def get(self, id):
-        student_guardian: StudentGuardianModel = StudentGuardianModel.find_by_id(id)
+        student_guardian = StudentGuardianModel.find_by_id(id)
 
         if student_guardian is None:
             response = {
@@ -79,15 +72,15 @@ class StudentGuardianResource(Resource):
             'message': student_guardian.json()
         }
         return Response(json.dumps(response), 200)
-    
+
     def put(self):
         data = request.get_json()
-        
+
         if '_id' not in data:
             response = {
                 'success': False,
                 'message': 'Student guardian does not exist'
-            } 
+            }
             return Response(json.dumps(response), 404)
 
         student_guardian = StudentGuardianModel.find_by_id(data['_id'])
@@ -105,9 +98,9 @@ class StudentGuardianResource(Resource):
             'message': student_guardian.json()
         }
         return Response(json.dumps(response), 200)        
-        
+
     def delete(self, id):
-        student_guardian: StudentGuardianModel = StudentGuardianModel.find_by_id(id)
+        student_guardian = StudentGuardianModel.find_by_id(id)
 
         if student_guardian is None:
             response = {
@@ -115,7 +108,7 @@ class StudentGuardianResource(Resource):
                 'message': 'Student guardian does not exist'
             }
             return Response(json.dumps(response), 404)
-        
+
         student_guardian.delete_by_id(id)
         response = {
             'success': True,

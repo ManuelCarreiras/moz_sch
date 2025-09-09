@@ -15,7 +15,7 @@ from resources.student import StudentResource
 from resources.teacher import TeacherResource
 from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear  # noqa
 from resources.year_level import YearLevelResource
-from resources.student_class import StudentClassResourceStudent, StudentClassResourceClass  # noqa
+from resources.student_class import StudentClassResource
 from resources.class_model import ClassModelResource, ClassResourceSubjectList, ClassResourceTeacherList, ClassResourceTermList, ClassResourcePeriodList, ClassResourceClassroomList  # noqa
 from resources.classroom_types import ClassroomTypesResource
 from resources.classroom import ClassroomResource
@@ -23,6 +23,7 @@ from resources.department import DepartmentResource
 from resources.subject import SubjectResource
 from resources.term import TermResource
 from resources.period import PeriodResource
+from resources.score_range import ScoreRangeResource
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -179,10 +180,8 @@ api.add_resource(StudentYearLevelResourceLevel, "/student_year_level",
 api.add_resource(StudentYearLevelResourceYear, "/student_year_level/year/<id>")
 api.add_resource(StudentYearLevelResourceStudent, "/student_year_level/student/<id>")  # noqa
 
-api.add_resource(StudentClassResourceStudent, "/student_class",
-                                              "/student_class/student/<id>")
-
-api.add_resource(StudentClassResourceClass, "/student_class/class/<id>")
+api.add_resource(StudentClassResource, "/student_class",
+                                              "/student_class/<id>")
 
 api.add_resource(ClassroomTypesResource, "/classroom_types",
                                          "/classroom_types/<id>")
@@ -210,6 +209,8 @@ api.add_resource(ClassResourceTermList, "/class/list/term/<id>")
 api.add_resource(ClassResourcePeriodList, "/class/list/period/<id>")
 api.add_resource(ClassResourceClassroomList, "/class/list/classroom/<id>")
 
+api.add_resource(ScoreRangeResource, "/score_range",
+                                     "/score_range/<id>")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

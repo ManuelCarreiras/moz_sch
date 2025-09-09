@@ -102,4 +102,3 @@ class ClassroomResource(Resource):
             }
 
         return Response(json.dumps(response), 200)
-      

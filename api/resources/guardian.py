@@ -1,13 +1,12 @@
-from flask import request, g, Response
+from flask import request, Response
 from flask_restful import Resource
 from models.guardian import GuardianModel
 import json
 
 
-
 class GuardianResource(Resource):
 
-   def post(self):
+    def post(self):
         data = request.get_json()
 
         if (
@@ -15,7 +14,7 @@ class GuardianResource(Resource):
         ):
             response = {
                 'success': False,
-                'message':'Missing required field'
+                'message': 'Missing required field'
             }
             return Response(json.dumps(response), status=400)
 
@@ -27,8 +26,8 @@ class GuardianResource(Resource):
             'message': new_guardian.json()
         }
         return Response(json.dumps(response), 201)
-   
-   def get(self,id):
+
+    def get(self, id):
         guardian = GuardianModel.find_by_id(id)
 
         if guardian is None:
@@ -44,7 +43,7 @@ class GuardianResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def put(self):
+    def put(self):
         data = request.get_json()
 
         if '_id' not in data:
@@ -69,7 +68,7 @@ class GuardianResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-   def delete(self,id):
+    def delete(self, id):
         guardian = GuardianModel.find_by_id(id)
 
         if guardian is None:

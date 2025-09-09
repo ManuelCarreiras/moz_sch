@@ -1,12 +1,11 @@
 import uuid
-from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
 
 class StudentModel(db.Model):
     __tablename__ = 'student'
-    _id = db.Column(UUID(as_uuid=True), primary_key=True, default = uuid.uuid4)
+    _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     given_name = db.Column(db.String(100), nullable=False)
     middle_name = db.Column(db.String(100), nullable=True)
     surname = db.Column(db.String(100), nullable=False)
@@ -14,7 +13,7 @@ class StudentModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     enrollment_date = db.Column(db.Date, nullable=False)
 
-    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date):
+    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date):     # noqa501
         self.given_name = given_name
         self.middle_name = middle_name
         self.surname = surname
@@ -28,9 +27,9 @@ class StudentModel(db.Model):
             'given_name': self.given_name,
             'middle_name': self.middle_name,
             'surname': self.surname,
-            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,  # noqa501
             'gender': self.gender,
-            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None
+            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None  # noqa501
         }
 
     @classmethod
