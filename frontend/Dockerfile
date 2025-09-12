@@ -1,8 +1,33 @@
-FROM node:18-alpine
+# syntax=docker/dockerfile:1
+
+# Multi-stage build for React frontend
+FROM node:18-alpine AS build
+
 WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
-RUN npm install
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
 COPY . .
-RUN npm install @vitejs/plugin-react --save-dev
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host"] 
+
+# Build the application
+RUN npm run build
+
+# Production stage with Nginx
+FROM nginx:alpine
+
+# Copy built assets from build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

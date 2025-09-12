@@ -1,25 +1,36 @@
+// Main App component - mirrors your backend webPlatform_api.py structure
+// This follows the same pattern as your Flask app setup
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { LandingPage } from './pages/LandingPage';
+import { StudentDashboard } from './pages/student/StudentDashboard';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
 import './App.css';
-import logo from './assets/logo.png';
 
 function App() {
   return (
-    <div className="App" style={{ textAlign: 'center', marginTop: 40 }}>
-      <img src={logo} alt="Liceu Santa Isabel Logo" style={{ width: 180, marginBottom: 24 }} />
-      <h1>Welcome to Liceu Santa Isabel</h1>
-      <p>Your school management system</p>
-      <div style={{ marginTop: 32 }}>
-        <h2>API Endpoints</h2>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          <li><a href="http://localhost:5000/users" target="_blank" rel="noopener noreferrer">Users</a></li>
-          <li><a href="http://localhost:5000/students" target="_blank" rel="noopener noreferrer">Students</a></li>
-          <li><a href="http://localhost:5000/classes" target="_blank" rel="noopener noreferrer">Classes</a></li>
-          <li><a href="http://localhost:5000/professors" target="_blank" rel="noopener noreferrer">Professors</a></li>
-          <li><a href="http://localhost:5000/mensalities" target="_blank" rel="noopener noreferrer">Mensalities</a></li>
-          <li><a href="http://localhost:5000/expenses" target="_blank" rel="noopener noreferrer">Expenses</a></li>
-        </ul>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Landing Page - equivalent to your Home resource */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Student Routes */}
+          <Route path="/student/*" element={<StudentDashboard />} />
+          
+          {/* Teacher Routes */}
+          <Route path="/teacher/*" element={<div>Teacher Dashboard - Coming Soon</div>} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/*" element={<AdminDashboard />} />
+          
+          {/* Default redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 
-export default App; 
+export default App;
