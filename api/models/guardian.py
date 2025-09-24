@@ -1,28 +1,22 @@
 import uuid
-from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
-from enum import Enum
-from sqlalchemy import Enum as SQLAlchemyEnum
-
 
 
 # Initializing the class guardian
 class GuardianModel(db.Model):
     __tablename__ = 'guardian'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    given_name = db.Column(db.String(120), nullable = False)
-    surname = db.Column(db.String(100), nullable = False)
+    given_name = db.Column(db.String(120), nullable=False)
+    surname = db.Column(db.String(100), nullable=False)
     email_address = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.VARCHAR(10), unique=True, nullable=False)
-
 
     def __init__(self, given_name, surname, email_address, phone_number):
         self.given_name = given_name
         self.surname = surname
         self.email_address = email_address
         self.phone_number = phone_number
-
 
     def json(self):
         return {
@@ -32,16 +26,15 @@ class GuardianModel(db.Model):
             'email_address': self.email_address,
             'phone_number': self.phone_number
         }
-        
 
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
-    
+
     @classmethod
     def find_by_given_name(cls, given_name):
         return cls.query.filter_by(given_name=given_name).first()
-    
+
     @classmethod
     def find_by_surname(cls, surname):
         return cls.query.filter_by(surname=surname).first()
@@ -49,11 +42,10 @@ class GuardianModel(db.Model):
     @classmethod
     def find_by_email(cls, email_address):
         return cls.query.filter_by(email_address=email_address).first()
-    
+
     @classmethod
     def find_by_phone_number(cls, phone_number):
         return cls.query.filter_by(phone_number=phone_number).first()
-    
 
     def save_to_db(self):
         db.session.add(self)
@@ -75,4 +67,4 @@ class GuardianModel(db.Model):
         obj = self.query.filter_by(_id=record_id).first()
         if obj:
             db.session.delete(obj)
-            db.session.commit() 
+            db.session.commit()

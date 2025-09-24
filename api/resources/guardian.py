@@ -10,7 +10,10 @@ class GuardianResource(Resource):
         data = request.get_json()
 
         if (
-            not data.get('guardian_name')
+            not data.get('given_name') or
+            not data.get('surname') or
+            not data.get('email_address') or
+            not data.get('phone_number')
         ):
             response = {
                 'success': False,

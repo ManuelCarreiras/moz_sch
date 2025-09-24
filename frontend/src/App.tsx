@@ -83,6 +83,7 @@ function App() {
       <footer className="footer">
         <span>© Santa Isabel Escola</span>
       </footer>
+      </div>
 
       {isLoginOpen && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" onClick={() => setIsLoginOpen(false)}>

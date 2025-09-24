@@ -24,6 +24,9 @@ from resources.subject import SubjectResource
 from resources.term import TermResource
 from resources.period import PeriodResource
 from resources.score_range import ScoreRangeResource
+from resources.guardian import GuardianResource
+from resources.student_guardian import StudentGuardianResource
+from resources.guardian_type import GuardianTypeResource
 
 # Get environment variables and print them for debugging
 POSTGRES_USER = os.getenv("POSTGRES_USER")
