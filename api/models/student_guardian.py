@@ -10,23 +10,29 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 # Initializing the class class with its values
 class StudentGuardianModel(db.Model):
     __tablename__ = 'student_guardian'
+    _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     student_id = db.column(UUID(as_uuid=True), db.ForeignKey('student._id'))
     guardian_type_id = db.Column(UUID(as_uuid=True), db.ForeignKey('guardian_type._id'))
     guardian_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'))
 
     
-    def __init__(self, student_id, guardian_type_id, class_name):
+    def __init__(self, student_id, guardian_type_id, guardian_id):
         self.student_id = student_id
         self.guardian_type_id = guardian_type_id
-        self.class_name = class_name
+        self.guardian_id = guardian_id
 
 
     def json(self):
         return {
-            'student_id': self.student_id,
-            'guardian_type_id': self.guardian_type_id,
-            'guardian_id': self.guardian_id
+            '_id': str(self._id),
+            'student_id': str(self.student_id),
+            'guardian_type_id': str(self.guardian_type_id),
+            'guardian_id': str(self.guardian_id)
         }
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(_id=_id).first()
 
     @classmethod
     def find_by_student_id(cls, student_id):

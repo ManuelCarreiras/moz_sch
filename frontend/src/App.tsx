@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import logoSrc from './assets/Santa_Isabel.png'
 import watermarkSrc from './assets/Escola_marca_de_água.png'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { LoginModal } from './components/LoginModal'
+import { Dashboard } from './components/Dashboard'
 
 type ScreenSize = 'mobile' | 'tablet' | 'desktop' | 'wide'
 
-function App() {
+function AppContent() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [screenSize, setScreenSize] = useState<ScreenSize>('desktop')
+  const { isAuthenticated, isLoading } = useAuth()
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -28,9 +32,25 @@ function App() {
     return () => window.removeEventListener('resize', updateScreenSize)
   }, [])
 
-  const handleLogin = (portal: string) => {
-    alert(`${portal} login TBD`)
-    setIsLoginOpen(false)
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: 'var(--text-lg)',
+        color: 'var(--muted)'
+      }}>
+        Loading...
+      </div>
+    )
+  }
+
+  // If authenticated, show dashboard
+  if (isAuthenticated) {
+    return <Dashboard />
   }
 
   return (
@@ -85,22 +105,16 @@ function App() {
       </footer>
       </div>
 
-      {isLoginOpen && (
-        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" onClick={() => setIsLoginOpen(false)}>
-          <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2 id="login-title">Choose your portal</h2>
-              <button className="icon-btn" aria-label="Close" onClick={() => setIsLoginOpen(false)}>✕</button>
-            </div>
-            <div className="modal__content">
-              <button className="portal" onClick={() => handleLogin('Admin')}>Admin Portal</button>
-              <button className="portal" onClick={() => handleLogin('Teacher')}>Teacher Portal</button>
-              <button className="portal" onClick={() => handleLogin('Student')}>Student Portal</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 

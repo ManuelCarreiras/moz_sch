@@ -5,7 +5,6 @@ from flask import request, g, Response
 from utils.decode_verify_jwt import verify_accessToken
 
 API_KEY = os.getenv("API_KEY")
-SCHOOL_EMAIL = os.getenv("SCHOOL_EMAIL")
 
 
 def check_api_key():
@@ -15,18 +14,46 @@ def check_api_key():
     return False
 
 
+def check_if_is_device_request():
+    '''If is device making request it is not needed api key'''
+    device_key = request.headers.get('MONITORING_DEVICE_KEY')
+    device_id = request.headers.get('MONITORING_DEVICE_ID')
+    device_url = "/monitoring_data"
+
+    if device_key and device_id and device_url in request.url:
+        return True
+    return False
+
+
 # Auth validation
 def validAuth():
+    from utils.decode_verify_jwt import verify_accessToken
 
     exempt_routes = ["home"]
     if request.endpoint in exempt_routes:
         return
 
+    # Check for API key first (for admin/debug access)
     api_key = check_api_key()
     if api_key:
+        g.user = "admin_user"
+        g.admin = True
+        g.email = "admin@system.local"  # No need for SCHOOL_EMAIL
+        return
+
+    # Check if debug mode (bypass auth in development)
+    from flask import current_app
+    if current_app.config.get('DEBUG') or os.getenv("DEBUG", "false").lower() == "true":
         g.user = "debug_user"
         g.admin = True
-        g.email = SCHOOL_EMAIL
+        g.email = "debug@system.local"  # No need for SCHOOL_EMAIL
+        return
+
+    # Check if device request (for monitoring/IoT)
+    if check_if_is_device_request():
+        g.user = "device_user"
+        g.admin = False
+        g.email = "device@system.local"
         return
     # Obtain access token and check api key
     try:
