@@ -27,7 +27,6 @@ def check_if_is_device_request():
 
 # Auth validation
 def validAuth():
-    from utils.decode_verify_jwt import verify_accessToken
 
     exempt_routes = ["home"]
     if request.endpoint in exempt_routes:

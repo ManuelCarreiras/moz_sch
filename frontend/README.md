@@ -1,12 +1,18 @@
 # Santa Isabel Escola - Portal Escolar
 
-A modern React + TypeScript frontend for the Santa Isabel Escola school management system.
+A modern React + TypeScript frontend for the Santa Isabel Escola school management system with AWS Cognito authentication.
 
 ## 🎯 Overview
 
-This is the frontend application for the Santa Isabel Escola school management portal, providing a clean and responsive interface for managing students, teachers, classes, and academic schedules.
+This is the frontend application for the Santa Isabel Escola school management portal, providing a clean and responsive interface for managing students, teachers, classes, and academic schedules with secure authentication.
 
 ## ✨ Features
+
+### Authentication System
+- **AWS Cognito Integration**: Secure user authentication with JWT tokens
+- **Role-Based Access**: Admin, Teacher, and Student portals with different permissions
+- **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
+- **Session Management**: Automatic token refresh and secure logout
 
 ### Landing Page
 - **Responsive Design**: Adapts to all screen sizes from mobile to ultra-wide monitors
@@ -16,6 +22,7 @@ This is the frontend application for the Santa Isabel Escola school management p
 
 ### Technical Features
 - **React 19** with TypeScript for type safety
+- **AWS Amplify** for Cognito authentication
 - **Vite** for fast development and optimized builds
 - **CSS Grid & Flexbox** for responsive layouts
 - **Viewport Units** for true responsive scaling
@@ -24,12 +31,20 @@ This is the frontend application for the Santa Isabel Escola school management p
 ## 🛠 Technology Stack
 
 - **Frontend**: React 19.1.1, TypeScript 5.8.3
+- **Authentication**: AWS Amplify with Cognito
 - **Build Tool**: Vite with Rolldown
 - **Styling**: CSS3 with CSS Grid, Flexbox, and custom properties
 - **Containerization**: Docker with Nginx for production serving
 - **Development**: ESLint, TypeScript strict mode
+- **Secrets Management**: Doppler for environment variables
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 20+
+- Docker and Docker Compose
+- Doppler CLI (for secrets management)
+- AWS Cognito User Pool and App Client
 
 ### Development
 ```bash
@@ -48,12 +63,16 @@ npm run preview
 
 ### Docker Development
 ```bash
+# Set Doppler token
+export DOPPLER_TOKEN_TEMP="your_doppler_token"
+
 # Build and run with Docker Compose
 docker-compose up -d --build
 
 # Access the application
 # Frontend: http://localhost:3000
 # API: http://localhost:5000
+# Database Admin: http://localhost:8080
 ```
 
 ## 📱 Responsive Design
@@ -131,15 +150,43 @@ The frontend is configured to work with the full stack:
 
 ## 🔧 Configuration
 
-### Environment Variables
-- `VITE_API_BASE_URL`: Backend API URL (default: `http://localhost:5000`)
+### Environment Variables (Doppler Secrets)
+```bash
+# Database Configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_DB=santa_isabel_db
+POSTGRES_HOST=postgres-db
+POSTGRES_PORT=5432
+
+# API Configuration
+API_KEY=your_secure_api_key
+DEBUG=true
+
+# Cognito Configuration
+AWS_COGNITO_USERPOOL_ID=eu-west-1_xxxxxxxxx
+AWS_COGNITO_APP_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
+COGNITO_REGION_NAME=eu-west-1
+
+# Frontend Configuration
+VITE_API_BASE_URL=http://localhost:5000
+```
 
 ### Build Configuration
 - **TypeScript**: Strict mode enabled
 - **ESLint**: React and TypeScript rules
 - **Vite**: Optimized for production with code splitting
+- **AWS Amplify**: Cognito authentication configuration
 
 ## 📝 Development Notes
+
+### Authentication Implementation
+The authentication system uses:
+- AWS Amplify for Cognito integration
+- React Context for global auth state management
+- JWT token handling with automatic refresh
+- Role-based access control (Admin, Teacher, Student)
+- Multiple authentication methods for flexibility
 
 ### Responsive Implementation
 The responsive system uses:
@@ -154,6 +201,12 @@ The responsive system uses:
 - Vite handles optimization and caching
 - Watermark uses React component for proper asset resolution
 
+### API Integration
+- Centralized API service with authentication headers
+- Automatic JWT token injection
+- Error handling and loading states
+- TypeScript interfaces for type safety
+
 ## 🤝 Contributing
 
 1. Follow TypeScript strict mode guidelines
@@ -161,13 +214,29 @@ The responsive system uses:
 3. Maintain the dark theme aesthetic
 4. Test across all responsive breakpoints
 5. Ensure accessibility standards
+6. Follow authentication best practices
+7. Test with different user roles
+
+## 🐛 Troubleshooting
+
+### Authentication Issues
+- **Login not working**: Check Doppler secrets are set correctly
+- **Cognito errors**: Verify User Pool ID and App Client ID
+- **Token issues**: Check browser console for JWT errors
+- **Permission denied**: Verify user is in correct Cognito group
+
+### Development Issues
+- **Build failures**: Check TypeScript errors and dependencies
+- **Environment variables**: Ensure Doppler token is set
+- **API connection**: Verify backend is running and accessible
 
 ## 📞 Support
 
 For technical support or questions about the Santa Isabel Escola portal:
 - Check the API documentation
-- Review the responsive design guidelines
+- Review the authentication setup guide
 - Test across different screen sizes
+- Verify Doppler secrets configuration
 
 ---
 

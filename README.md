@@ -1,6 +1,6 @@
-# Moz School API - School Management System
+# Santa Isabel Escola - School Management System
 
-A comprehensive REST API for managing school administration, student records, teacher information, class scheduling, and academic tracking.
+A comprehensive full-stack school management system with React frontend, Flask API, and AWS Cognito authentication for managing students, teachers, classes, and academic schedules.
 
 ## 📋 Table of Contents
 
@@ -18,7 +18,7 @@ A comprehensive REST API for managing school administration, student records, te
 
 ## 🎯 Overview
 
-Moz School API is a Flask-based REST API designed to handle comprehensive school management operations. It provides endpoints for managing students, teachers, classes, subjects, academic years, and various educational administrative tasks.
+Santa Isabel Escola is a modern full-stack school management system designed for comprehensive educational administration. It features a React frontend with AWS Cognito authentication, a Flask REST API backend, and PostgreSQL database for managing students, teachers, classes, subjects, academic years, and various educational administrative tasks.
 
 ## ✨ Features
 
@@ -32,38 +32,64 @@ Moz School API is a Flask-based REST API designed to handle comprehensive school
 - **Grade Tracking**: Student performance monitoring and score management
 - **Classroom Management**: Physical classroom and facility administration
 
+### Authentication & Security
+- **AWS Cognito Integration**: Secure user authentication with JWT tokens
+- **Role-Based Access Control**: Admin, Teacher, and Student portals
+- **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
+- **Session Management**: Automatic token refresh and secure logout
+
 ### Technical Features
-- RESTful API design with standard HTTP methods
-- PostgreSQL database with SQLAlchemy ORM
-- JWT-based authentication
-- Docker containerization
-- Comprehensive testing suite
-- CORS support for frontend integration
+- **Frontend**: React 19 with TypeScript and AWS Amplify
+- **Backend**: Flask REST API with SQLAlchemy ORM
+- **Database**: PostgreSQL with comprehensive relational design
+- **Containerization**: Docker & Docker Compose
+- **Secrets Management**: Doppler for secure environment variables
+- **Testing**: Comprehensive test suite with pytest
+- **CORS Support**: Full frontend-backend integration
 
 ## 🛠 Technology Stack
 
-- **Backend**: Flask 2.3.2, Flask-RESTful
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **Authentication**: Flask-JWT-Extended
-- **Containerization**: Docker & Docker Compose
-- **Testing**: pytest, pytest-cov
-- **Code Quality**: flake8
-- **Frontend**: React with TypeScript (separate repository)
+### Frontend
+- **React 19.1.1** with TypeScript 5.8.3
+- **AWS Amplify** for Cognito authentication
+- **Vite** with Rolldown for fast builds
+- **CSS Grid & Flexbox** for responsive design
+- **Nginx** for production serving
+
+### Backend
+- **Flask 2.3.2** with Flask-RESTful
+- **PostgreSQL** with SQLAlchemy ORM
+- **AWS Cognito** for JWT authentication
+- **Doppler** for secrets management
+- **Gunicorn** for production WSGI server
+
+### DevOps & Infrastructure
+- **Docker & Docker Compose** for containerization
+- **pytest** for testing
+- **flake8** for code quality
+- **Adminer** for database management
 
 ## 🏗 Architecture
 
 The system follows a modular architecture with clear separation of concerns:
 
 ```
-moz_school/
+moz_sch/
 ├── api/                    # Backend API
 │   ├── models/            # Database models
 │   ├── resources/          # API endpoints
 │   ├── tests/             # Test suite
-│   ├── utils/             # Utilities
-│   └── webPlatform_api.py # Main application
+│   ├── utils/             # Utilities (auth, JWT, email)
+│   └── webPlatform_api.py # Main Flask application
 ├── frontend/              # React frontend
-└── docker-compose.yml     # Container orchestration
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── contexts/      # React contexts (Auth)
+│   │   ├── services/      # API and auth services
+│   │   └── config/        # Configuration files
+│   └── Dockerfile         # Frontend container
+├── docker-compose.yml     # Container orchestration
+└── README.md             # Project documentation
 ```
 
 ## 📊 Data Model
@@ -165,44 +191,65 @@ DELETE /classroom_types/<id> # Delete classroom type
 ### Prerequisites
 - Docker and Docker Compose
 - Git
+- Doppler CLI (for secrets management)
+- AWS Cognito User Pool and App Client
 
 ### Quick Start
 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd moz_school
+   cd moz_sch
    ```
 
-2. **Set up environment variables**
+2. **Set up Doppler secrets**
    ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
+   # Install Doppler CLI
+   # Add secrets to your Doppler project (see Configuration section)
+   export DOPPLER_TOKEN_TEMP="your_doppler_token"
    ```
 
 3. **Start the services**
    ```bash
-   docker-compose up -d
+   docker-compose up -d --build
    ```
 
 4. **Verify installation**
    ```bash
+   # Check API
    curl http://localhost:5000/
    # Should return: {"status": "Scale4Audit API online!"}
+   
+   # Check Frontend
+   open http://localhost:3000
+   
+   # Check Database Admin
+   open http://localhost:8080
    ```
 
-### Environment Variables
+### Configuration (Doppler Secrets)
 
-Create a `.env` file with the following variables:
+Add these secrets to your Doppler project:
 
-```env
-POSTGRES_USER=your_db_user
-POSTGRES_PASSWORD=your_db_password
-POSTGRES_DB=moz_school
+```bash
+# Database Configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_DB=santa_isabel_db
 POSTGRES_HOST=postgres-db
 POSTGRES_PORT=5432
-API_KEY=your_api_key
-DEBUG=False
+
+# API Configuration
+API_KEY=your_secure_api_key
+DEBUG=true
+
+# Cognito Configuration
+AWS_COGNITO_USERPOOL_ID=eu-west-1_xxxxxxxxx
+AWS_COGNITO_APP_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
+COGNITO_REGION_NAME=eu-west-1
+
+# Frontend Configuration
+VITE_API_BASE_URL=http://localhost:5000
 ```
 
 ## 📖 Usage Examples
@@ -287,9 +334,18 @@ Tests are organized by entity:
 ### Services
 
 The system runs the following services:
-- **API**: Flask application (port 5000)
+- **Frontend**: React application with Nginx (port 3000)
+- **API**: Flask application with Gunicorn (port 5000)
 - **PostgreSQL**: Database (port 5432)
 - **Adminer**: Database management interface (port 8080)
+
+### Authentication Flow
+
+1. **User Access**: Users visit the frontend at `http://localhost:3000`
+2. **Login**: Users authenticate via AWS Cognito
+3. **Token Management**: JWT tokens are automatically managed
+4. **API Access**: Authenticated requests include JWT tokens
+5. **Role-Based Access**: Different permissions for Admin, Teacher, Student roles
 
 ## 🤝 Contributing
 
@@ -309,10 +365,12 @@ The system runs the following services:
 
 ### Code Standards
 
-- Follow PEP 8 style guidelines
+- Follow PEP 8 style guidelines for Python
+- Follow TypeScript strict mode guidelines for React
 - Write comprehensive tests for new features
 - Update documentation for API changes
 - Use meaningful commit messages
+- Test authentication flows with different user roles
 
 ## 📝 License
 
@@ -327,4 +385,4 @@ For support and questions:
 
 ---
 
-**Moz School API** - Empowering educational institutions with comprehensive management solutions.
+**Santa Isabel Escola** - Empowering education through technology with modern full-stack solutions.

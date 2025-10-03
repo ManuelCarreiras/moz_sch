@@ -86,26 +86,27 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+
 # Add authentication middleware
 @app.before_request
 def before_request():
     # Skip auth for static files and health checks
     if request.endpoint in ['static', 'home']:
         return
-    
+
     # Skip auth during startup (when no endpoint is set)
     if not request.endpoint:
         return
-        
+
     from utils.valid_auth import validAuth
     return validAuth()
 
-# Authentication helper functions are now in utils/valid_auth.py
 
 # Auth validation
 def validAuth():  # pragma: no cover
     from utils.valid_auth import validAuth as cognito_auth
     return cognito_auth()
+
 
 api.add_resource(Home, "/")
 
@@ -127,7 +128,7 @@ api.add_resource(StudentYearLevelResourceYear, "/student_year_level/year/<id>")
 api.add_resource(StudentYearLevelResourceStudent, "/student_year_level/student/<id>")  # noqa
 
 api.add_resource(StudentClassResource, "/student_class",
-                                              "/student_class/<id>")
+                                       "/student_class/<id>")
 
 api.add_resource(ClassroomTypesResource, "/classroom_types",
                                          "/classroom_types/<id>")

@@ -27,7 +27,7 @@ CLIENT_ID = os.getenv("AWS_COGNITO_APPCLIENT_ID")
 API_KEY = os.getenv("API_KEY")
 
 # CLIENT_SECRET = os.getenv("COGNITO_CLIENT_SECRET")  # noqa:E501
-REGION_NAME = os.getenv("COGNITO_REGION_NAME", 'eu-west-2')
+REGION_NAME = os.getenv("COGNITO_REGION_NAME", 'eu-west-1')
 
 keys_url = 'https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json'\
            .format(REGION_NAME, USER_POOL_ID)
