@@ -62,13 +62,16 @@ class Home(Resource):
         app.logger.error('ERROR message')
         app.logger.critical('CRITICAL message')
 
-        response = {'status': 'Scale4Audit API online!'}
+        response = {'status': 'Sta Isabel API online!'}
         return Response(json.dumps(response), status=200)  # HTTP OK
 
 
 app = Flask(__name__)
 
-CORS(app)
+# Configure CORS to allow all origins for development
+CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"], 
+     allow_headers=["Content-Type", "Authorization", "accessToken"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     "postgresql://{}:{}@{}:{}/{}".format(POSTGRES_USER,

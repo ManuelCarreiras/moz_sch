@@ -1,4 +1,5 @@
 import { useAuth, useUser } from '../contexts/AuthContext';
+import { AdminDashboard } from './admin/AdminDashboard';
 
 export function Dashboard() {
   const { signOut, isLoading } = useAuth();
@@ -42,10 +43,14 @@ export function Dashboard() {
     );
   }
 
+  // Route to appropriate dashboard based on user role
+  if (user.role === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  // Teacher and Student dashboards (placeholder for now)
   const getWelcomeMessage = () => {
     switch (user.role) {
-      case 'admin':
-        return 'Welcome to the Admin Portal';
       case 'teacher':
         return 'Welcome to the Teacher Portal';
       case 'student':
@@ -57,31 +62,6 @@ export function Dashboard() {
 
   const getPortalContent = () => {
     switch (user.role) {
-      case 'admin':
-        return (
-          <div>
-            <h2>Admin Dashboard</h2>
-            <p>Manage students, teachers, classes, and school settings.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-              <div className="feature">
-                <h3>Students</h3>
-                <p>View and manage student records, enrollment, and academic progress.</p>
-              </div>
-              <div className="feature">
-                <h3>Teachers</h3>
-                <p>Manage teacher profiles, assignments, and department information.</p>
-              </div>
-              <div className="feature">
-                <h3>Classes</h3>
-                <p>Create and manage class schedules, subjects, and classroom assignments.</p>
-              </div>
-              <div className="feature">
-                <h3>Reports</h3>
-                <p>Generate academic reports and analytics for school administration.</p>
-              </div>
-            </div>
-          </div>
-        );
       case 'teacher':
         return (
           <div>

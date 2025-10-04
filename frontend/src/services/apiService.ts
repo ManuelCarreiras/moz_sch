@@ -57,7 +57,7 @@ class ApiService {
 
       return {
         success: true,
-        data,
+        data: data || null,
       };
     } catch (error: any) {
       return {

@@ -218,7 +218,7 @@ DELETE /classroom_types/<id> # Delete classroom type
    ```bash
    # Check API
    curl http://localhost:5000/
-   # Should return: {"status": "Scale4Audit API online!"}
+   # Should return: {"status": "Sta API online!"}
    
    # Check Frontend
    open http://localhost:3000
