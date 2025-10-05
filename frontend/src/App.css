@@ -969,43 +969,104 @@ body {
   color: var(--muted);
 }
 
-/* Responsive Admin Dashboard */
+/* Wizard Styles */
+.wizard-modal {
+  max-width: 800px;
+  max-height: 90vh;
+}
+
+.wizard-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.progress-step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.3s ease;
+}
+
+.progress-step.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.wizard-step {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.wizard-step h3 {
+  margin: 0 0 var(--space-md) 0;
+  font-size: var(--text-xl);
+  color: var(--text);
+  text-align: center;
+}
+
+.review-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.review-section h4 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--text-lg);
+  color: var(--primary);
+}
+
+.review-section p {
+  margin: var(--space-xs) 0;
+  color: var(--text);
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  gap: var(--space-sm);
+}
+
+.wizard-actions .btn {
+  min-width: 120px;
+}
+
+/* Responsive Wizard */
 @media (max-width: 768px) {
-  .admin-main {
-    grid-template-columns: 1fr;
-  }
-  
-  .admin-sidebar {
-    display: none;
-  }
-  
-  .table-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .reports-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .modal {
-    padding: var(--space-sm);
-  }
-  
-  .modal__dialog {
+  .wizard-modal {
+    max-width: 95vw;
     max-height: 95vh;
   }
   
-  .modal__header,
-  .modal__content {
-    padding: var(--space-md);
+  .wizard-step {
+    min-height: 300px;
+  }
+  
+  .wizard-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .wizard-actions .btn {
+    width: 100%;
   }
 }

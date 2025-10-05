@@ -19,6 +19,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Subscribe to auth state changes
     const unsubscribe = authService.subscribe(setAuthState);
+    
+    // Force a re-check of authentication state on mount
+    const checkAuth = async () => {
+      try {
+        const currentState = authService.getAuthState();
+        if (currentState.isLoading) {
+          // If still loading, wait a bit and check again
+          setTimeout(() => {
+            const updatedState = authService.getAuthState();
+            setAuthState(updatedState);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error checking auth state:', error);
+      }
+    };
+    
+    checkAuth();
+    
     return unsubscribe;
   }, []);
 
