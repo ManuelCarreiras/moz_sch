@@ -34,27 +34,32 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 
 ### Authentication & Security
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
-- **Role-Based Access Control**: Admin, Teacher, and Student portals
+- **Multi-Portal Access**: Admin, Teacher, and Student portals with unified access
+- **Role-Based Routing**: Client-side navigation with protected routes (role restrictions temporarily disabled for development)
 - **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
 - **Session Management**: Automatic token refresh and secure logout
 
 ### Technical Features
-- **Frontend**: React 19 with TypeScript and AWS Amplify
+- **Frontend**: React 19 with TypeScript, AWS Amplify, and React Router DOM
 - **Backend**: Flask REST API with SQLAlchemy ORM
 - **Database**: PostgreSQL with comprehensive relational design
 - **Containerization**: Docker & Docker Compose
 - **Secrets Management**: Doppler for secure environment variables
 - **Testing**: Comprehensive test suite with pytest
 - **CORS Support**: Full frontend-backend integration
+- **Client-Side Routing**: Seamless navigation between portals
+- **API Integration**: Real-time frontend-backend communication
 
 ## 🛠 Technology Stack
 
 ### Frontend
 - **React 19.1.1** with TypeScript 5.8.3
 - **AWS Amplify** for Cognito authentication
+- **React Router DOM** for client-side routing
 - **Vite** with Rolldown for fast builds
 - **CSS Grid & Flexbox** for responsive design
 - **Nginx** for production serving
+- **Fetch API** for backend communication
 
 ### Backend
 - **Flask 2.3.2** with Flask-RESTful
@@ -123,7 +128,7 @@ The system uses a comprehensive relational database design with the following ke
 
 ### Student Management
 ```
-POST   /student              # Create new student
+POST   /student              # Create new student (integrated with frontend form)
 GET    /student/<id>         # Get student by ID
 PUT    /student              # Update student
 DELETE /student/<id>         # Delete student
@@ -342,10 +347,22 @@ The system runs the following services:
 ### Authentication Flow
 
 1. **User Access**: Users visit the frontend at `http://localhost:3000`
-2. **Login**: Users authenticate via AWS Cognito
-3. **Token Management**: JWT tokens are automatically managed
-4. **API Access**: Authenticated requests include JWT tokens
-5. **Role-Based Access**: Different permissions for Admin, Teacher, Student roles
+2. **Landing Page**: Users see the school portal introduction at `/landing`
+3. **Login**: Users navigate to `/login` and authenticate via AWS Cognito
+4. **Portal Navigation**: Users can access any portal:
+   - **Admin Dashboard**: `/dashboard` - Administrative management
+   - **Student Portal**: `/student` - Student features and management
+   - **Teacher Portal**: `/teacher` - Teacher features and management
+5. **Token Management**: JWT tokens are automatically managed
+6. **API Access**: Authenticated requests include JWT tokens
+7. **Bidirectional Navigation**: Easy navigation between all portals
+
+### Current Development Status
+
+- **Role Restrictions**: Temporarily disabled for development - any authenticated user can access all portals
+- **Student Management**: Fully functional with frontend form integration
+- **Navigation**: Complete bidirectional navigation between all portals
+- **API Integration**: Student creation form directly connected to Flask backend
 
 ## 🤝 Contributing
 
