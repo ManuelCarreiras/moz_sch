@@ -2,19 +2,12 @@ import { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
 
 export interface Teacher {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  date_of_birth: string;
-  gender: 'M' | 'F';
-  address: string;
-  hire_date: string;
-  status: 'active' | 'inactive';
-  department_id?: string;
-  department_name?: string;
-  subjects?: string[];
+  _id: string;
+  given_name: string;
+  surname: string;
+  email_address: string;
+  phone_number: string;
+  gender: string;
 }
 
 export function TeachersTable() {
@@ -33,7 +26,9 @@ export function TeachersTable() {
       const response = await apiService.getTeachers();
       
       if (response.success && response.data) {
-        setTeachers(Array.isArray(response.data) ? response.data : []);
+        // The backend returns { success: true, message: [...] } format
+        const teacherData = (response.data as any).message || response.data;
+        setTeachers(Array.isArray(teacherData) ? teacherData : []);
       } else {
         setError(response.error || 'Failed to load teachers');
       }
@@ -87,38 +82,32 @@ export function TeachersTable() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Department</th>
-              <th>Hire Date</th>
-              <th>Status</th>
+              <th>Gender</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {teachers.length === 0 ? (
               <tr>
-                <td colSpan={7} className="empty-state">
+                <td colSpan={5} className="empty-state">
                   No teachers found.
                 </td>
               </tr>
             ) : (
               teachers.map((teacher) => (
-                <tr key={teacher.id}>
+                <tr key={teacher._id}>
                   <td>
                     <div className="teacher-name">
-                      <strong>{teacher.first_name} {teacher.last_name}</strong>
-                      <span className="teacher-gender">
-                        {teacher.gender === 'M' ? '♂' : '♀'}
-                      </span>
+                      <strong>{teacher.given_name} {teacher.surname}</strong>
                     </div>
                   </td>
-                  <td>{teacher.email}</td>
-                  <td>{teacher.phone}</td>
-                  <td>{teacher.department_name || 'N/A'}</td>
-                  <td>{new Date(teacher.hire_date).toLocaleDateString()}</td>
+                  <td>{teacher.email_address}</td>
+                  <td>{teacher.phone_number}</td>
                   <td>
-                    <span className={`status-badge status-badge--${teacher.status}`}>
-                      {teacher.status}
+                    <span className="teacher-gender">
+                      {teacher.gender === 'Male' ? '♂' : teacher.gender === 'Female' ? '♀' : '⚧'}
                     </span>
+                    {teacher.gender}
                   </td>
                   <td>
                     <div className="action-buttons">

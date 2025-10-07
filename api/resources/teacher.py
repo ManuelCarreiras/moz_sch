@@ -33,17 +33,29 @@ class TeacherResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        professor = TeacherModel.find_by_id(UUID(id))
+    def get(self, id=None):
+        if id:
+            # Get specific teacher by ID
+            professor = TeacherModel.find_by_id(UUID(id))
 
-        if professor is None:
-            return {'message': 'Professor not found'}, 404
+            if professor is None:
+                return {'message': 'Professor not found'}, 404
 
-        response = {
-            'success': True,
-            'message': professor.json()
-        }
-        return Response(json.dumps(response), 201)
+            response = {
+                'success': True,
+                'message': professor.json()
+            }
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all teachers
+            professors = TeacherModel.find_all()
+            professors_list = [professor.json() for professor in professors]
+            
+            response = {
+                'success': True,
+                'message': professors_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

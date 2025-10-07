@@ -52,6 +52,10 @@ class TeacherModel(db.Model):
     def find_by_email(cls, email_address):
         return cls.query.filter_by(email_address=email_address).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

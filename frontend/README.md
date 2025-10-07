@@ -32,12 +32,22 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Real-time Feedback**: Success/error messages and loading states
 - **Modal Interface**: Clean, accessible form design
 
+### Teacher Portal Features
+- **Teacher Management**: Create new teachers with full form validation
+- **API Integration**: Direct integration with Flask backend (`POST /teacher`)
+- **Form Handling**: Complete teacher registration with required fields:
+  - Given Name, Surname, Gender
+  - Email Address, Phone Number
+- **Real-time Feedback**: Success/error messages and loading states
+- **Modal Interface**: Clean, accessible single-column form design
+- **Consistent UI**: Matches student portal design and behavior
+
 ### Admin Dashboard Features
 - **Overview Section**: Quick access to all portal features
 - **Portal Access**: Direct navigation to Student and Teacher portals
 - **Management Tools**: Access to Classes, Reports, and Settings
 - **Student Management**: Full CRUD operations for student data
-- **Teacher Management**: Complete teacher administration
+- **Teacher Management**: Complete teacher administration and creation
 - **Class Management**: Course and classroom administration
 
 ### Landing Page
@@ -153,7 +163,9 @@ frontend/
 │   │   ├── admin/                # Admin dashboard components
 │   │   │   ├── AdminDashboard.tsx
 │   │   │   ├── StudentsTable.tsx
+│   │   │   ├── StudentWizard.tsx
 │   │   │   ├── TeachersTable.tsx
+│   │   │   ├── TeacherWizard.tsx
 │   │   │   └── ClassesTable.tsx
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
@@ -256,7 +268,9 @@ The responsive system uses:
 - Error handling and loading states
 - TypeScript interfaces for type safety
 - Student creation form with full validation
+- Teacher creation form with full validation
 - Real-time API communication with Flask backend
+- Consistent success/error notifications across all forms
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation

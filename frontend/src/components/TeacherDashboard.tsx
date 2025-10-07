@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
 import watermarkSrc from '../assets/Escola_marca_de_água.png';
+import { TeacherWizard } from './admin/TeacherWizard';
 
 export function TeacherDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  const [showCreateTeacher, setShowCreateTeacher] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -15,6 +18,11 @@ export function TeacherDashboard() {
     } catch (error) {
       console.error('Sign out failed:', error);
     }
+  };
+
+  const handleTeacherCreated = () => {
+    // Refresh teacher list or show success message
+    console.log('Teacher created successfully');
   };
 
   if (isLoading) {
@@ -74,10 +82,20 @@ export function TeacherDashboard() {
         </header>
 
         <main className="hero">
-          <h1>Teacher Portal</h1>
-          <p className="hero__subtitle">Manage your classes, students, and teaching resources.</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div>
+              <h1>Teacher Portal</h1>
+              <p className="hero__subtitle">Manage your classes, students, and teaching resources.</p>
+            </div>
+            <button 
+              className="btn btn--primary"
+              onClick={() => setShowCreateTeacher(true)}
+            >
+              Create New Teacher
+            </button>
+          </div>
           
-          <div style={{ marginTop: 'var(--space-lg)' }}>
+          <div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-md)' }}>
               <div className="feature">
                 <h3>My Classes</h3>
@@ -127,6 +145,13 @@ export function TeacherDashboard() {
           <span>© Santa Isabel Escola - Teacher Portal</span>
         </footer>
       </div>
+
+      {showCreateTeacher && (
+        <TeacherWizard
+          onClose={() => setShowCreateTeacher(false)}
+          onSuccess={handleTeacherCreated}
+        />
+      )}
     </>
   );
 }
