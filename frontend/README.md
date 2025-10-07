@@ -10,30 +10,60 @@ This is the frontend application for the Santa Isabel Escola school management p
 
 ### Authentication System
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
-- **Role-Based Access**: Admin, Teacher, and Student portals with different permissions
+- **Multi-Role Access**: Admin, Teacher, and Student portals with unified access (role restrictions temporarily disabled for development)
 - **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
 - **Session Management**: Automatic token refresh and secure logout
+
+### Navigation & Routing
+- **Client-Side Routing**: React Router DOM for seamless navigation
+- **Landing Page**: `localhost:3000/landing` - School introduction and login access
+- **Login Page**: `localhost:3000/login` - Dedicated authentication page
+- **Admin Dashboard**: `localhost:3000/dashboard` - Administrative management interface
+- **Student Portal**: `localhost:3000/student` - Student-specific features and tools
+- **Teacher Portal**: `localhost:3000/teacher` - Teacher-specific features and tools
+- **Bidirectional Navigation**: Easy navigation between all portals
+
+### Student Portal Features
+- **Student Management**: Create new students with full form validation
+- **API Integration**: Direct integration with Flask backend (`POST /student`)
+- **Form Handling**: Complete student registration with required fields:
+  - Given Name, Middle Name, Surname
+  - Date of Birth, Gender, Enrollment Date
+- **Real-time Feedback**: Success/error messages and loading states
+- **Modal Interface**: Clean, accessible form design
+
+### Admin Dashboard Features
+- **Overview Section**: Quick access to all portal features
+- **Portal Access**: Direct navigation to Student and Teacher portals
+- **Management Tools**: Access to Classes, Reports, and Settings
+- **Student Management**: Full CRUD operations for student data
+- **Teacher Management**: Complete teacher administration
+- **Class Management**: Course and classroom administration
 
 ### Landing Page
 - **Responsive Design**: Adapts to all screen sizes from mobile to ultra-wide monitors
 - **School Branding**: Features the official Santa Isabel Escola logo and watermark
-- **Portal Access**: Login modal with Admin, Teacher, and Student portal options
 - **Modern UI**: Dark theme with blue accents and smooth animations
+- **Optimized Sizing**: Properly scaled elements for better user experience
 
 ### Technical Features
 - **React 19** with TypeScript for type safety
 - **AWS Amplify** for Cognito authentication
+- **React Router DOM** for client-side routing
 - **Vite** for fast development and optimized builds
 - **CSS Grid & Flexbox** for responsive layouts
 - **Viewport Units** for true responsive scaling
 - **Docker** containerization for production deployment
+- **API Integration**: Full backend connectivity with error handling
 
 ## 🛠 Technology Stack
 
 - **Frontend**: React 19.1.1, TypeScript 5.8.3
 - **Authentication**: AWS Amplify with Cognito
+- **Routing**: React Router DOM 6.x
 - **Build Tool**: Vite with Rolldown
 - **Styling**: CSS3 with CSS Grid, Flexbox, and custom properties
+- **API Integration**: Fetch API with error handling
 - **Containerization**: Docker with Nginx for production serving
 - **Development**: ESLint, TypeScript strict mode
 - **Secrets Management**: Doppler for environment variables
@@ -116,16 +146,35 @@ The application uses a sophisticated responsive system:
 ```
 frontend/
 ├── src/
-│   ├── assets/           # Images and static assets
+│   ├── assets/                    # Images and static assets
 │   │   ├── Santa_Isabel.png
 │   │   └── Escola_marca_de_água.png
-│   ├── App.tsx          # Main application component
-│   ├── App.css          # Global styles and responsive system
-│   └── main.tsx         # Application entry point
-├── public/              # Static public assets
-├── Dockerfile          # Production Docker configuration
-├── nginx.conf          # Nginx configuration for serving
-└── package.json        # Dependencies and scripts
+│   ├── components/                # React components
+│   │   ├── admin/                # Admin dashboard components
+│   │   │   ├── AdminDashboard.tsx
+│   │   │   ├── StudentsTable.tsx
+│   │   │   ├── TeachersTable.tsx
+│   │   │   └── ClassesTable.tsx
+│   │   ├── Dashboard.tsx         # Main dashboard component
+│   │   ├── Landing.tsx           # Landing page component
+│   │   ├── Login.tsx             # Login page component
+│   │   ├── LoginModal.tsx        # Modal login component (legacy)
+│   │   ├── StudentDashboard.tsx  # Student portal component
+│   │   └── TeacherDashboard.tsx  # Teacher portal component
+│   ├── contexts/                 # React contexts
+│   │   └── AuthContext.tsx       # Authentication context
+│   ├── services/                 # API and authentication services
+│   │   ├── apiService.ts         # API communication
+│   │   └── authService.ts        # Authentication service
+│   ├── config/                   # Configuration files
+│   │   └── auth.ts              # AWS Cognito configuration
+│   ├── App.tsx                   # Main application component with routing
+│   ├── App.css                   # Global styles and responsive system
+│   └── main.tsx                  # Application entry point
+├── public/                       # Static public assets
+├── Dockerfile                    # Production Docker configuration
+├── nginx.conf                    # Nginx configuration for serving
+└── package.json                  # Dependencies and scripts
 ```
 
 ## 🐳 Production Deployment
@@ -206,6 +255,15 @@ The responsive system uses:
 - Automatic JWT token injection
 - Error handling and loading states
 - TypeScript interfaces for type safety
+- Student creation form with full validation
+- Real-time API communication with Flask backend
+
+### Navigation & Routing Implementation
+- React Router DOM for client-side navigation
+- Protected routes for authenticated users
+- Public routes for landing and login pages
+- Bidirectional navigation between portals
+- Role-based route protection (currently disabled for development)
 
 ## 🤝 Contributing
 

@@ -1,38 +1,15 @@
-import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
-import logoSrc from './assets/Santa_Isabel.png'
-import watermarkSrc from './assets/Escola_marca_de_água.png'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { LoginModal } from './components/LoginModal'
+import { AuthProvider, useAuth, useUser } from './contexts/AuthContext'
+import { Landing } from './components/Landing'
+import { Login } from './components/Login'
 import { Dashboard } from './components/Dashboard'
+import { StudentDashboard } from './components/StudentDashboard'
+import { TeacherDashboard } from './components/TeacherDashboard'
 
-type ScreenSize = 'mobile' | 'tablet' | 'desktop' | 'wide'
-
-function AppContent() {
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [screenSize, setScreenSize] = useState<ScreenSize>('desktop')
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
-  useEffect(() => {
-    const updateScreenSize = () => {
-      const width = window.innerWidth
-      if (width < 640) {
-        setScreenSize('mobile')
-      } else if (width < 1024) {
-        setScreenSize('tablet')
-      } else if (width < 1536) {
-        setScreenSize('desktop')
-      } else {
-        setScreenSize('wide')
-      }
-    }
-
-    updateScreenSize()
-    window.addEventListener('resize', updateScreenSize)
-    return () => window.removeEventListener('resize', updateScreenSize)
-  }, [])
-
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div style={{ 
@@ -48,65 +25,88 @@ function AppContent() {
     )
   }
 
-  // If authenticated, show dashboard
-  if (isAuthenticated) {
-    return <Dashboard />
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+// Public Route component (redirects to appropriate dashboard if already authenticated)
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth()
+  const user = useUser()
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: 'var(--text-lg)',
+        color: 'var(--muted)'
+      }}>
+        Loading...
+      </div>
+    )
   }
 
+  if (isAuthenticated && user) {
+    // Redirect to appropriate dashboard based on user role
+    const redirectPath = user.role === 'admin' ? '/dashboard' : `/${user.role}`
+    return <Navigate to={redirectPath} replace />
+  }
+
+  return <>{children}</>
+}
+
+// Role-based routing removed for now - all authenticated users can access all endpoints
+
+function AppContent() {
   return (
-    <>
-      <div className="watermark" style={{ backgroundImage: `url(${watermarkSrc})` }}></div>
-      <div className={`landing landing--${screenSize}`}>
-      <header className="landing__header">
-        <div className="brand">
-          <img className="brand__logo" src={logoSrc} alt="Santa Isabel Escola" loading="eager" />
-          <span className="brand__name">Santa Isabel Escola</span>
-        </div>
-        <nav className="nav">
-          {screenSize !== 'mobile' && (
-            <>
-              <a className="nav__link" href="#features">Features</a>
-              <a className="nav__link" href="#docs">Docs</a>
-              <a className="nav__link" href="#contact">Contact</a>
-            </>
-          )}
-          <button className="btn btn--small btn--primary" onClick={() => setIsLoginOpen(true)}>
-            {screenSize === 'mobile' ? 'Login' : 'Login'}
-          </button>
-        </nav>
-      </header>
-
-      <main className="hero">
-        <h1>Portal Escolar</h1>
-        <p className="hero__subtitle">Para gestão de dados de alunos, professores, turmas e horários.</p>
-        <div className="hero__actions">
-          <button className="btn btn--primary" onClick={() => setIsLoginOpen(true)}>Login</button>
-          <a className="btn" href="#learn-more">Learn More</a>
-        </div>
-      </main>
-
-      <section id="features" className="features">
-        <div className="feature">
-          <h3>Students & Guardians</h3>
-          <p>Track enrollment, progress, and family relationships.</p>
-        </div>
-        <div className="feature">
-          <h3>Teachers & Subjects</h3>
-          <p>Manage teacher profiles, departments, and subjects.</p>
-        </div>
-        <div className="feature">
-          <h3>Classes & Scheduling</h3>
-          <p>Organize timetables with periods, terms, and classrooms.</p>
-        </div>
-      </section>
-
-      <footer className="footer">
-        <span>© Santa Isabel Escola</span>
-      </footer>
-      </div>
-
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route 
+          path="/landing" 
+          element={
+            <PublicRoute>
+              <Landing />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/teacher" 
+          element={
+            <ProtectedRoute>
+              <TeacherDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/student" 
+          element={
+            <ProtectedRoute>
+              <StudentDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/landing" replace />} />
+      </Routes>
+    </Router>
   )
 }
 

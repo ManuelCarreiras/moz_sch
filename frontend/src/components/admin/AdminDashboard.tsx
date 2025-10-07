@@ -1,24 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../../contexts/AuthContext';
-import { StudentsTable } from './StudentsTable';
-import { TeachersTable } from './TeachersTable';
 import { ClassesTable } from './ClassesTable';
 import { ReportsView } from './ReportsView';
 
-type AdminTab = 'students' | 'teachers' | 'classes' | 'reports' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'classes' | 'reports' | 'portals' | 'settings';
 
 export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
-  const [activeTab, setActiveTab] = useState<AdminTab>('students');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      navigate('/landing');
     } catch (error) {
       console.error('Sign out failed:', error);
     }
   };
+
+  const handlePortalAccess = (portalType: 'teacher' | 'student') => {
+    navigate(`/${portalType}`);
+  };
+
+  // Handle navigation when tab changes
+  useEffect(() => {
+    if (activeTab === 'students') {
+      navigate('/student', { replace: true });
+    } else if (activeTab === 'teachers') {
+      navigate('/teacher', { replace: true });
+    }
+  }, [activeTab, navigate]);
 
   if (isLoading) {
     return (
@@ -51,23 +65,146 @@ export function AdminDashboard() {
   }
 
   const tabs = [
+    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠' },
     { id: 'students' as AdminTab, label: 'Students', icon: '👥' },
     { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
+    { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
     { id: 'settings' as AdminTab, label: 'Settings', icon: '⚙️' },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="admin-content">
+            <h2>Admin Overview</h2>
+            <p>Welcome to the Santa Isabel Escola Admin Portal. Manage all aspects of the school system from here.</p>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: 'var(--space-lg)', 
+              marginTop: 'var(--space-lg)' 
+            }}>
+              <div className="feature" style={{ 
+                padding: 'var(--space-lg)',
+                backgroundColor: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)'
+              }}>
+                <h3>User Portal Access</h3>
+                <p>Click "Students" or "Teachers" in the sidebar to navigate to those portals.</p>
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>
+                    • <strong>Students</strong> → localhost:3000/student<br/>
+                    • <strong>Teachers</strong> → localhost:3000/teacher
+                  </p>
+                </div>
+              </div>
+              
+              <div className="feature" style={{ 
+                padding: 'var(--space-lg)',
+                backgroundColor: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)'
+              }}>
+                <h3>Admin Management Tools</h3>
+                <p>Administrative functions for managing school data (stays within admin dashboard).</p>
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                  <button 
+                    className="btn btn--small" 
+                    onClick={() => setActiveTab('classes')}
+                    style={{ marginRight: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}
+                  >
+                    📚 Manage Classes
+                  </button>
+                  <button 
+                    className="btn btn--small" 
+                    onClick={() => setActiveTab('reports')}
+                    style={{ marginRight: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}
+                  >
+                    📊 View Reports
+                  </button>
+                  <button 
+                    className="btn btn--small" 
+                    onClick={() => setActiveTab('settings')}
+                    style={{ marginBottom: 'var(--space-sm)' }}
+                  >
+                    ⚙️ Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       case 'students':
-        return <StudentsTable />;
+        // Navigation handled by useEffect
+        return (
+          <div className="admin-content">
+            <h2>Redirecting to Student Portal...</h2>
+            <p>You will be redirected to the student portal shortly.</p>
+          </div>
+        );
       case 'teachers':
-        return <TeachersTable />;
+        // Navigation handled by useEffect
+        return (
+          <div className="admin-content">
+            <h2>Redirecting to Teacher Portal...</h2>
+            <p>You will be redirected to the teacher portal shortly.</p>
+          </div>
+        );
       case 'classes':
         return <ClassesTable />;
       case 'reports':
         return <ReportsView />;
+      case 'portals':
+        return (
+          <div className="admin-content">
+            <h2>Portal Access</h2>
+            <p>Access different user portals to experience the system from different perspectives.</p>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: 'var(--space-lg)', 
+              marginTop: 'var(--space-lg)' 
+            }}>
+              <div className="feature" style={{ 
+                padding: 'var(--space-lg)',
+                backgroundColor: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)'
+              }}>
+                <h3>Teacher Portal</h3>
+                <p>Access the teacher dashboard to manage classes, students, and grades.</p>
+                <button 
+                  className="btn btn--primary" 
+                  onClick={() => handlePortalAccess('teacher')}
+                  style={{ marginTop: 'var(--space-md)' }}
+                >
+                  Go to Teacher Portal
+                </button>
+              </div>
+              <div className="feature" style={{ 
+                padding: 'var(--space-lg)',
+                backgroundColor: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)'
+              }}>
+                <h3>Student Portal</h3>
+                <p>Access the student dashboard to view grades, schedule, and assignments.</p>
+                <button 
+                  className="btn btn--primary" 
+                  onClick={() => handlePortalAccess('student')}
+                  style={{ marginTop: 'var(--space-md)' }}
+                >
+                  Go to Student Portal
+                </button>
+              </div>
+            </div>
+          </div>
+        );
       case 'settings':
         return (
           <div className="admin-content">
@@ -76,7 +213,12 @@ export function AdminDashboard() {
           </div>
         );
       default:
-        return <StudentsTable />;
+        return (
+          <div className="admin-content">
+            <h2>Admin Overview</h2>
+            <p>Welcome to the Santa Isabel Escola Admin Portal. Use the sidebar to navigate.</p>
+          </div>
+        );
     }
   };
 
