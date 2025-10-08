@@ -288,7 +288,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="z-KsflchiQsLVIYyh2aT-14" value="term" style="shape=table;startSize=31;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
-          <mxGeometry x="-539" y="533" width="180" height="177" as="geometry">
+          <mxGeometry x="-465" y="357" width="180" height="177" as="geometry">
             <mxRectangle x="116" y="686" width="64" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -455,7 +455,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="z-KsflchiQsLVIYyh2aT-74" value="period" style="shape=table;startSize=31;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
-          <mxGeometry x="-691" y="780" width="180" height="177" as="geometry">
+          <mxGeometry x="-615" y="685" width="180" height="177" as="geometry">
             <mxRectangle x="116" y="686" width="64" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -627,7 +627,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="yPZC9Lnk0OfoxYbapFvj-21" value="school_year" style="shape=table;startSize=31;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" parent="1" vertex="1">
-          <mxGeometry x="-765" y="153" width="180" height="147" as="geometry">
+          <mxGeometry x="-680" y="201" width="180" height="147" as="geometry">
             <mxRectangle x="116" y="686" width="64" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -690,7 +690,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="yPZC9Lnk0OfoxYbapFvj-36" value="year_level" style="shape=table;startSize=31;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
-          <mxGeometry x="-289" y="90" width="180" height="117" as="geometry">
+          <mxGeometry x="-465" y="13" width="180" height="117" as="geometry">
             <mxRectangle x="116" y="686" width="64" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
