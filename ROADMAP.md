@@ -4,7 +4,7 @@
 A comprehensive school management system with React frontend and Flask backend, featuring AWS Cognito authentication and PostgreSQL database.
 
 ## 🎯 Current Status: **Phase 1 - Personnel Management**
-**Progress: 75% Complete**
+**Progress: 90% Complete**
 
 ### ✅ **Completed Features**
 - [x] **Student Portal**: Student creation, management, and API integration
@@ -16,13 +16,13 @@ A comprehensive school management system with React frontend and Flask backend, 
 - [x] **Database Schema**: Complete 18-table ERD design
 - [x] **UI/UX Consistency**: Matching modals and success notifications
 - [x] **Docker Deployment**: Full containerization with docker-compose
+- [x] **Teacher Department Assignment**: Interface to assign teachers to departments
+- [x] **Academic Setup Section**: Departments, Subjects, Classrooms management
 
 ### 🔄 **In Progress**
-- [ ] **Teacher Department Assignment**: Extend teacher portal with department linking
 - [ ] **Student Year Level Assignment**: Academic level assignment for students
 
 ### 📝 **Next Steps (Phase 1)**
-- [ ] **Teacher Department Assignment**: Interface to assign teachers to departments
 - [ ] **Student Year Level Assignment**: Academic level assignment for students
 - [ ] **Personnel Dashboard**: Unified view of all personnel data
 
@@ -41,7 +41,7 @@ A comprehensive school management system with React frontend and Flask backend, 
 
 #### **Personnel Relationships**
 - [x] **Student-Guardian** - Link students with their guardians (one-to-many)
-- [ ] **Teacher-Department** - Assign teachers to departments
+- [x] **Teacher-Department** - Assign teachers to departments
 - [ ] **Student-Year Level** - Academic level assignments
 
 #### **Personnel Portals**
@@ -56,10 +56,10 @@ A comprehensive school management system with React frontend and Flask backend, 
 **Timeline: Weeks 3-4** | **Priority: HIGH**
 
 #### **Academic Setup (Admin Dashboard)**
-- [ ] **Departments** - Subject department organization
-- [ ] **Subjects** - Course subject management
-- [ ] **Classrooms** - Physical classroom management
-- [ ] **Classroom Types** - Lab, Lecture Hall, etc.
+- [x] **Departments** - Subject department organization
+- [x] **Subjects** - Course subject management
+- [x] **Classrooms** - Physical classroom management
+- [x] **Classroom Types** - Lab, Lecture Hall, etc.
 
 #### **Academic Foundation**
 - [ ] **School Years** - Academic year management
@@ -165,7 +165,7 @@ frontend/src/components/
 - [x] Complete guardian management system
 - [x] All personnel can be created and managed
 - [x] Student-guardian relationships established
-- [ ] Teacher-department assignments working
+- [x] Teacher-department assignments working
 - [x] Personnel portals fully functional
 
 ### **Phase 2 Goals**
@@ -199,7 +199,7 @@ frontend/src/components/
 - [x] Student-guardian assignment interface ready
 
 ### **Week 2 Check-in**
-- [ ] Teacher-department assignment complete
+- [x] Teacher-department assignment complete
 - [ ] Student year level assignment working
 - [ ] Personnel management phase complete
 
@@ -238,16 +238,18 @@ frontend/src/components/
 
 ## 🎯 **Current Sprint Focus**
 
-**Sprint Goal**: Implement Academic Setup in Admin Dashboard
+**Sprint Goal**: Complete Phase 1 - Personnel Management
 **Duration**: Current sprint
 **Key Deliverables**:
-1. Academic Setup section in Admin Dashboard
-2. Department management interface
-3. Subject management interface
-4. Classroom management interface
-5. Classroom Types management interface
+1. ✅ Academic Setup section in Admin Dashboard
+2. ✅ Department management interface
+3. ✅ Subject management interface
+4. ✅ Classroom management interface
+5. ✅ Classroom Types management interface
+6. ✅ Teacher Department Assignment interface
+7. ⏳ Student Year Level Assignment interface
 
-**Next Sprint**: Academic Foundation & Teacher Department Assignment
+**Next Sprint**: Phase 2 - Academic Foundation (School Years, Terms, Periods)
 
 ---
 
@@ -262,6 +264,9 @@ frontend/src/components/
 - ✅ One-to-many relationship for Guardian-Student assignments
 - ✅ Multi-select interface for batch student assignments
 - ✅ Automatic guardian pre-selection for improved UX
+- ✅ Teacher-Department relationship as optional during creation
+- ✅ Bulk assignment interface for existing teachers
+- ✅ Academic Setup as sub-section within Admin Dashboard
 
 ### **Technical Decisions**
 - ✅ Reuse StudentWizard/TeacherWizard patterns for consistency
@@ -277,6 +282,6 @@ frontend/src/components/
 
 ---
 
-**Last Updated**: [Current Date]
-**Next Review**: [Weekly Check-in Date]
-**Project Status**: 🟡 In Progress - Phase 1
+**Last Updated**: October 8, 2025
+**Next Review**: Week 2 Check-in
+**Project Status**: 🟢 Phase 1 - 90% Complete | Moving to Student Year Level Assignment

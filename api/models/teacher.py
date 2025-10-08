@@ -17,16 +17,15 @@ class TeacherModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     email_address = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.VARCHAR(20), nullable=False)
-    department_id = db.Column(UUID(as_uuid=True), db.ForeignKey('department._id'), nullable=True)
+    # department_id removed - now using junction table for many-to-many relationship
 
     def __init__(self, given_name, surname, gender, email_address,
-                 phone_number, department_id=None):
+                 phone_number):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
-        self.department_id = department_id
 
     def json(self):
         return {
@@ -35,9 +34,23 @@ class TeacherModel(db.Model):
             'surname': self.surname,
             'gender': self.gender,
             'email_address': self.email_address,
-            'phone_number': self.phone_number,
-            'department_id': str(self.department_id) if self.department_id else None
+            'phone_number': self.phone_number
         }
+
+    def json_with_departments(self):
+        """Return teacher JSON with department information"""
+        from models.teacher_department import TeacherDepartmentModel
+        from models.department import DepartmentModel
+        
+        teacher_data = self.json()
+        assignments = TeacherDepartmentModel.find_by_teacher_id(self._id)
+        departments = []
+        for assignment in assignments:
+            department = DepartmentModel.find_by_id(assignment.department_id)
+            if department:
+                departments.append(department.json())
+        teacher_data['departments'] = departments
+        return teacher_data
 
     @classmethod
     def find_by_id(cls, _id):
@@ -61,7 +74,16 @@ class TeacherModel(db.Model):
 
     @classmethod
     def find_by_department_id(cls, department_id):
-        return cls.query.filter_by(department_id=department_id).all()
+        """Find teachers by department using junction table"""
+        from models.teacher_department import TeacherDepartmentModel
+        
+        assignments = TeacherDepartmentModel.find_by_department_id(department_id)
+        teachers = []
+        for assignment in assignments:
+            teacher = cls.find_by_id(assignment.teacher_id)
+            if teacher:
+                teachers.append(teacher)
+        return teachers
 
     def save_to_db(self):
         db.session.add(self)
@@ -76,8 +98,7 @@ class TeacherModel(db.Model):
             self.surname = data['surname']
         if data.get('phone_number') is not None:
             self.phone_number = data['phone_number']
-        if data.get('department_id') is not None:
-            self.department_id = data['department_id']
+        # department_id handling removed - now managed through junction table
 
         self.save_to_db()
 

@@ -8,6 +8,7 @@ import { SubjectTable } from './SubjectTable';
 import { ClassroomManagement } from './ClassroomManagement';
 import { SimpleGuardianWizard } from './SimpleGuardianWizard';
 import { StudentGuardianAssignment } from './StudentGuardianAssignment';
+import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
 type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'classes' | 'reports' | 'portals' | 'settings';
@@ -261,23 +262,7 @@ export function AdminDashboard() {
         }
         
         if (activeAcademicTab === 'teacher-departments') {
-          return (
-            <div className="admin-content">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-                <button 
-                  className="btn btn--secondary"
-                  onClick={() => setActiveAcademicTab('overview')}
-                >
-                  ← Back to Academic Setup
-                </button>
-                <div>
-                  <h2>Teacher Department Assignment</h2>
-                  <p>Assign teachers to departments for better organization and class management.</p>
-                </div>
-              </div>
-              <p>Teacher department assignment interface coming soon...</p>
-            </div>
-          );
+          return <TeacherDepartmentAssignment onBack={() => setActiveAcademicTab('overview')} />;
         }
         
         if (activeAcademicTab === 'classrooms') {

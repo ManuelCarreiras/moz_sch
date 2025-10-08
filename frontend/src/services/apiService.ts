@@ -252,6 +252,25 @@ class ApiService {
     return this.delete(`/classroom_types/${id}`);
   }
 
+  // Teacher-Department Assignments
+  async getTeacherDepartments(teacherId?: string) {
+    if (teacherId) {
+      return this.get(`/teacher-department/${teacherId}`);
+    }
+    return this.get('/teacher-department');
+  }
+
+  async assignTeacherToDepartment(teacherId: string, departmentId: string) {
+    return this.post('/teacher-department', {
+      teacher_id: teacherId,
+      department_id: departmentId
+    });
+  }
+
+  async removeTeacherFromDepartment(teacherId: string, departmentId: string) {
+    return this.delete(`/teacher-department/${teacherId}/${departmentId}`);
+  }
+
   // Terms
   async getTerms() {
     return this.get('/term');

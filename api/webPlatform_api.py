@@ -27,6 +27,7 @@ from resources.score_range import ScoreRangeResource
 from resources.guardian import GuardianResource
 from resources.student_guardian import StudentGuardianResource
 from resources.guardian_type import GuardianTypeResource
+from resources.teacher_department import TeacherDepartmentResource
 from resources.auth import AuthLoginResource, AuthMeResource
 
 # Get environment variables from Doppler
@@ -163,6 +164,7 @@ api.add_resource(ScoreRangeResource, "/score_range")
 api.add_resource(StudentGuardianResource, "/student_guardian")
 api.add_resource(GuardianTypeResource, "/guardian/types", "/guardian/types/<id>")
 api.add_resource(GuardianResource, "/guardian", "/guardian/<id>")
+api.add_resource(TeacherDepartmentResource, "/teacher-department", "/teacher-department/<teacher_id>", "/teacher-department/<teacher_id>/<department_id>")
 
 # Authentication endpoints
 api.add_resource(AuthLoginResource, "/auth/login")

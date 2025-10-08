@@ -14,6 +14,7 @@ interface TeacherFormData {
   phone_number: string;
 }
 
+
 export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,6 +146,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                 />
               </div>
             </div>
+
 
             {error && (
               <div className="error-message">

@@ -25,7 +25,9 @@ class TeacherResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        new_professor: TeacherModel = TeacherModel(**data)
+        # Remove department_id from teacher creation - will be handled separately
+        teacher_data = {k: v for k, v in data.items() if k != 'department_id'}
+        new_professor: TeacherModel = TeacherModel(**teacher_data)
         new_professor.save_to_db()
 
         response = {
@@ -52,12 +54,7 @@ class TeacherResource(Resource):
             professors = TeacherModel.find_all()
             professors_list = []
             for professor in professors:
-                professor_data = professor.json()
-                # Get department name
-                if professor.department_id:
-                    department = DepartmentModel.find_by_id(professor.department_id)
-                    if department:
-                        professor_data['department_name'] = department.department_name
+                professor_data = professor.json_with_departments()
                 professors_list.append(professor_data)
             
             response = {
@@ -75,7 +72,9 @@ class TeacherResource(Resource):
         if professor is None:
             return {'message': 'Professor not found'}, 404
 
-        professor.update_entry(data)
+        # Remove department_id from update - will be handled separately
+        teacher_data = {k: v for k, v in data.items() if k != 'department_id'}
+        professor.update_entry(teacher_data)
         response = {
             'success': True,
             'message': professor.json()
