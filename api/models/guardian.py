@@ -47,6 +47,10 @@ class GuardianModel(db.Model):
     def find_by_phone_number(cls, phone_number):
         return cls.query.filter_by(phone_number=phone_number).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

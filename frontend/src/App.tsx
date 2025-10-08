@@ -6,6 +6,7 @@ import { Login } from './components/Login'
 import { Dashboard } from './components/Dashboard'
 import { StudentDashboard } from './components/StudentDashboard'
 import { TeacherDashboard } from './components/TeacherDashboard'
+import { GuardianDashboard } from './components/GuardianDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -101,6 +102,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <StudentDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/guardian" 
+          element={
+            <ProtectedRoute>
+              <GuardianDashboard />
             </ProtectedRoute>
           } 
         />

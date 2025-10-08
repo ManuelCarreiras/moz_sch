@@ -11,9 +11,9 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 class StudentGuardianModel(db.Model):
     __tablename__ = 'student_guardian'
     _id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    student_id = db.column(UUID(as_uuid=True), db.ForeignKey('student._id'))
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('student._id'))
     guardian_type_id = db.Column(UUID(as_uuid=True), db.ForeignKey('guardian_type._id'))
-    guardian_id = db.Column(UUID(as_uuid=True), db.ForeignKey('term._id'))
+    guardian_id = db.Column(UUID(as_uuid=True), db.ForeignKey('guardian._id'))
 
     
     def __init__(self, student_id, guardian_type_id, guardian_id):
@@ -45,7 +45,7 @@ class StudentGuardianModel(db.Model):
 
     @classmethod
     def find_by_guardian_id(cls, guardian_id):
-        return cls.query.filter_by(guardian_id=guardian_id).first()
+        return cls.query.filter_by(guardian_id=guardian_id).all()
 
 
     def save_to_db(self):

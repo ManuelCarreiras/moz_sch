@@ -36,6 +36,21 @@ class StudentModel(db.Model):
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()
 
+    @classmethod
+    def find_by_full_name(cls, given_name, middle_name=None, surname=None):
+        query = cls.query
+        if given_name:
+            query = query.filter(cls.given_name.ilike(f'%{given_name}%'))
+        if middle_name:
+            query = query.filter(cls.middle_name.ilike(f'%{middle_name}%'))
+        if surname:
+            query = query.filter(cls.surname.ilike(f'%{surname}%'))
+        return query.all()
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

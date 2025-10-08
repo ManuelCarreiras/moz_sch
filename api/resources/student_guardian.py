@@ -23,24 +23,24 @@ class StudentGuardianResource(Resource):
             }
             return Response(json.dumps(response), status=400)
 
-        student_id = StudentModel.find_by_id(data.get('_id'))
-        if not student_id:
+        student = StudentModel.find_by_id(data.get('student_id'))
+        if not student:
             response = {
                 'success': False,
                 'message': 'Student does not exist in the database'
             }
             return Response(json.dumps(response), 400)
 
-        guardian_type_id = GuardianTypeModel.find_by_id(data.get('_id'))
-        if not guardian_type_id:
+        guardian_type = GuardianTypeModel.find_by_id(data.get('guardian_type_id'))
+        if not guardian_type:
             response = {
                 'success': False,
                 'message': 'Guardian type does not exist in the database'
             }
             return Response(json.dumps(response), 400)
 
-        guardian_id = GuardianModel.find_by_id(data.get('_id'))
-        if not guardian_id:
+        guardian = GuardianModel.find_by_id(data.get('guardian_id'))
+        if not guardian:
             response = {
                 'success': False,
                 'message': 'Guardian does not exist in the database'

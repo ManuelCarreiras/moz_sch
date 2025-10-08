@@ -27,21 +27,33 @@ class GuardianTypeResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        guardian_type = GuardianTypeModel.find_by_id(id)
-
-        if guardian_type is None:
+    def get(self, id=None):
+        if id:
+            # Get specific guardian type by ID
+            guardian_type = GuardianTypeModel.find_by_id(id)
+            if guardian_type is None:
+                response = {
+                    'success': False,
+                    'message': 'Guardian type not found'
+                }
+                return Response(json.dumps(response), 404)
             response = {
-                'success': False,
-                'message': 'Guardian type not found'
+                'success': True,
+                'message': guardian_type.json()
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': guardian_type.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Create default guardian types if they don't exist
+            GuardianTypeModel.create_default_types()
+            
+            # Get all guardian types
+            guardian_types = GuardianTypeModel.find_all()
+            guardian_types_list = [guardian_type.json() for guardian_type in guardian_types]
+            response = {
+                'success': True,
+                'message': guardian_types_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

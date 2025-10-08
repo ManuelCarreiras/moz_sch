@@ -192,6 +192,66 @@ class ApiService {
   async getPeriods() {
     return this.get('/period');
   }
+
+  // Guardians
+  async getGuardians() {
+    return this.get('/guardian');
+  }
+
+  async getGuardian(id: string) {
+    return this.get(`/guardian/${id}`);
+  }
+
+  async createGuardian(guardianData: any) {
+    return this.post('/guardian', guardianData);
+  }
+
+  async createGuardianWithStudent(guardianData: any, studentId: string, guardianTypeId: string) {
+    const data = {
+      ...guardianData,
+      student_id: studentId,
+      guardian_type_id: guardianTypeId
+    };
+    return this.post('/guardian', data);
+  }
+
+  async updateGuardian(id: string, guardianData: any) {
+    return this.put(`/guardian/${id}`, guardianData);
+  }
+
+  async deleteGuardian(id: string) {
+    return this.delete(`/guardian/${id}`);
+  }
+
+  // Guardian Types (nested under guardian)
+  async getGuardianTypes() {
+    return this.get('/guardian/types');
+  }
+
+  async getGuardianType(id: string) {
+    return this.get(`/guardian/types/${id}`);
+  }
+
+  async createGuardianType(guardianTypeData: any) {
+    return this.post('/guardian/types', guardianTypeData);
+  }
+
+  async updateGuardianType(id: string, guardianTypeData: any) {
+    return this.put(`/guardian/types/${id}`, guardianTypeData);
+  }
+
+  async deleteGuardianType(id: string) {
+    return this.delete(`/guardian/types/${id}`);
+  }
+
+  // Student-Guardian Relationships
+  async getStudentGuardians() {
+    return this.get('/student_guardian');
+  }
+
+  async createStudentGuardian(studentGuardianData: any) {
+    return this.post('/student_guardian', studentGuardianData);
+  }
 }
 
 // Export singleton instance

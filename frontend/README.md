@@ -21,6 +21,7 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Admin Dashboard**: `localhost:3000/dashboard` - Administrative management interface
 - **Student Portal**: `localhost:3000/student` - Student-specific features and tools
 - **Teacher Portal**: `localhost:3000/teacher` - Teacher-specific features and tools
+- **Guardian Portal**: `localhost:3000/guardian` - Guardian management and student assignments
 - **Bidirectional Navigation**: Easy navigation between all portals
 
 ### Student Portal Features
@@ -42,12 +43,25 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Modal Interface**: Clean, accessible single-column form design
 - **Consistent UI**: Matches student portal design and behavior
 
+### Guardian Portal Features
+- **Guardian Management**: Create new guardians with full form validation
+- **API Integration**: Direct integration with Flask backend (`POST /guardian`)
+- **Multi-Student Assignment**: Assign one guardian to multiple students (one-to-many relationship)
+- **Student Search**: Full name search with pagination for student selection
+- **Guardian Search**: Search existing guardians by name, email, or phone
+- **Relationship Types**: Standard guardian types (Mother, Father, Sister, Brother, Grandmother, Grandfather, Other)
+- **Custom Relationships**: Specify custom relationship types when "Other" is selected
+- **Pre-selection**: Newly created guardians are automatically pre-selected for assignment
+- **Batch Assignment**: Assign guardian to multiple students with single operation
+- **Modal Interface**: Wide modal with no horizontal scrolling for optimal UX
+
 ### Admin Dashboard Features
 - **Overview Section**: Quick access to all portal features
-- **Portal Access**: Direct navigation to Student and Teacher portals
+- **Portal Access**: Direct navigation to Student, Teacher, and Guardian portals
 - **Management Tools**: Access to Classes, Reports, and Settings
 - **Student Management**: Full CRUD operations for student data
 - **Teacher Management**: Complete teacher administration and creation
+- **Guardian Management**: Complete guardian administration and student assignments
 - **Class Management**: Course and classroom administration
 
 ### Landing Page
@@ -166,13 +180,16 @@ frontend/
 │   │   │   ├── StudentWizard.tsx
 │   │   │   ├── TeachersTable.tsx
 │   │   │   ├── TeacherWizard.tsx
+│   │   │   ├── SimpleGuardianWizard.tsx
+│   │   │   ├── StudentGuardianAssignment.tsx
 │   │   │   └── ClassesTable.tsx
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
 │   │   ├── Login.tsx             # Login page component
 │   │   ├── LoginModal.tsx        # Modal login component (legacy)
 │   │   ├── StudentDashboard.tsx  # Student portal component
-│   │   └── TeacherDashboard.tsx  # Teacher portal component
+│   │   ├── TeacherDashboard.tsx  # Teacher portal component
+│   │   └── GuardianDashboard.tsx # Guardian portal component
 │   ├── contexts/                 # React contexts
 │   │   └── AuthContext.tsx       # Authentication context
 │   ├── services/                 # API and authentication services
@@ -269,6 +286,8 @@ The responsive system uses:
 - TypeScript interfaces for type safety
 - Student creation form with full validation
 - Teacher creation form with full validation
+- Guardian creation form with full validation
+- Multi-student assignment with batch processing
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
 

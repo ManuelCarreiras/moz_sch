@@ -4,7 +4,7 @@ import { useAuth, useUser } from '../../contexts/AuthContext';
 import { ClassesTable } from './ClassesTable';
 import { ReportsView } from './ReportsView';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'classes' | 'reports' | 'portals' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'classes' | 'reports' | 'portals' | 'settings';
 
 export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
@@ -21,7 +21,7 @@ export function AdminDashboard() {
     }
   };
 
-  const handlePortalAccess = (portalType: 'teacher' | 'student') => {
+  const handlePortalAccess = (portalType: 'teacher' | 'student' | 'guardian') => {
     navigate(`/${portalType}`);
   };
 
@@ -31,6 +31,8 @@ export function AdminDashboard() {
       navigate('/student', { replace: true });
     } else if (activeTab === 'teachers') {
       navigate('/teacher', { replace: true });
+    } else if (activeTab === 'guardians') {
+      navigate('/guardian', { replace: true });
     }
   }, [activeTab, navigate]);
 
@@ -68,6 +70,7 @@ export function AdminDashboard() {
     { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠' },
     { id: 'students' as AdminTab, label: 'Students', icon: '👥' },
     { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
+    { id: 'guardians' as AdminTab, label: 'Guardians', icon: '👨‍👩‍👧‍👦' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
     { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
@@ -95,11 +98,12 @@ export function AdminDashboard() {
                 border: '1px solid var(--border)'
               }}>
                 <h3>User Portal Access</h3>
-                <p>Click "Students" or "Teachers" in the sidebar to navigate to those portals.</p>
+                <p>Click "Students", "Teachers", or "Guardians" in the sidebar to navigate to those portals.</p>
                 <div style={{ marginTop: 'var(--space-md)' }}>
                   <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>
                     • <strong>Students</strong> → localhost:3000/student<br/>
-                    • <strong>Teachers</strong> → localhost:3000/teacher
+                    • <strong>Teachers</strong> → localhost:3000/teacher<br/>
+                    • <strong>Guardians</strong> → localhost:3000/guardian
                   </p>
                 </div>
               </div>
@@ -155,6 +159,14 @@ export function AdminDashboard() {
             <p>You will be redirected to the teacher portal shortly.</p>
           </div>
         );
+      case 'guardians':
+        // Navigation handled by useEffect
+        return (
+          <div className="admin-content">
+            <h2>Redirecting to Guardian Portal...</h2>
+            <p>You will be redirected to the guardian portal shortly.</p>
+          </div>
+        );
       case 'classes':
         return <ClassesTable />;
       case 'reports':
@@ -200,6 +212,22 @@ export function AdminDashboard() {
                   style={{ marginTop: 'var(--space-md)' }}
                 >
                   Go to Student Portal
+                </button>
+              </div>
+              <div className="feature" style={{ 
+                padding: 'var(--space-lg)',
+                backgroundColor: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border)'
+              }}>
+                <h3>Guardian Portal</h3>
+                <p>Access the guardian dashboard to manage guardian information and relationships.</p>
+                <button 
+                  className="btn btn--primary" 
+                  onClick={() => handlePortalAccess('guardian')}
+                  style={{ marginTop: 'var(--space-md)' }}
+                >
+                  Go to Guardian Portal
                 </button>
               </div>
             </div>

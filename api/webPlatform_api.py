@@ -161,8 +161,8 @@ api.add_resource(ClassResourceClassroomList, "/class/list/classroom/<id>")
 
 api.add_resource(ScoreRangeResource, "/score_range")
 api.add_resource(StudentGuardianResource, "/student_guardian")
-api.add_resource(GuardianTypeResource, "/guardian_type")
-api.add_resource(GuardianResource, "/guardian")
+api.add_resource(GuardianTypeResource, "/guardian/types", "/guardian/types/<id>")
+api.add_resource(GuardianResource, "/guardian", "/guardian/<id>")
 
 # Authentication endpoints
 api.add_resource(AuthLoginResource, "/auth/login")

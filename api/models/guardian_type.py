@@ -35,6 +35,28 @@ class GuardianTypeModel(db.Model):
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
   
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
+    @classmethod
+    def create_default_types(cls):
+        """Create default guardian types if they don't exist"""
+        default_types = [
+            'Mother',
+            'Father', 
+            'Sister',
+            'Brother',
+            'Grandmother',
+            'Grandfather',
+            'Other'
+        ]
+        
+        for type_name in default_types:
+            existing = cls.find_by_name(type_name)
+            if not existing:
+                new_type = cls(name=type_name)
+                new_type.save_to_db()
 
     def save_to_db(self):
         db.session.add(self)

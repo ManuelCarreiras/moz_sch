@@ -33,16 +33,40 @@ class StudentResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        student = StudentModel.find_by_id(id)
-
-        if student is None:
-            return {'message': 'Student not found'}, 404
-        response = {
-            'success': True,
-            'message': student.json()
-        }
-        return Response(json.dumps(response), 200)
+    def get(self, id=None):
+        if id:
+            # Get specific student by ID
+            student = StudentModel.find_by_id(id)
+            if student is None:
+                response = {
+                    'success': False,
+                    'message': 'Student not found'
+                }
+                return Response(json.dumps(response), 404)
+            response = {
+                'success': True,
+                'message': student.json()
+            }
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all students or search by name
+            given_name = request.args.get('given_name')
+            middle_name = request.args.get('middle_name')
+            surname = request.args.get('surname')
+            
+            if given_name or middle_name or surname:
+                # Search by full name
+                students = StudentModel.find_by_full_name(given_name, middle_name, surname)
+            else:
+                # Get all students
+                students = StudentModel.find_all()
+            
+            students_list = [student.json() for student in students]
+            response = {
+                'success': True,
+                'message': students_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()
