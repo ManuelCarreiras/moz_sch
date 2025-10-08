@@ -27,6 +27,10 @@ class DepartmentModel(db.Model):
     def find_by_department_name(cls, department_name):
         return cls.query.filter_by(department_name=department_name).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

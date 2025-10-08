@@ -1,6 +1,7 @@
 from flask import request, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
+from models.department import DepartmentModel
 import json
 from uuid import UUID
 
@@ -47,9 +48,17 @@ class TeacherResource(Resource):
             }
             return Response(json.dumps(response), 200)
         else:
-            # Get all teachers
+            # Get all teachers with department information
             professors = TeacherModel.find_all()
-            professors_list = [professor.json() for professor in professors]
+            professors_list = []
+            for professor in professors:
+                professor_data = professor.json()
+                # Get department name
+                if professor.department_id:
+                    department = DepartmentModel.find_by_id(professor.department_id)
+                    if department:
+                        professor_data['department_name'] = department.department_name
+                professors_list.append(professor_data)
             
             response = {
                 'success': True,

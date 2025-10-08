@@ -26,22 +26,30 @@ class DepartmentResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-
-        departpament = DepartmentModel.find_by_id(id)
-
-        if departpament is None:
+    def get(self, id=None):
+        if id:
+            # Get specific department by ID
+            department = DepartmentModel.find_by_id(id)
+            if department is None:
+                response = {
+                    'success': False,
+                    'message': 'Department not found'
+                }
+                return Response(json.dumps(response), 404)
             response = {
-                'success': False,
-                'message': 'Department not found'
+                'success': True,
+                'message': department.json()
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': departpament.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all departments
+            departments = DepartmentModel.find_all()
+            departments_list = [department.json() for department in departments]
+            response = {
+                'success': True,
+                'message': departments_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

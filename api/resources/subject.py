@@ -39,21 +39,39 @@ class SubjectResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        subject_id = SubjectModel.find_by_id(id)
+    def get(self, id=None):
+        if id:
+            # Get specific subject by ID
+            subject = SubjectModel.find_by_id(id)
+            if subject is None:
+                response = {
+                    'success': False,
+                    'message': 'Subject not found'
+                }
+                return Response(json.dumps(response), 404)
 
-        if subject_id is None:
             response = {
-                'success': False,
-                'message': 'Subject not found'
+                'success': True,
+                'message': subject.json()
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': subject_id.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all subjects with department information
+            subjects = SubjectModel.find_all()
+            subjects_list = []
+            for subject in subjects:
+                subject_data = subject.json()
+                # Get department name
+                department = DepartmentModel.find_by_id(subject.department_id)
+                if department:
+                    subject_data['department_name'] = department.department_name
+                subjects_list.append(subject_data)
+            
+            response = {
+                'success': True,
+                'message': subjects_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

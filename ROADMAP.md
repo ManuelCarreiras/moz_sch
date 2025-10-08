@@ -52,20 +52,20 @@ A comprehensive school management system with React frontend and Flask backend, 
 
 ---
 
-### **Phase 2: Academic Foundation**
+### **Phase 2: Academic Structure**
 **Timeline: Weeks 3-4** | **Priority: HIGH**
 
-#### **Academic Structure**
-- [ ] **School Years** - Academic year management
-- [ ] **Terms** - Semester/quarter management
-- [ ] **Periods** - Class period scheduling
-- [ ] **Year Levels** - Grade level management
-
-#### **Academic Infrastructure**
+#### **Academic Setup (Admin Dashboard)**
 - [ ] **Departments** - Subject department organization
 - [ ] **Subjects** - Course subject management
 - [ ] **Classrooms** - Physical classroom management
 - [ ] **Classroom Types** - Lab, Lecture Hall, etc.
+
+#### **Academic Foundation**
+- [ ] **School Years** - Academic year management
+- [ ] **Terms** - Semester/quarter management
+- [ ] **Periods** - Class period scheduling
+- [ ] **Year Levels** - Grade level management
 - [ ] **Score Ranges** - Grading scale management
 
 #### **Academic Setup Wizard**
@@ -238,15 +238,16 @@ frontend/src/components/
 
 ## 🎯 **Current Sprint Focus**
 
-**Sprint Goal**: Complete Teacher Department Assignment & Student Year Level Assignment
+**Sprint Goal**: Implement Academic Setup in Admin Dashboard
 **Duration**: Current sprint
 **Key Deliverables**:
-1. Teacher-department assignment interface
-2. Student year level assignment system
-3. Personnel dashboard integration
-4. Phase 1 completion
+1. Academic Setup section in Admin Dashboard
+2. Department management interface
+3. Subject management interface
+4. Classroom management interface
+5. Classroom Types management interface
 
-**Next Sprint**: Academic Foundation Setup (Phase 2)
+**Next Sprint**: Academic Foundation & Teacher Department Assignment
 
 ---
 

@@ -35,6 +35,10 @@ class SubjectModel(db.Model):
     def find_by_department_id(cls, department_id):
         return cls.query.filter_by(department_id=department_id).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

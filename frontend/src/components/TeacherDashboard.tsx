@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
-import watermarkSrc from '../assets/Escola_marca_de_água.png';
 import { TeacherWizard } from './admin/TeacherWizard';
+
+type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
 
 export function TeacherDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TeacherTab>('overview');
   const [showCreateTeacher, setShowCreateTeacher] = useState(false);
 
   const handleSignOut = async () => {
@@ -55,103 +57,170 @@ export function TeacherDashboard() {
     );
   }
 
+  const tabs = [
+    { id: 'overview' as TeacherTab, label: 'Overview', icon: '🏠' },
+    { id: 'classes' as TeacherTab, label: 'My Classes', icon: '📚' },
+    { id: 'students' as TeacherTab, label: 'Students', icon: '👥' },
+    { id: 'grades' as TeacherTab, label: 'Grades', icon: '📊' },
+    { id: 'resources' as TeacherTab, label: 'Resources', icon: '📖' },
+    { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
+    { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' },
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'classes':
+        return (
+          <div className="teacher-content">
+            <h2>My Classes</h2>
+            <p>View your assigned classes and teaching schedule.</p>
+            <div className="placeholder-content">
+              <p>Classes functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'students':
+        return (
+          <div className="teacher-content">
+            <h2>Students</h2>
+            <p>Access student information and track academic progress.</p>
+            <div className="placeholder-content">
+              <p>Student management functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'grades':
+        return (
+          <div className="teacher-content">
+            <h2>Grades</h2>
+            <p>Enter and manage student grades and assessments.</p>
+            <div className="placeholder-content">
+              <p>Grade management functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'resources':
+        return (
+          <div className="teacher-content">
+            <h2>Resources</h2>
+            <p>Access teaching materials and educational resources.</p>
+            <div className="placeholder-content">
+              <p>Resources functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'attendance':
+        return (
+          <div className="teacher-content">
+            <h2>Attendance</h2>
+            <p>Track student attendance and manage records.</p>
+            <div className="placeholder-content">
+              <p>Attendance tracking functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'assignments':
+        return (
+          <div className="teacher-content">
+            <h2>Assignments</h2>
+            <p>Create and manage assignments and homework.</p>
+            <div className="placeholder-content">
+              <p>Assignment management functionality coming soon...</p>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="teacher-content">
+            <h2>Teacher Portal</h2>
+            <p>Manage your classes, students, and teaching resources.</p>
+            <div className="welcome-message">
+              <p>Welcome to your teacher portal! Use the sidebar to navigate to different sections.</p>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
-    <>
-      <div className="watermark" style={{ backgroundImage: `url(${watermarkSrc})` }}></div>
-      <div className="landing">
-        <header className="landing__header">
-          <div className="brand">
-            <img className="brand__logo" src={logoSrc} alt="Santa Isabel Escola" loading="eager" />
-            <span className="brand__name">Santa Isabel Escola</span>
+    <div className="teacher-dashboard">
+      {/* Header */}
+      <header className="teacher-header">
+        <div className="teacher-header__brand">
+          <img 
+            className="teacher-header__logo" 
+            src={logoSrc} 
+            alt="Santa Isabel Escola" 
+            loading="eager" 
+          />
+          <div className="teacher-header__title">
+            <h1>Teacher Portal</h1>
+            <span className="teacher-header__subtitle">Santa Isabel Escola</span>
           </div>
-          <nav className="nav">
-            <button 
-              className="btn btn--small" 
-              onClick={() => navigate('/dashboard')}
-              style={{ marginRight: 'var(--space-sm)' }}
-            >
-              Back to Dashboard
-            </button>
-            <span style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-              Teacher: {user.email}
-            </span>
-            <button className="btn btn--small" onClick={handleSignOut}>
-              Sign Out
-            </button>
+        </div>
+        <div className="teacher-header__user">
+          <span className="teacher-header__user-info">
+            Teacher: {user.email}
+          </span>
+          <button className="btn btn--small" onClick={() => navigate('/dashboard')}>
+            Back to Dashboard
+          </button>
+          <button className="btn btn--small" onClick={handleSignOut}>
+            Sign Out
+          </button>
+        </div>
+      </header>
+
+      <div className="teacher-dashboard__content">
+        {/* Sidebar */}
+        <aside className="teacher-sidebar">
+          <nav className="teacher-nav">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`teacher-nav__item ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="teacher-nav__icon">{tab.icon}</span>
+                <span className="teacher-nav__label">{tab.label}</span>
+              </button>
+            ))}
           </nav>
-        </header>
+        </aside>
 
-        <main className="hero">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-            <div>
-              <h1>Teacher Portal</h1>
-              <p className="hero__subtitle">Manage your classes, students, and teaching resources.</p>
-            </div>
-            <button 
-              className="btn btn--primary"
-              onClick={() => setShowCreateTeacher(true)}
-            >
-              Create New Teacher
-            </button>
-          </div>
-          
-          <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-md)' }}>
-              <div className="feature">
-                <h3>My Classes</h3>
-                <p>View your assigned classes and teaching schedule.</p>
-                <button className="btn btn--small btn--primary">View Classes</button>
+        {/* Main Content */}
+        <main className="teacher-main">
+          {activeTab === 'overview' && (
+            <div className="teacher-content">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+                <div>
+                  <h2>Teacher Portal</h2>
+                  <p>Manage your classes, students, and teaching resources.</p>
+                </div>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setShowCreateTeacher(true)}
+                  style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
+                >
+                  Create New Teacher
+                </button>
               </div>
-              <div className="feature">
-                <h3>Students</h3>
-                <p>Access student information and track academic progress.</p>
-                <button className="btn btn--small btn--primary">View Students</button>
-              </div>
-              <div className="feature">
-                <h3>Grades</h3>
-                <p>Enter and manage student grades and assessments.</p>
-                <button className="btn btn--small btn--primary">Manage Grades</button>
-              </div>
-              <div className="feature">
-                <h3>Resources</h3>
-                <p>Access teaching materials and educational resources.</p>
-                <button className="btn btn--small btn--primary">Access Resources</button>
-              </div>
-              <div className="feature">
-                <h3>Attendance</h3>
-                <p>Mark student attendance and view attendance records.</p>
-                <button className="btn btn--small btn--primary">Mark Attendance</button>
-              </div>
-              <div className="feature">
-                <h3>Assignments</h3>
-                <p>Create and manage homework and project assignments.</p>
-                <button className="btn btn--small btn--primary">Manage Assignments</button>
-              </div>
-              <div className="feature">
-                <h3>Reports</h3>
-                <p>Generate academic reports and performance analytics.</p>
-                <button className="btn btn--small btn--primary">View Reports</button>
-              </div>
-              <div className="feature">
-                <h3>Profile</h3>
-                <p>Update your personal information and teaching preferences.</p>
-                <button className="btn btn--small btn--primary">Edit Profile</button>
+              <div className="welcome-message">
+                <p>Welcome to your teacher portal! Use the sidebar to navigate to different sections.</p>
               </div>
             </div>
-          </div>
+          )}
+          {activeTab !== 'overview' && renderTabContent()}
         </main>
-
-        <footer className="footer">
-          <span>© Santa Isabel Escola - Teacher Portal</span>
-        </footer>
       </div>
 
+      {/* Create Teacher Modal */}
       {showCreateTeacher && (
-        <TeacherWizard
+        <TeacherWizard 
           onClose={() => setShowCreateTeacher(false)}
           onSuccess={handleTeacherCreated}
         />
       )}
-    </>
+    </div>
   );
 }

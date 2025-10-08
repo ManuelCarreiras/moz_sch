@@ -3,14 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../../contexts/AuthContext';
 import { ClassesTable } from './ClassesTable';
 import { ReportsView } from './ReportsView';
+import { DepartmentTable } from './DepartmentTable';
+import { SubjectTable } from './SubjectTable';
+import { ClassroomManagement } from './ClassroomManagement';
+import { SimpleGuardianWizard } from './SimpleGuardianWizard';
+import { StudentGuardianAssignment } from './StudentGuardianAssignment';
+import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'classes' | 'reports' | 'portals' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'classes' | 'reports' | 'portals' | 'settings';
+type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments';
+type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 
 export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
+  const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
 
   const handleSignOut = async () => {
     try {
@@ -21,7 +31,7 @@ export function AdminDashboard() {
     }
   };
 
-  const handlePortalAccess = (portalType: 'teacher' | 'student' | 'guardian') => {
+  const handlePortalAccess = (portalType: 'teacher' | 'student') => {
     navigate(`/${portalType}`);
   };
 
@@ -31,9 +41,8 @@ export function AdminDashboard() {
       navigate('/student', { replace: true });
     } else if (activeTab === 'teachers') {
       navigate('/teacher', { replace: true });
-    } else if (activeTab === 'guardians') {
-      navigate('/guardian', { replace: true });
     }
+    // Guardians now handled within Admin Dashboard (no redirect)
   }, [activeTab, navigate]);
 
   if (isLoading) {
@@ -70,7 +79,8 @@ export function AdminDashboard() {
     { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠' },
     { id: 'students' as AdminTab, label: 'Students', icon: '👥' },
     { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
-    { id: 'guardians' as AdminTab, label: 'Guardians', icon: '👨‍👩‍👧‍👦' },
+    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
+    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
     { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
@@ -160,11 +170,170 @@ export function AdminDashboard() {
           </div>
         );
       case 'guardians':
-        // Navigation handled by useEffect
+        if (activeGuardianTab === 'guardian-creation') {
+          return (
+            <div className="admin-content">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+                <button 
+                  className="btn btn--secondary"
+                  onClick={() => setActiveGuardianTab('overview')}
+                >
+                  ← Back to Guardian Management
+                </button>
+                <div>
+                  <h2>Create New Guardian</h2>
+                  <p>Add a new guardian to the system.</p>
+                </div>
+              </div>
+              <SimpleGuardianWizard 
+                onClose={() => setActiveGuardianTab('overview')}
+                onSuccess={() => {
+                  setActiveGuardianTab('overview');
+                }}
+              />
+            </div>
+          );
+        }
+        
+        if (activeGuardianTab === 'student-assignment') {
+          return (
+            <div className="admin-content">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+                <button 
+                  className="btn btn--secondary"
+                  onClick={() => setActiveGuardianTab('overview')}
+                >
+                  ← Back to Guardian Management
+                </button>
+                <div>
+                  <h2>Assign Guardian to Student</h2>
+                  <p>Link guardians with students and define their relationships.</p>
+                </div>
+              </div>
+              <StudentGuardianAssignment 
+                onClose={() => setActiveGuardianTab('overview')}
+                onSuccess={() => {
+                  setActiveGuardianTab('overview');
+                }}
+              />
+            </div>
+          );
+        }
+        
         return (
           <div className="admin-content">
-            <h2>Redirecting to Guardian Portal...</h2>
-            <p>You will be redirected to the guardian portal shortly.</p>
+            <h2>Guardian Management</h2>
+            <p>Manage guardians and their relationships with students.</p>
+            
+            <div className="features-grid">
+              <div className="feature-card">
+                <h3>👨‍👩‍👧‍👦 Guardian Creation</h3>
+                <p>Create new guardians with personal information and contact details</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveGuardianTab('guardian-creation')}
+                >
+                  Create New Guardian
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>🔗 Student Assignment</h3>
+                <p>Assign guardians to students and define relationship types (Parent, Grandparent, etc.)</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveGuardianTab('student-assignment')}
+                >
+                  Assign Guardian to Student
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      case 'academic-setup':
+        if (activeAcademicTab === 'departments') {
+          return <DepartmentTable onBack={() => setActiveAcademicTab('overview')} />;
+        }
+        
+        if (activeAcademicTab === 'subjects') {
+          return <SubjectTable onBack={() => setActiveAcademicTab('overview')} />;
+        }
+        
+        if (activeAcademicTab === 'teacher-departments') {
+          return (
+            <div className="admin-content">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+                <button 
+                  className="btn btn--secondary"
+                  onClick={() => setActiveAcademicTab('overview')}
+                >
+                  ← Back to Academic Setup
+                </button>
+                <div>
+                  <h2>Teacher Department Assignment</h2>
+                  <p>Assign teachers to departments for better organization and class management.</p>
+                </div>
+              </div>
+              <p>Teacher department assignment interface coming soon...</p>
+            </div>
+          );
+        }
+        
+        if (activeAcademicTab === 'classrooms') {
+          return <ClassroomManagement onBack={() => setActiveAcademicTab('overview')} />;
+        }
+        
+        return (
+          <div className="admin-content">
+            <h2>Academic Setup</h2>
+            <p>Configure the foundational academic infrastructure for your school.</p>
+            
+            <div className="features-grid">
+              <div className="feature-card">
+                <h3>🏢 Departments</h3>
+                <p>Organize subjects into departments (Mathematics, Science, Languages, Arts, etc.)</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('departments')}
+                >
+                  Manage Departments
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>📚 Subjects</h3>
+                <p>Define individual subjects and courses offered at the school</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('subjects')}
+                >
+                  Manage Subjects
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>🏫 Classroom Management</h3>
+                <p>Manage classroom types and physical classroom spaces with capacity planning</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('classrooms')}
+                >
+                  Manage Classrooms
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>👨‍🏫 Teacher Department Assignment</h3>
+                <p>Assign teachers to departments for better organization and class management</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('teacher-departments')}
+                >
+                  Assign Teachers to Departments
+                </button>
+              </div>
+            </div>
           </div>
         );
       case 'classes':
@@ -220,14 +389,14 @@ export function AdminDashboard() {
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border)'
               }}>
-                <h3>Guardian Portal</h3>
-                <p>Access the guardian dashboard to manage guardian information and relationships.</p>
+                <h3>Guardian Management</h3>
+                <p>Guardian management is now integrated into the Admin Dashboard.</p>
                 <button 
                   className="btn btn--primary" 
-                  onClick={() => handlePortalAccess('guardian')}
+                  onClick={() => setActiveTab('guardians')}
                   style={{ marginTop: 'var(--space-md)' }}
                 >
-                  Go to Guardian Portal
+                  Go to Guardian Management
                 </button>
               </div>
             </div>
@@ -257,7 +426,7 @@ export function AdminDashboard() {
         <div className="admin-header__brand">
           <img 
             className="admin-header__logo" 
-            src="/src/assets/Santa_Isabel.png" 
+            src={logoSrc} 
             alt="Santa Isabel Escola" 
             loading="eager" 
           />

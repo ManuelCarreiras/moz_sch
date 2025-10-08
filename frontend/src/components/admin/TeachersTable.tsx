@@ -8,6 +8,8 @@ export interface Teacher {
   email_address: string;
   phone_number: string;
   gender: string;
+  department_id?: string;
+  department_name?: string;
 }
 
 export function TeachersTable() {
@@ -83,13 +85,14 @@ export function TeachersTable() {
               <th>Email</th>
               <th>Phone</th>
               <th>Gender</th>
+              <th>Department</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {teachers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="empty-state">
+                <td colSpan={6} className="empty-state">
                   No teachers found.
                 </td>
               </tr>
@@ -109,6 +112,7 @@ export function TeachersTable() {
                     </span>
                     {teacher.gender}
                   </td>
+                  <td>{teacher.department_name || 'Not Assigned'}</td>
                   <td>
                     <div className="action-buttons">
                       <button className="btn btn--small btn--secondary">Edit</button>

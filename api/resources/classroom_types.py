@@ -36,21 +36,31 @@ class ClassroomTypesResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        classroom_types = ClassroomTypesModel.find_by_id(id)
+    def get(self, id=None):
+        if id:
+            # Get specific classroom type by ID
+            classroom_type = ClassroomTypesModel.find_by_id(id)
+            if classroom_type is None:
+                response = {
+                    'success': False,
+                    'message': 'Classroom type not found'
+                }
+                return Response(json.dumps(response), 404)
 
-        if classroom_types is None:
             response = {
-                'success': False,
-                'message': 'classroom type not found'
+                'success': True,
+                'message': classroom_type.json()
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': classroom_types.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all classroom types
+            classroom_types = ClassroomTypesModel.find_all()
+            classroom_types_list = [classroom_type.json() for classroom_type in classroom_types]
+            response = {
+                'success': True,
+                'message': classroom_types_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

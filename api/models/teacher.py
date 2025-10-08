@@ -17,14 +17,16 @@ class TeacherModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     email_address = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.VARCHAR(20), nullable=False)
+    department_id = db.Column(UUID(as_uuid=True), db.ForeignKey('department._id'), nullable=True)
 
     def __init__(self, given_name, surname, gender, email_address,
-                 phone_number):
+                 phone_number, department_id=None):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
+        self.department_id = department_id
 
     def json(self):
         return {
@@ -33,7 +35,8 @@ class TeacherModel(db.Model):
             'surname': self.surname,
             'gender': self.gender,
             'email_address': self.email_address,
-            'phone_number': self.phone_number
+            'phone_number': self.phone_number,
+            'department_id': str(self.department_id) if self.department_id else None
         }
 
     @classmethod
@@ -56,6 +59,10 @@ class TeacherModel(db.Model):
     def find_all(cls):
         return cls.query.all()
 
+    @classmethod
+    def find_by_department_id(cls, department_id):
+        return cls.query.filter_by(department_id=department_id).all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
@@ -69,6 +76,8 @@ class TeacherModel(db.Model):
             self.surname = data['surname']
         if data.get('phone_number') is not None:
             self.phone_number = data['phone_number']
+        if data.get('department_id') is not None:
+            self.department_id = data['department_id']
 
         self.save_to_db()
 

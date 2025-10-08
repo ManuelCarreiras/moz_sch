@@ -163,9 +163,41 @@ class ApiService {
     return this.get('/subject');
   }
 
+  async getSubject(id: string) {
+    return this.get(`/subject/${id}`);
+  }
+
+  async createSubject(subjectData: any) {
+    return this.post('/subject', subjectData);
+  }
+
+  async updateSubject(id: string, subjectData: any) {
+    return this.put(`/subject/${id}`, subjectData);
+  }
+
+  async deleteSubject(id: string) {
+    return this.delete(`/subject/${id}`);
+  }
+
   // Departments
   async getDepartments() {
     return this.get('/department');
+  }
+
+  async getDepartment(id: string) {
+    return this.get(`/department/${id}`);
+  }
+
+  async createDepartment(departmentData: any) {
+    return this.post('/department', departmentData);
+  }
+
+  async updateDepartment(id: string, departmentData: any) {
+    return this.put(`/department/${id}`, departmentData);
+  }
+
+  async deleteDepartment(id: string) {
+    return this.delete(`/department/${id}`);
   }
 
   // Year Levels
@@ -181,6 +213,43 @@ class ApiService {
   // Classrooms
   async getClassrooms() {
     return this.get('/classroom');
+  }
+
+  async getClassroom(id: string) {
+    return this.get(`/classroom/${id}`);
+  }
+
+  async createClassroom(classroomData: any) {
+    return this.post('/classroom', classroomData);
+  }
+
+  async updateClassroom(id: string, classroomData: any) {
+    return this.put(`/classroom/${id}`, classroomData);
+  }
+
+  async deleteClassroom(id: string) {
+    return this.delete(`/classroom/${id}`);
+  }
+
+  // Classroom Types
+  async getClassroomTypes() {
+    return this.get('/classroom_types');
+  }
+
+  async getClassroomType(id: string) {
+    return this.get(`/classroom_types/${id}`);
+  }
+
+  async createClassroomType(classroomTypeData: any) {
+    return this.post('/classroom_types', classroomTypeData);
+  }
+
+  async updateClassroomType(id: string, classroomTypeData: any) {
+    return this.put(`/classroom_types/${id}`, classroomTypeData);
+  }
+
+  async deleteClassroomType(id: string) {
+    return this.delete(`/classroom_types/${id}`);
   }
 
   // Terms
@@ -252,6 +321,7 @@ class ApiService {
   async createStudentGuardian(studentGuardianData: any) {
     return this.post('/student_guardian', studentGuardianData);
   }
+
 }
 
 // Export singleton instance
