@@ -13,7 +13,7 @@ from flask_restful import Api, Resource
 from resources.school_year import SchoolYearResource
 from resources.student import StudentResource
 from resources.teacher import TeacherResource
-from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear  # noqa
+from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear, StudentYearLevelAssignmentResource  # noqa
 from resources.year_level import YearLevelResource
 from resources.student_class import StudentClassResource
 from resources.class_model import ClassModelResource, ClassResourceSubjectList, ClassResourceTeacherList, ClassResourceTermList, ClassResourcePeriodList, ClassResourceClassroomList  # noqa
@@ -165,6 +165,7 @@ api.add_resource(StudentGuardianResource, "/student_guardian")
 api.add_resource(GuardianTypeResource, "/guardian/types", "/guardian/types/<id>")
 api.add_resource(GuardianResource, "/guardian", "/guardian/<id>")
 api.add_resource(TeacherDepartmentResource, "/teacher-department", "/teacher-department/<teacher_id>", "/teacher-department/<teacher_id>/<department_id>")
+api.add_resource(StudentYearLevelAssignmentResource, "/student-year-level-assignment", "/student-year-level-assignment/<student_id>", "/student-year-level-assignment/<student_id>/<level_id>")
 
 # Authentication endpoints
 api.add_resource(AuthLoginResource, "/auth/login")

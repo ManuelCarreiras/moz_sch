@@ -61,7 +61,7 @@ class StudentResource(Resource):
                 # Get all students
                 students = StudentModel.find_all()
             
-            students_list = [student.json() for student in students]
+            students_list = [student.json_with_year_levels() for student in students]
             response = {
                 'success': True,
                 'message': students_list

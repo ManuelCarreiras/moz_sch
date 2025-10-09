@@ -32,6 +32,21 @@ class StudentModel(db.Model):
             'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None  # noqa501
         }
 
+    def json_with_year_levels(self):
+        """Return student JSON with year level information"""
+        from models.student_year_level import StudentYearLevelModel
+        from models.year_level import YearLevelModel
+        
+        student_data = self.json()
+        assignments = StudentYearLevelModel.find_all_by_student_id(self._id)
+        year_levels = []
+        for assignment in assignments:
+            year_level = YearLevelModel.find_by_id(assignment.level_id)
+            if year_level:
+                year_levels.append(year_level.json())
+        student_data['year_levels'] = year_levels
+        return student_data
+
     @classmethod
     def find_by_id(cls, _id):
         return cls.query.filter_by(_id=_id).first()

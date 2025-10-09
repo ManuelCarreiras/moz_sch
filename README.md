@@ -108,15 +108,16 @@ The system uses a comprehensive relational database design with the following ke
 - **Classes**: Scheduled courses with teacher, classroom, and time assignments
 
 ### Academic Structure
-- **School Years**: Academic year definitions with start/end dates
+- **School Years**: Academic year management (2026, 2027, etc.) with start/end dates
+- **Year Levels**: Grade level management with letters and grades (1st Grade A, 2nd Grade B, etc.)
 - **Terms**: Academic periods within school years
-- **Year Levels**: Grade levels (e.g., Grade 1, Grade 2)
 - **Periods**: Time slots for class scheduling
 
 ### Relationships & Tracking
-- **Student-Year-Level**: Academic progression tracking
+- **Student-Year-Level**: Academic progression tracking with grade and level assignments
 - **Student-Class**: Course enrollment and performance
 - **Student-Guardian**: Family relationships and contact information
+- **Teacher-Department**: Teacher assignments to academic departments
 - **Class Scheduling**: Teacher, classroom, and time assignments
 
 ### Infrastructure
@@ -145,17 +146,20 @@ DELETE /teacher/<id>         # Delete teacher
 ### Academic Structure
 ```
 POST   /school_year          # Create school year
-GET    /school_year/<id>     # Get school year
+GET    /school_year          # Get all school years
+GET    /school_year/<id>     # Get school year by ID
 PUT    /school_year          # Update school year
 DELETE /school_year/<id>     # Delete school year
 
 POST   /year_level           # Create year level
-GET    /year_level/<id>      # Get year level
+GET    /year_level           # Get all year levels
+GET    /year_level/<id>      # Get year level by ID
 PUT    /year_level           # Update year level
 DELETE /year_level/<id>      # Delete year level
 
 POST   /subject              # Create subject
-GET    /subject/<id>         # Get subject
+GET    /subject              # Get all subjects
+GET    /subject/<id>         # Get subject by ID
 PUT    /subject              # Update subject
 DELETE /subject/<id>         # Delete subject
 ```
@@ -170,6 +174,12 @@ DELETE /class/<id>           # Delete class
 
 ### Student Academic Tracking
 ```
+POST   /student_year_level             # Create student-year level assignment
+GET    /student_year_level             # Get all student-year level assignments
+GET    /student_year_level/<id>        # Get assignment by ID
+PUT    /student_year_level/<id>        # Update assignment
+DELETE /student_year_level/<id>        # Delete assignment
+
 GET    /student_year_level/level/<id>    # Get students by year level
 GET    /student_year_level/year/<id>     # Get students by school year
 GET    /student_year_level/student/<id>  # Get student's year level info
@@ -181,12 +191,20 @@ GET    /student_class/class/<id>         # Get class enrollment
 ### Infrastructure Management
 ```
 POST   /department           # Create department
-GET    /department/<id>      # Get department
+GET    /department           # Get all departments
+GET    /department/<id>      # Get department by ID
 PUT    /department           # Update department
 DELETE /department/<id>      # Delete department
 
+POST   /classroom            # Create classroom
+GET    /classroom            # Get all classrooms
+GET    /classroom/<id>       # Get classroom by ID
+PUT    /classroom            # Update classroom
+DELETE /classroom/<id>       # Delete classroom
+
 POST   /classroom_types      # Create classroom type
-GET    /classroom_types/<id> # Get classroom type
+GET    /classroom_types      # Get all classroom types
+GET    /classroom_types/<id> # Get classroom type by ID
 PUT    /classroom_types      # Update classroom type
 DELETE /classroom_types/<id> # Delete classroom type
 ```

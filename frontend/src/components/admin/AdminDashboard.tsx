@@ -9,10 +9,11 @@ import { ClassroomManagement } from './ClassroomManagement';
 import { SimpleGuardianWizard } from './SimpleGuardianWizard';
 import { StudentGuardianAssignment } from './StudentGuardianAssignment';
 import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
+import { SchoolYearManagement } from './SchoolYearManagement';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
 type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'classes' | 'reports' | 'portals' | 'settings';
-type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments';
+type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 
 export function AdminDashboard() {
@@ -265,6 +266,10 @@ export function AdminDashboard() {
           return <TeacherDepartmentAssignment onBack={() => setActiveAcademicTab('overview')} />;
         }
         
+        if (activeAcademicTab === 'school-year-management') {
+          return <SchoolYearManagement onBack={() => setActiveAcademicTab('overview')} />;
+        }
+        
         if (activeAcademicTab === 'classrooms') {
           return <ClassroomManagement onBack={() => setActiveAcademicTab('overview')} />;
         }
@@ -316,6 +321,17 @@ export function AdminDashboard() {
                   onClick={() => setActiveAcademicTab('teacher-departments')}
                 >
                   Assign Teachers to Departments
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>📅 School Year Management</h3>
+                <p>Complete academic structure: year levels, school years, and student assignments</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('school-year-management')}
+                >
+                  Manage School Years
                 </button>
               </div>
             </div>

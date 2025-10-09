@@ -38,6 +38,14 @@ class StudentYearLevelModel(db.Model):
     def find_by_year_id(cls, record_id):
         return cls.query.filter_by(year_id=record_id).first()
 
+    @classmethod
+    def find_by_student_and_level(cls, student_id, level_id):
+        return cls.query.filter_by(student_id=student_id, level_id=level_id).first()
+
+    @classmethod
+    def find_all_by_student_id(cls, student_id):
+        return cls.query.filter_by(student_id=student_id).all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
@@ -64,3 +72,12 @@ class StudentYearLevelModel(db.Model):
         if obj:
             db.session.delete(obj)
             db.session.commit()
+
+    @classmethod
+    def delete_by_student_and_level(cls, student_id, level_id):
+        assignment = cls.find_by_student_and_level(student_id, level_id)
+        if assignment:
+            db.session.delete(assignment)
+            db.session.commit()
+            return True
+        return False

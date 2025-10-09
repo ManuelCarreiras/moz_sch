@@ -205,9 +205,62 @@ class ApiService {
     return this.get('/year_level');
   }
 
+  async getYearLevel(id: string) {
+    return this.get(`/year_level/${id}`);
+  }
+
+  async createYearLevel(yearLevelData: any) {
+    return this.post('/year_level', yearLevelData);
+  }
+
+  async updateYearLevel(id: string, yearLevelData: any) {
+    return this.put(`/year_level/${id}`, yearLevelData);
+  }
+
+  async deleteYearLevel(id: string) {
+    return this.delete(`/year_level/${id}`);
+  }
+
   // School Years
   async getSchoolYears() {
     return this.get('/school_year');
+  }
+
+  async getSchoolYear(id: string) {
+    return this.get(`/school_year/${id}`);
+  }
+
+  async createSchoolYear(schoolYearData: any) {
+    return this.post('/school_year', schoolYearData);
+  }
+
+  async updateSchoolYear(id: string, schoolYearData: any) {
+    return this.put(`/school_year/${id}`, schoolYearData);
+  }
+
+  async deleteSchoolYear(id: string) {
+    return this.delete(`/school_year/${id}`);
+  }
+
+  // Student Year Level Assignments
+  async getStudentYearLevels() {
+    return this.get('/student-year-level');
+  }
+
+  async getStudentYearLevel(id: string) {
+    return this.get(`/student-year-level/${id}`);
+  }
+
+  async createStudentYearLevel(assignmentData: any) {
+    return this.post('/student-year-level', assignmentData);
+  }
+
+  async updateStudentYearLevel(id: string, assignmentData: any) {
+    return this.put(`/student-year-level/${id}`, assignmentData);
+  }
+
+  async deleteStudentYearLevel(id: string) {
+    return this.delete(`/student-year-level/${id}`);
   }
 
   // Classrooms
@@ -269,6 +322,25 @@ class ApiService {
 
   async removeTeacherFromDepartment(teacherId: string, departmentId: string) {
     return this.delete(`/teacher-department/${teacherId}/${departmentId}`);
+  }
+
+  // Student-Year Level Assignments
+  async getStudentYearLevelAssignments(studentId?: string) {
+    if (studentId) {
+      return this.get(`/student-year-level-assignment/${studentId}`);
+    }
+    return this.get('/student-year-level-assignment');
+  }
+
+  async assignStudentToYearLevel(studentId: string, levelId: string) {
+    return this.post('/student-year-level-assignment', {
+      student_id: studentId,
+      level_id: levelId
+    });
+  }
+
+  async removeStudentFromYearLevel(studentId: string, levelId: string) {
+    return this.delete(`/student-year-level-assignment/${studentId}/${levelId}`);
   }
 
   // Terms

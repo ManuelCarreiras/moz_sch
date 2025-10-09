@@ -62,7 +62,15 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Student Management**: Full CRUD operations for student data
 - **Teacher Management**: Complete teacher administration and creation
 - **Guardian Management**: Complete guardian administration and student assignments
-- **Class Management**: Course and classroom administration
+- **Academic Setup**: Comprehensive academic structure management
+  - **Department Management**: Create and manage academic departments
+  - **Subject Management**: Organize subjects by departments
+  - **Classroom Management**: Physical classroom and type administration
+  - **Teacher Department Assignment**: Assign teachers to multiple departments
+  - **School Year Management**: Complete academic year and grade level system
+    - **Year Levels**: Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)
+    - **School Years**: Manage academic years (2026, 2027, etc.)
+    - **Student Assignments**: Assign students to year levels and school years with combined format ("1st A", "2nd B")
 
 ### Landing Page
 - **Responsive Design**: Adapts to all screen sizes from mobile to ultra-wide monitors
@@ -182,6 +190,14 @@ frontend/
 │   │   │   ├── TeacherWizard.tsx
 │   │   │   ├── SimpleGuardianWizard.tsx
 │   │   │   ├── StudentGuardianAssignment.tsx
+│   │   │   ├── TeacherDepartmentAssignment.tsx
+│   │   │   ├── DepartmentTable.tsx
+│   │   │   ├── SubjectTable.tsx
+│   │   │   ├── ClassroomManagement.tsx
+│   │   │   ├── SchoolYearManagement.tsx
+│   │   │   ├── YearLevelTable.tsx
+│   │   │   ├── SchoolYearTable.tsx
+│   │   │   ├── StudentYearLevelAssignment.tsx
 │   │   │   └── ClassesTable.tsx
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
@@ -288,8 +304,13 @@ The responsive system uses:
 - Teacher creation form with full validation
 - Guardian creation form with full validation
 - Multi-student assignment with batch processing
+- Teacher-department assignment with many-to-many relationships
+- Academic structure management (departments, subjects, classrooms)
+- School year and year level management with tabbed interface
+- Student-year level assignment with combined format display
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
+- Consistent modal styling and form field widths across all interfaces
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation
