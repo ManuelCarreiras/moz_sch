@@ -160,7 +160,7 @@ api.add_resource(ClassResourceTermList, "/class/list/term/<id>")
 api.add_resource(ClassResourcePeriodList, "/class/list/period/<id>")
 api.add_resource(ClassResourceClassroomList, "/class/list/classroom/<id>")
 
-api.add_resource(ScoreRangeResource, "/score_range")
+api.add_resource(ScoreRangeResource, "/score_range", "/score_range/<id>")
 api.add_resource(StudentGuardianResource, "/student_guardian")
 api.add_resource(GuardianTypeResource, "/guardian/types", "/guardian/types/<id>")
 api.add_resource(GuardianResource, "/guardian", "/guardian/<id>")

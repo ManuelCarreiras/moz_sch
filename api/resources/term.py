@@ -6,6 +6,31 @@ import json
 
 
 class TermResource(Resource):
+    def get(self, id=None):
+        if id:
+            # Get specific term by ID
+            term = TermModel.find_by_id(id)
+            if term is None:
+                response = {
+                    'success': False,
+                    'message': 'Term not found'
+                }
+                return Response(json.dumps(response), 404)
+            response = {
+                'success': True,
+                'message': term.json()
+            }
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all terms
+            terms = TermModel.query.all()
+            terms_list = [term.json() for term in terms]
+            response = {
+                'success': True,
+                'message': terms_list
+            }
+            return Response(json.dumps(response), 200)
+
     def post(self):
         data = request.get_json()
 
@@ -40,21 +65,6 @@ class TermResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        term = TermModel.find_by_id(id)
-
-        if term is None:
-            response = {
-                'success': False,
-                'message': 'Term not found'
-            }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': term.json()
-        }
-        return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

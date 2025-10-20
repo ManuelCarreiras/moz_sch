@@ -5,6 +5,31 @@ import json
 
 
 class ScoreRangeResource(Resource):
+    def get(self, id=None):
+        if id:
+            # Get specific score range by ID
+            score_range = ScoreRangeModel.find_by_id(id)
+            if score_range is None:
+                response = {
+                    'success': False,
+                    'message': 'Score range not found'
+                }
+                return Response(json.dumps(response), 404)
+            response = {
+                'success': True,
+                'message': score_range.json()
+            }
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all score ranges
+            score_ranges = ScoreRangeModel.query.all()
+            score_ranges_list = [score_range.json() for score_range in score_ranges]
+            response = {
+                'success': True,
+                'message': score_ranges_list
+            }
+            return Response(json.dumps(response), 200)
+
     def post(self):
         data = request.get_json()
 
@@ -29,21 +54,6 @@ class ScoreRangeResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-    def get(self, id):
-        score_range = ScoreRangeModel.find_by_id(id)
-
-        if score_range is None:
-            response = {
-                'success': False,
-                'message': 'Score range not found'
-            }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': score_range.json()
-        }
-        return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

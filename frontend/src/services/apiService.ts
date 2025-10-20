@@ -348,9 +348,62 @@ class ApiService {
     return this.get('/term');
   }
 
+  async getTerm(id: string) {
+    return this.get(`/term/${id}`);
+  }
+
+  async createTerm(termData: any) {
+    return this.post('/term', termData);
+  }
+
+  async updateTerm(id: string, termData: any) {
+    return this.put(`/term/${id}`, termData);
+  }
+
+  async deleteTerm(id: string) {
+    return this.delete(`/term/${id}`);
+  }
+
   // Periods
   async getPeriods() {
     return this.get('/period');
+  }
+
+  async getPeriod(id: string) {
+    return this.get(`/period/${id}`);
+  }
+
+  async createPeriod(periodData: any) {
+    return this.post('/period', periodData);
+  }
+
+  async updatePeriod(id: string, periodData: any) {
+    return this.put(`/period/${id}`, periodData);
+  }
+
+  async deletePeriod(id: string) {
+    return this.delete(`/period/${id}`);
+  }
+
+  // Score Ranges
+  async getScoreRanges() {
+    return this.get('/score_range');
+  }
+
+  async getScoreRange(id: string) {
+    return this.get(`/score_range/${id}`);
+  }
+
+  async createScoreRange(scoreRangeData: any) {
+    return this.post('/score_range', scoreRangeData);
+  }
+
+  async updateScoreRange(id: string, scoreRangeData: any) {
+    return this.put(`/score_range/${id}`, scoreRangeData);
+  }
+
+  async deleteScoreRange(id: string) {
+    return this.delete(`/score_range/${id}`);
   }
 
   // Guardians

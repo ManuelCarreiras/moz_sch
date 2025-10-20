@@ -10,9 +10,10 @@ import { SimpleGuardianWizard } from './SimpleGuardianWizard';
 import { StudentGuardianAssignment } from './StudentGuardianAssignment';
 import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
 import { SchoolYearManagement } from './SchoolYearManagement';
+import AcademicFoundationManagement from './AcademicFoundationManagement';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'classes' | 'reports' | 'portals' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'reports' | 'portals' | 'settings';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 
@@ -83,6 +84,7 @@ export function AdminDashboard() {
     { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
     { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
     { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
+    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
     { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
@@ -337,6 +339,8 @@ export function AdminDashboard() {
             </div>
           </div>
         );
+      case 'academic-foundation':
+        return <AcademicFoundationManagement />;
       case 'classes':
         return <ClassesTable />;
       case 'reports':

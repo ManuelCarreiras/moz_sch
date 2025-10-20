@@ -26,7 +26,7 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 - **Student Management**: Complete student lifecycle from enrollment to graduation
 - **Teacher Management**: Teacher profiles, contact information, and assignments
 - **Class Management**: Course scheduling, classroom assignments, and teacher allocations
-- **Academic Structure**: Year levels, terms, periods, and school year management
+- **Academic Structure**: Year levels, terms, periods, score ranges, and school year management
 - **Subject Management**: Academic subjects organized by departments
 - **Guardian Management**: Student guardian relationships and contact information
 - **Grade Tracking**: Student performance monitoring and score management
@@ -110,8 +110,9 @@ The system uses a comprehensive relational database design with the following ke
 ### Academic Structure
 - **School Years**: Academic year management (2026, 2027, etc.) with start/end dates
 - **Year Levels**: Grade level management with letters and grades (1st Grade A, 2nd Grade B, etc.)
-- **Terms**: Academic periods within school years
-- **Periods**: Time slots for class scheduling
+- **Terms**: Academic periods within school years (semesters/quarters)
+- **Periods**: Time slots for class scheduling (daily periods)
+- **Score Ranges**: Grading scales and letter grades (A, B, C, D, F)
 
 ### Relationships & Tracking
 - **Student-Year-Level**: Academic progression tracking with grade and level assignments
@@ -156,6 +157,24 @@ GET    /year_level           # Get all year levels
 GET    /year_level/<id>      # Get year level by ID
 PUT    /year_level           # Update year level
 DELETE /year_level/<id>      # Delete year level
+
+POST   /term                 # Create term
+GET    /term                 # Get all terms
+GET    /term/<id>            # Get term by ID
+PUT    /term                 # Update term
+DELETE /term/<id>            # Delete term
+
+POST   /period               # Create period
+GET    /period               # Get all periods
+GET    /period/<id>          # Get period by ID
+PUT    /period               # Update period
+DELETE /period/<id>          # Delete period
+
+POST   /score_range          # Create score range
+GET    /score_range          # Get all score ranges
+GET    /score_range/<id>     # Get score range by ID
+PUT    /score_range          # Update score range
+DELETE /score_range/<id>     # Delete score range
 
 POST   /subject              # Create subject
 GET    /subject              # Get all subjects

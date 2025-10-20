@@ -6,6 +6,31 @@ import json
 
 
 class PeriodResource(Resource):
+    def get(self, id=None):
+        if id:
+            # Get specific period by ID
+            period = PeriodModel.find_by_id(id)
+            if period is None:
+                response = {
+                    'success': False,
+                    'message': 'Period not found'
+                }
+                return Response(json.dumps(response), 404)
+            response = {
+                'success': True,
+                'message': period.json()
+            }
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all periods
+            periods = PeriodModel.query.all()
+            periods_list = [period.json() for period in periods]
+            response = {
+                'success': True,
+                'message': periods_list
+            }
+            return Response(json.dumps(response), 200)
+
     def post(self):
         data = request.get_json()
         start_time = data.get('start_time')
@@ -40,21 +65,6 @@ class PeriodResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        period = PeriodModel.find_by_id(id)
-
-        if period is None:
-            response = {
-                'success': False,
-                'message': 'Period not found'
-            }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': period.json()
-        }
-        return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

@@ -62,15 +62,20 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Student Management**: Full CRUD operations for student data
 - **Teacher Management**: Complete teacher administration and creation
 - **Guardian Management**: Complete guardian administration and student assignments
-- **Academic Setup**: Comprehensive academic structure management
-  - **Department Management**: Create and manage academic departments
-  - **Subject Management**: Organize subjects by departments
-  - **Classroom Management**: Physical classroom and type administration
-  - **Teacher Department Assignment**: Assign teachers to multiple departments
-  - **School Year Management**: Complete academic year and grade level system
-    - **Year Levels**: Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)
-    - **School Years**: Manage academic years (2026, 2027, etc.)
-    - **Student Assignments**: Assign students to year levels and school years with combined format ("1st A", "2nd B")
+  - **Academic Setup**: Comprehensive academic structure management
+    - **Department Management**: Create and manage academic departments
+    - **Subject Management**: Organize subjects by departments
+    - **Classroom Management**: Physical classroom and type administration
+    - **Teacher Department Assignment**: Assign teachers to multiple departments
+    - **School Year Management**: Complete academic year and grade level system
+      - **Year Levels**: Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)
+      - **School Years**: Manage academic years (2026, 2027, etc.)
+      - **Student Assignments**: Assign students to year levels and school years with combined format ("1st A", "2nd B")
+  - **Academic Foundation**: Complete academic foundation management system
+    - **Term Management**: Manage academic terms (semesters/quarters) with school year integration
+    - **Period Management**: Manage daily class periods and scheduling with time-based organization
+    - **Score Range Management**: Manage grading scales and letter grades (A, B, C, D, F)
+    - **Tabbed Interface**: Unified management interface for all academic foundation components
 
 ### Landing Page
 - **Responsive Design**: Adapts to all screen sizes from mobile to ultra-wide monitors
@@ -198,6 +203,10 @@ frontend/
 │   │   │   ├── YearLevelTable.tsx
 │   │   │   ├── SchoolYearTable.tsx
 │   │   │   ├── StudentYearLevelAssignment.tsx
+│   │   │   ├── TermTable.tsx
+│   │   │   ├── PeriodTable.tsx
+│   │   │   ├── ScoreRangeTable.tsx
+│   │   │   ├── AcademicFoundationManagement.tsx
 │   │   │   └── ClassesTable.tsx
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
@@ -308,9 +317,11 @@ The responsive system uses:
 - Academic structure management (departments, subjects, classrooms)
 - School year and year level management with tabbed interface
 - Student-year level assignment with combined format display
+- Academic foundation management (terms, periods, score ranges)
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
 - Consistent modal styling and form field widths across all interfaces
+- Tabbed interface for academic foundation management
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation
