@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import TermTable from './TermTable';
 import PeriodTable from './PeriodTable';
-import ScoreRangeTable from './ScoreRangeTable';
 
-type AcademicFoundationTab = 'terms' | 'periods' | 'score-ranges';
+type AcademicFoundationTab = 'terms' | 'periods';
 
 const AcademicFoundationManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AcademicFoundationTab>('terms');
 
   const tabs = [
     { id: 'terms' as const, label: 'Terms', description: 'Manage academic terms (semesters/quarters)' },
-    { id: 'periods' as const, label: 'Periods', description: 'Manage daily class periods and schedules' },
-    { id: 'score-ranges' as const, label: 'Score Ranges', description: 'Manage grading scales and letter grades' }
+    { id: 'periods' as const, label: 'Periods', description: 'Manage daily class periods and schedules' }
   ];
 
   const renderTabContent = () => {
@@ -20,8 +18,6 @@ const AcademicFoundationManagement: React.FC = () => {
         return <TermTable />;
       case 'periods':
         return <PeriodTable />;
-      case 'score-ranges':
-        return <ScoreRangeTable />;
       default:
         return <TermTable />;
     }
@@ -83,14 +79,12 @@ const AcademicFoundationManagement: React.FC = () => {
           </div>
           
           <div className="requirement-card">
-            <h4>3. Score Ranges</h4>
-            <p>Establish grading scales for student assessment. Define score ranges and their corresponding letter grades.</p>
+            <h4>3. Score Ranges (Now in Academic Setup)</h4>
+            <p>Score ranges are now managed within the Subject management section in Academic Setup. Create grading scales when defining subjects.</p>
             <ul>
-              <li>A: 90-100%</li>
-              <li>B: 80-89%</li>
-              <li>C: 70-79%</li>
-              <li>D: 60-69%</li>
-              <li>F: 0-59%</li>
+              <li>Go to Academic Setup → Subjects & Score Ranges</li>
+              <li>Create score ranges (A: 90-100%, B: 80-89%, etc.)</li>
+              <li>Assign score ranges to subjects during creation</li>
             </ul>
           </div>
         </div>

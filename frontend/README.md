@@ -6,6 +6,17 @@ A modern React + TypeScript frontend for the Santa Isabel Escola school manageme
 
 This is the frontend application for the Santa Isabel Escola school management portal, providing a clean and responsive interface for managing students, teachers, classes, and academic schedules with secure authentication.
 
+### 🎉 **Phase 2 Complete - Academic Foundation (100%)**
+
+**✅ All Personnel Management**: Students, Teachers, Guardians with wizard-based creation  
+**✅ All Academic Setup**: Departments, Subjects, Classrooms, Year Levels, School Years  
+**✅ Academic Foundation**: Terms, Periods, Score Ranges with tabbed interface  
+**✅ Academic Setup Wizard**: Complete guided setup with auto-generation  
+**✅ All Assignment Interfaces**: Teacher-Department, Student-Guardian, Student-Year Level  
+**✅ UI/UX Excellence**: Consistent modals, responsive design, comprehensive validation  
+
+**🚀 Ready for Phase 3**: Class Management, Enrollment, Grades, Schedules
+
 ## ✨ Features
 
 ### Authentication System
@@ -62,20 +73,27 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Student Management**: Full CRUD operations for student data
 - **Teacher Management**: Complete teacher administration and creation
 - **Guardian Management**: Complete guardian administration and student assignments
-  - **Academic Setup**: Comprehensive academic structure management
+    - **Academic Setup**: Comprehensive academic structure management
     - **Department Management**: Create and manage academic departments
-    - **Subject Management**: Organize subjects by departments
+    - **Subject Management**: Organize subjects by departments with integrated score range assignment
     - **Classroom Management**: Physical classroom and type administration
     - **Teacher Department Assignment**: Assign teachers to multiple departments
     - **School Year Management**: Complete academic year and grade level system
       - **Year Levels**: Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)
       - **School Years**: Manage academic years (2026, 2027, etc.)
       - **Student Assignments**: Assign students to year levels and school years with combined format ("1st A", "2nd B")
-  - **Academic Foundation**: Complete academic foundation management system
+  - **Academic Foundation**: Complete academic foundation management system with guided setup wizard
     - **Term Management**: Manage academic terms (semesters/quarters) with school year integration
     - **Period Management**: Manage daily class periods and scheduling with time-based organization
-    - **Score Range Management**: Manage grading scales and letter grades (A, B, C, D, F)
+    - **Score Range Management**: Manage grading scales and letter grades integrated with subject creation
     - **Tabbed Interface**: Unified management interface for all academic foundation components
+  - **Academic Setup Wizard** 🧙‍♂️: Comprehensive guided setup for academic infrastructure
+    - **6-Step Process**: Welcome → Academic Years → Terms → Periods → Departments → Completion
+    - **Auto-Generation**: Smart term date calculation and distribution
+    - **Default Templates**: Pre-configured period schedules and department lists
+    - **Progress Tracking**: Visual progress bar and step indicators
+    - **Real-time Status**: Shows existing data and system configuration
+    - **Validation**: Comprehensive form validation and error handling
 
 ### Landing Page
 - **Responsive Design**: Adapts to all screen sizes from mobile to ultra-wide monitors
@@ -197,7 +215,7 @@ frontend/
 │   │   │   ├── StudentGuardianAssignment.tsx
 │   │   │   ├── TeacherDepartmentAssignment.tsx
 │   │   │   ├── DepartmentTable.tsx
-│   │   │   ├── SubjectTable.tsx
+│   │   │   ├── SubjectTable.tsx (with integrated score range management)
 │   │   │   ├── ClassroomManagement.tsx
 │   │   │   ├── SchoolYearManagement.tsx
 │   │   │   ├── YearLevelTable.tsx
@@ -207,6 +225,7 @@ frontend/
 │   │   │   ├── PeriodTable.tsx
 │   │   │   ├── ScoreRangeTable.tsx
 │   │   │   ├── AcademicFoundationManagement.tsx
+│   │   │   ├── AcademicSetupWizard.tsx
 │   │   │   └── ClassesTable.tsx
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
@@ -318,10 +337,13 @@ The responsive system uses:
 - School year and year level management with tabbed interface
 - Student-year level assignment with combined format display
 - Academic foundation management (terms, periods, score ranges)
+- Subject-score range integration with flexible assignment workflow
+- Score range creation integrated into subject creation process
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
 - Consistent modal styling and form field widths across all interfaces
 - Tabbed interface for academic foundation management
+- Modal UI consistency fixes across all components
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation

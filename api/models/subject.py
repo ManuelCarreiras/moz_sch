@@ -11,16 +11,20 @@ class SubjectModel(db.Model):
     department_id = db.Column(UUID(as_uuid=True), db.ForeignKey(
                                                  'department._id'))
     subject_name = db.Column(db.String(100), nullable=False)
+    score_range_id = db.Column(UUID(as_uuid=True), db.ForeignKey(
+                                                 'score_range._id'), nullable=True)
 
-    def __init__(self, subject_name, department_id):
+    def __init__(self, subject_name, department_id, score_range_id=None):
         self.subject_name = subject_name
         self.department_id = department_id
+        self.score_range_id = score_range_id
 
     def json(self):
         return {
             '_id': str(self._id),
             'department_id': str(self.department_id),
-            'subject_name': self.subject_name
+            'subject_name': self.subject_name,
+            'score_range_id': str(self.score_range_id) if self.score_range_id else None
         }
 
     @classmethod
@@ -36,6 +40,10 @@ class SubjectModel(db.Model):
         return cls.query.filter_by(department_id=department_id).first()
 
     @classmethod
+    def find_by_score_range_id(cls, score_range_id):
+        return cls.query.filter_by(score_range_id=score_range_id).all()
+
+    @classmethod
     def find_all(cls):
         return cls.query.all()
 
@@ -46,6 +54,8 @@ class SubjectModel(db.Model):
     def update_entry(self, data=None):
         if data.get('subject_name') is not None:
             self.subject_name = data['subject_name']
+        if data.get('score_range_id') is not None:
+            self.score_range_id = data['score_range_id']
 
         self.save_to_db()
 

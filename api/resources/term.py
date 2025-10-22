@@ -34,9 +34,8 @@ class TermResource(Resource):
     def post(self):
         data = request.get_json()
 
-        start_date = data.get('start_date')
-        end_date = data.get('end_date')
         if (
+            not data.get('year_id') or
             not data.get('term_number') or
             not data.get('start_date') or
             not data.get('end_date')
@@ -46,17 +45,46 @@ class TermResource(Resource):
                 'message': 'Missing required field'
             }
             return Response(json.dumps(response), 400)
-        year_id = SchoolYearModel.find_by_dates(start_date,
-                                                end_date)
-        if not year_id:
+        
+        # Validate that the school year exists
+        school_year = SchoolYearModel.find_by_id(data.get('year_id'))
+        if not school_year:
             response = {
                 'success': False,
-                'message':
-                'Start and end dates do not correspond to a school year'
+                'message': 'School year not found'
             }
             return Response(json.dumps(response), 400)
+        
+        # Validate term dates against school year dates
+        from datetime import datetime
+        try:
+            term_start = datetime.fromisoformat(data.get('start_date').replace('Z', '+00:00'))
+            term_end = datetime.fromisoformat(data.get('end_date').replace('Z', '+00:00'))
+            year_start = school_year.start_date
+            year_end = school_year.end_date
+            
+            if term_start < year_start or term_end > year_end:
+                response = {
+                    'success': False,
+                    'message': 'Term dates must be within the school year dates'
+                }
+                return Response(json.dumps(response), 400)
+                
+            if term_start >= term_end:
+                response = {
+                    'success': False,
+                    'message': 'Term start date must be before end date'
+                }
+                return Response(json.dumps(response), 400)
+                
+        except ValueError:
+            response = {
+                'success': False,
+                'message': 'Invalid date format'
+            }
+            return Response(json.dumps(response), 400)
+        
         new_term = TermModel(**data)
-
         new_term.save_to_db()
 
         response = {

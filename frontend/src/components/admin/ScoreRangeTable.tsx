@@ -162,21 +162,22 @@ const ScoreRangeTable: React.FC = () => {
 
       {showModal && (
         <div className="modal">
-          <div className="modal__dialog">
-            <div className="modal__content">
-              <div className="modal__header">
-                <h3>{editingScoreRange ? 'Edit Score Range' : 'Add New Score Range'}</h3>
-                <button 
-                  className="modal__close"
-                  onClick={() => {
-                    setShowModal(false);
-                    setEditingScoreRange(null);
-                    setFormData({ min_score: 0, max_score: 100, grade: '' });
-                  }}
-                >
-                  ×
-                </button>
-              </div>
+          <div className="modal__overlay">
+            <div className="modal__dialog">
+              <div className="modal__content">
+                <div className="modal__header">
+                  <h3>{editingScoreRange ? 'Edit Score Range' : 'Add New Score Range'}</h3>
+                  <button 
+                    className="modal__close"
+                    onClick={() => {
+                      setShowModal(false);
+                      setEditingScoreRange(null);
+                      setFormData({ min_score: 0, max_score: 100, grade: '' });
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
               <form onSubmit={handleSubmit} className="student-form">
                 <div className="form-group">
                   <label htmlFor="grade">Grade *</label>
@@ -236,6 +237,7 @@ const ScoreRangeTable: React.FC = () => {
                   </button>
                 </div>
               </form>
+              </div>
             </div>
           </div>
         </div>

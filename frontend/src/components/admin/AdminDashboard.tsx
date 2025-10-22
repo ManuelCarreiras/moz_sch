@@ -11,9 +11,10 @@ import { StudentGuardianAssignment } from './StudentGuardianAssignment';
 import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
 import { SchoolYearManagement } from './SchoolYearManagement';
 import AcademicFoundationManagement from './AcademicFoundationManagement';
+import AcademicSetupWizard from './AcademicSetupWizard';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'reports' | 'portals' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 
@@ -85,6 +86,7 @@ export function AdminDashboard() {
     { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
     { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
     { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
+    { id: 'academic-wizard' as AdminTab, label: 'Academic Setup Wizard', icon: '🧙‍♂️' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
     { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
@@ -294,13 +296,13 @@ export function AdminDashboard() {
               </div>
 
               <div className="feature-card">
-                <h3>📚 Subjects</h3>
-                <p>Define individual subjects and courses offered at the school</p>
+                <h3>📚 Subjects & Score Ranges</h3>
+                <p>Define individual subjects, courses, and their grading scales. Create score ranges and assign them to subjects.</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('subjects')}
                 >
-                  Manage Subjects
+                  Manage Subjects & Score Ranges
                 </button>
               </div>
 
@@ -341,6 +343,8 @@ export function AdminDashboard() {
         );
       case 'academic-foundation':
         return <AcademicFoundationManagement />;
+      case 'academic-wizard':
+        return <AcademicSetupWizard />;
       case 'classes':
         return <ClassesTable />;
       case 'reports':

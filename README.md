@@ -20,17 +20,27 @@ A comprehensive full-stack school management system with React frontend, Flask A
 
 Santa Isabel Escola is a modern full-stack school management system designed for comprehensive educational administration. It features a React frontend with AWS Cognito authentication, a Flask REST API backend, and PostgreSQL database for managing students, teachers, classes, subjects, academic years, and various educational administrative tasks.
 
+### 🚀 **Current Status: Phase 2 Complete (100%)**
+
+✅ **Personnel Management** - Students, Teachers, Guardians fully operational  
+✅ **Academic Foundation** - Complete academic structure setup with guided wizard  
+✅ **Assignment Interfaces** - All relationship management interfaces complete  
+✅ **UI/UX Excellence** - Consistent, responsive design across all components  
+
+**Next Phase**: Academic Operations (Class Management, Enrollment, Grades)
+
 ## ✨ Features
 
 ### Core Functionality
-- **Student Management**: Complete student lifecycle from enrollment to graduation
-- **Teacher Management**: Teacher profiles, contact information, and assignments
-- **Class Management**: Course scheduling, classroom assignments, and teacher allocations
-- **Academic Structure**: Year levels, terms, periods, score ranges, and school year management
-- **Subject Management**: Academic subjects organized by departments
-- **Guardian Management**: Student guardian relationships and contact information
-- **Grade Tracking**: Student performance monitoring and score management
-- **Classroom Management**: Physical classroom and facility administration
+- **Student Management**: Complete student lifecycle from enrollment to graduation with wizard-based creation
+- **Teacher Management**: Teacher profiles, contact information, and department assignments with wizard interface
+- **Guardian Management**: Guardian creation and student-guardian relationship management
+- **Academic Structure**: Comprehensive academic foundation with year levels, terms, periods, and school years
+- **Subject Management**: Academic subjects organized by departments with integrated grading scales
+- **Score Ranges**: Flexible grading scales (A, B, C, etc.) linked to subjects
+- **Classroom Management**: Physical classroom and facility administration with type classifications
+- **Academic Setup Wizard**: Guided step-by-step setup for complete academic infrastructure
+- **Assignment Interfaces**: Streamlined bulk assignment for teacher-department and student-year level relationships
 
 ### Authentication & Security
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
@@ -112,7 +122,7 @@ The system uses a comprehensive relational database design with the following ke
 - **Year Levels**: Grade level management with letters and grades (1st Grade A, 2nd Grade B, etc.)
 - **Terms**: Academic periods within school years (semesters/quarters)
 - **Periods**: Time slots for class scheduling (daily periods)
-- **Score Ranges**: Grading scales and letter grades (A, B, C, D, F)
+- **Score Ranges**: Grading scales and letter grades integrated with subject management
 
 ### Relationships & Tracking
 - **Student-Year-Level**: Academic progression tracking with grade and level assignments
@@ -124,7 +134,7 @@ The system uses a comprehensive relational database design with the following ke
 ### Infrastructure
 - **Departments**: Academic department organization
 - **Classrooms**: Physical facilities with capacity and type classification
-- **Score Ranges**: Grading scale definitions
+- **Subject-Score Range Integration**: Score ranges linked to subjects for flexible grading
 
 ## 🔌 API Endpoints
 
@@ -332,7 +342,20 @@ curl -X POST http://localhost:5000/subject \
   -H "Content-Type: application/json" \
   -d '{
     "subject_name": "Mathematics",
-    "department_id": "department-uuid-here"
+    "department_id": "department-uuid-here",
+    "score_range_id": "score-range-uuid-here"
+  }'
+```
+
+### Creating a Score Range
+
+```bash
+curl -X POST http://localhost:5000/score_range \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grade": "A",
+    "min_score": 90,
+    "max_score": 100
   }'
 ```
 

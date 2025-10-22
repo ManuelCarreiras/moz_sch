@@ -6,11 +6,25 @@ export interface Subject {
   department_id: string;
   subject_name: string;
   department_name?: string;
+  score_range_id?: string;
+  score_range?: {
+    _id: string;
+    min_score: number;
+    max_score: number;
+    grade: string;
+  };
 }
 
 export interface Department {
   _id: string;
   department_name: string;
+}
+
+export interface ScoreRange {
+  _id: string;
+  min_score: number;
+  max_score: number;
+  grade: string;
 }
 
 interface SubjectTableProps {
@@ -21,15 +35,24 @@ interface SubjectTableProps {
 export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [scoreRanges, setScoreRanges] = useState<ScoreRange[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
+  const [selectedScoreRangeId, setSelectedScoreRangeId] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [showScoreRangeModal, setShowScoreRangeModal] = useState(false);
+  const [newScoreRange, setNewScoreRange] = useState({
+    grade: '',
+    min_score: 0,
+    max_score: 100
+  });
 
   useEffect(() => {
     fetchSubjects();
     fetchDepartments();
+    fetchScoreRanges();
   }, []);
 
   const fetchSubjects = async () => {
@@ -64,6 +87,18 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
     }
   };
 
+  const fetchScoreRanges = async () => {
+    try {
+      const response = await apiService.getScoreRanges();
+      if (response.success) {
+        const scoreRangeData = (response.data as any).message || response.data;
+        setScoreRanges(Array.isArray(scoreRangeData) ? scoreRangeData : []);
+      }
+    } catch (err) {
+      console.error('Error fetching score ranges:', err);
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSubjectName.trim() || !selectedDepartmentId) return;
@@ -72,15 +107,22 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
     setError(null);
 
     try {
-      const response = await apiService.createSubject({
+      const subjectData: any = {
         subject_name: newSubjectName.trim(),
         department_id: selectedDepartmentId
-      });
+      };
+
+      if (selectedScoreRangeId) {
+        subjectData.score_range_id = selectedScoreRangeId;
+      }
+
+      const response = await apiService.createSubject(subjectData);
 
       if (response.success) {
         alert('Subject created successfully!');
         setNewSubjectName('');
         setSelectedDepartmentId('');
+        setSelectedScoreRangeId('');
         fetchSubjects();
         if (onSuccess) onSuccess();
       } else {
@@ -115,6 +157,26 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
     }
   };
 
+  const handleCreateScoreRange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiService.createScoreRange(newScoreRange);
+      
+      if (response.success) {
+        alert('Score range created successfully!');
+        setShowScoreRangeModal(false);
+        setNewScoreRange({ grade: '', min_score: 0, max_score: 100 });
+        fetchScoreRanges();
+      } else {
+        setError(response.error || 'Failed to create score range');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error creating score range:', err);
+    }
+  };
+
+
   if (loading) {
     return <div className="loading">Loading subjects...</div>;
   }
@@ -132,8 +194,8 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
             </button>
           )}
           <div>
-            <h3>Subjects</h3>
-            <p className="table-description">Define individual subjects and courses offered at the school.</p>
+            <h3>Subjects & Score Ranges</h3>
+            <p className="table-description">Define individual subjects and their grading scales. Create score ranges on-demand when creating subjects.</p>
           </div>
         </div>
       </div>
@@ -143,6 +205,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
           {error}
         </div>
       )}
+
 
       {/* Create Subject Form */}
       <div className="form-section">
@@ -177,6 +240,33 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
               ))}
             </select>
           </div>
+          <div className="form-group">
+            <label htmlFor="scoreRange">Score Range (Optional)</label>
+            <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+              <select
+                id="scoreRange"
+                value={selectedScoreRangeId}
+                onChange={(e) => setSelectedScoreRangeId(e.target.value)}
+                disabled={isCreating}
+                style={{ flex: 1 }}
+              >
+                <option value="">No Score Range</option>
+                {scoreRanges.map((scoreRange) => (
+                  <option key={scoreRange._id} value={scoreRange._id}>
+                    {scoreRange.grade}: {scoreRange.min_score}-{scoreRange.max_score}%
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => setShowScoreRangeModal(true)}
+                disabled={isCreating}
+              >
+                + Create New
+              </button>
+            </div>
+          </div>
           <button
             type="submit"
             className="btn btn--primary"
@@ -198,6 +288,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
               <tr>
                 <th>Subject Name</th>
                 <th>Department</th>
+                <th>Score Range</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -206,6 +297,15 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                 <tr key={subject._id}>
                   <td>{subject.subject_name}</td>
                   <td>{subject.department_name || 'Unknown'}</td>
+                  <td>
+                    {subject.score_range ? (
+                      <span className="grade-badge">
+                        {subject.score_range.grade}: {subject.score_range.min_score}-{subject.score_range.max_score}%
+                      </span>
+                    ) : (
+                      <span className="text-muted">No score range</span>
+                    )}
+                  </td>
                   <td>
                     <button
                       onClick={() => handleDelete(subject._id)}
@@ -220,6 +320,88 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
           </table>
         )}
       </div>
+
+      {/* Score Range Creation Modal */}
+      {showScoreRangeModal && (
+        <div className="modal">
+          <div className="modal__overlay">
+            <div className="modal__dialog">
+              <div className="modal__content">
+                <div className="modal__header">
+                  <h3>Create New Score Range</h3>
+                  <button 
+                    className="modal__close"
+                    onClick={() => {
+                      setShowScoreRangeModal(false);
+                      setNewScoreRange({ grade: '', min_score: 0, max_score: 100 });
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <form onSubmit={handleCreateScoreRange} className="student-form">
+                  <div className="form-group">
+                    <label htmlFor="newGrade">Grade *</label>
+                    <input
+                      type="text"
+                      id="newGrade"
+                      value={newScoreRange.grade}
+                      onChange={(e) => setNewScoreRange({ ...newScoreRange, grade: e.target.value.toUpperCase() })}
+                      placeholder="e.g., A, B+, C, F"
+                      maxLength={2}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="newMinScore">Minimum Score *</label>
+                    <input
+                      type="number"
+                      id="newMinScore"
+                      value={newScoreRange.min_score}
+                      onChange={(e) => setNewScoreRange({ ...newScoreRange, min_score: parseFloat(e.target.value) })}
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="newMaxScore">Maximum Score *</label>
+                    <input
+                      type="number"
+                      id="newMaxScore"
+                      value={newScoreRange.max_score}
+                      onChange={(e) => setNewScoreRange({ ...newScoreRange, max_score: parseFloat(e.target.value) })}
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-actions">
+                    <button type="submit" className="btn btn-primary">
+                      Create Score Range
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowScoreRangeModal(false);
+                        setNewScoreRange({ grade: '', min_score: 0, max_score: 100 });
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
