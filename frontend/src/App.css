@@ -1075,8 +1075,9 @@ body {
   border: 1px solid var(--border);
   max-width: 700px;
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
@@ -1086,6 +1087,7 @@ body {
   align-items: center;
   padding: var(--space-lg);
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .modal__header h3 {
@@ -1117,7 +1119,16 @@ body {
 
 .modal__content {
   padding: var(--space-lg);
+  overflow-y: auto;
+  flex: 1;
 }
+
+.modal__content input,
+.modal__content select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 
 .icon-btn {
   background: none;

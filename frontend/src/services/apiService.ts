@@ -244,23 +244,23 @@ class ApiService {
 
   // Student Year Level Assignments
   async getStudentYearLevels() {
-    return this.get('/student-year-level');
+    return this.get('/student_year_level');
   }
 
   async getStudentYearLevel(id: string) {
-    return this.get(`/student-year-level/${id}`);
+    return this.get(`/student_year_level/${id}`);
   }
 
   async createStudentYearLevel(assignmentData: any) {
-    return this.post('/student-year-level', assignmentData);
+    return this.post('/student_year_level', assignmentData);
   }
 
   async updateStudentYearLevel(id: string, assignmentData: any) {
-    return this.put(`/student-year-level/${id}`, assignmentData);
+    return this.put(`/student_year_level/${id}`, assignmentData);
   }
 
   async deleteStudentYearLevel(id: string) {
-    return this.delete(`/student-year-level/${id}`);
+    return this.delete(`/student_year_level/${id}`);
   }
 
   // Classrooms

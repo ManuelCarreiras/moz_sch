@@ -81,21 +81,75 @@ class ClassModelResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        class_id = ClassModel.find_by_id(id)
+    def get(self, id=None):
+        if id:
+            # Get specific class by ID
+            class_id = ClassModel.find_by_id(id)
 
-        if class_id is None:
+            if class_id is None:
+                response = {
+                    'success': False,
+                    'message': 'Class not found'
+                }
+                return Response(json.dumps(response), 404)
+
+            # Enhance with related data
+            class_data = class_id.json()
+            subject = SubjectModel.find_by_id(class_id.subject_id)
+            teacher = TeacherModel.find_by_id(class_id.teacher_id)
+            term = TermModel.find_by_id(class_id.term_id)
+            period = PeriodModel.find_by_id(class_id.period_id)
+            classroom = ClassroomModel.find_by_id(class_id.classroom_id)
+            
+            if subject:
+                class_data['subject_name'] = subject.subject_name
+            if teacher:
+                class_data['teacher_name'] = teacher.name
+            if term:
+                class_data['term_number'] = term.term_number
+            if period:
+                class_data['period_name'] = period.name
+            if classroom:
+                class_data['classroom_name'] = classroom.classroom_name
+
             response = {
-                'success': False,
-                'message': 'Class not found'
+                'success': True,
+                'message': class_data
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': class_id.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all classes
+            classes = ClassModel.query.all()
+            classes_list = []
+            
+            for class_item in classes:
+                class_data = class_item.json()
+                
+                # Enhance with related data
+                subject = SubjectModel.find_by_id(class_item.subject_id)
+                teacher = TeacherModel.find_by_id(class_item.teacher_id)
+                term = TermModel.find_by_id(class_item.term_id)
+                period = PeriodModel.find_by_id(class_item.period_id)
+                classroom = ClassroomModel.find_by_id(class_item.classroom_id)
+                
+                if subject:
+                    class_data['subject_name'] = subject.subject_name
+                if teacher:
+                    class_data['teacher_name'] = teacher.name
+                if term:
+                    class_data['term_number'] = term.term_number
+                if period:
+                    class_data['period_name'] = period.name
+                if classroom:
+                    class_data['classroom_name'] = classroom.classroom_name
+                
+                classes_list.append(class_data)
+            
+            response = {
+                'success': True,
+                'message': classes_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()
