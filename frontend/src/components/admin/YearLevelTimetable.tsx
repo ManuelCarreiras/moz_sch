@@ -17,6 +17,19 @@ interface Subject {
   department_id: string;
 }
 
+interface Teacher {
+  _id: string;
+  given_name: string;
+  surname: string;
+  departments?: Array<{ _id: string; department_name: string }>;
+}
+
+interface Classroom {
+  _id: string;
+  room_name: string;
+  capacity: number;
+}
+
 interface Class {
   _id: string;
   class_name: string;
@@ -53,12 +66,24 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [subjectSearchQuery, setSubjectSearchQuery] = useState<string>('');
+  
+  // Modal state for teacher/classroom selection
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [pendingSubject, setPendingSubject] = useState<Subject | null>(null);
+  const [pendingPeriodName, setPendingPeriodName] = useState<string>('');
+  const [pendingDay, setPendingDay] = useState<number>(0);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
+  const [selectedClassroomId, setSelectedClassroomId] = useState<string>('');
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
 
   useEffect(() => {
     loadYearLevels();
     loadSubjects();
     loadTerms();
     loadDepartments();
+    loadTeachers();
+    loadClassrooms();
   }, []);
 
   const loadSubjects = async () => {
@@ -94,6 +119,30 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
       }
     } catch (err) {
       console.error('Error loading departments:', err);
+    }
+  };
+
+  const loadTeachers = async () => {
+    try {
+      const response = await apiService.getTeachers();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setTeachers(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading teachers:', err);
+    }
+  };
+
+  const loadClassrooms = async () => {
+    try {
+      const response = await apiService.getClassrooms();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setClassrooms(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading classrooms:', err);
     }
   };
 
@@ -166,56 +215,99 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     
     if (!draggedSubject || !timetable || !timetable.all_periods) return;
     
-    // Find the period in all_periods to get its ID
-    const period = timetable.all_periods.find(p => p.name === periodName);
-    if (!period) return;
+    if (!selectedTermId) {
+      setError('Please select a term first.');
+      return;
+    }
     
+    // Set up modal state for teacher/classroom selection
+    setPendingSubject(draggedSubject);
+    setPendingPeriodName(periodName);
+    setPendingDay(day);
+    setSelectedTeacherId('');
+    setSelectedClassroomId('');
+    setShowAssignmentModal(true);
+    setDraggedSubject(null);
+  };
+
+  const handleAssignTeacherAndClassroom = async () => {
+    if (!pendingSubject || !selectedTeacherId || !selectedClassroomId) {
+      setError('Please select both a teacher and a classroom');
+      return;
+    }
+
+    if (!timetable || !timetable.all_periods) {
+      setError('Timetable data not available');
+      return;
+    }
+
+    // Find the period in all_periods to get its ID
+    const period = timetable.all_periods.find(p => p.name === pendingPeriodName);
+    if (!period) {
+      setError('Period not found');
+      return;
+    }
+
     try {
       // Check if a class already exists for this year level, period, and day
       const existingClass = timetable.timetable.find(
-        c => c.period_name === periodName && c.day_of_week === day
+        c => c.period_name === pendingPeriodName && c.day_of_week === pendingDay
       );
       
+      // Generate class name from year level order and name (not including subject)
+      const selectedYearLevel = yearLevels.find(yl => yl._id === selectedYearLevelId);
+      if (!selectedYearLevel) {
+        setError('Year level not found');
+        return;
+      }
+      
+      const gradeNames = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+      const gradeName = gradeNames[selectedYearLevel.level_order] || `${selectedYearLevel.level_order}th`;
+      const class_name = `${gradeName} ${selectedYearLevel.level_name}`;
+      
       if (existingClass) {
-        // Update existing class with subject
+        // Update existing class with subject, teacher, and classroom
         await apiService.updateClass(existingClass._id, {
           ...existingClass,
-          subject_id: draggedSubject._id
+          subject_id: pendingSubject._id,
+          teacher_id: selectedTeacherId,
+          classroom_id: selectedClassroomId
         });
       } else {
         // Create new class for this slot
-        if (!selectedTermId) {
-          setError('Please select a term first.');
-          return;
-        }
-        
-        // Generate class name from year level order and name (not including subject)
-        const selectedYearLevel = yearLevels.find(yl => yl._id === selectedYearLevelId);
-        if (!selectedYearLevel) {
-          setError('Year level not found');
-          return;
-        }
-        
-        const gradeNames = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
-        const gradeName = gradeNames[selectedYearLevel.level_order] || `${selectedYearLevel.level_order}th`;
-        const class_name = `${gradeName} ${selectedYearLevel.level_name}`;
-        
         await apiService.createClass({
           term_id: selectedTermId,
           year_level_id: selectedYearLevelId,
           class_name: class_name,
-          subject_id: draggedSubject._id,
+          subject_id: pendingSubject._id,
+          teacher_id: selectedTeacherId,
           period_id: period._id,
-          day_of_week: day
+          day_of_week: pendingDay,
+          classroom_id: selectedClassroomId
         });
       }
       
-      // Reload timetable
+      // Close modal and reload timetable
+      setShowAssignmentModal(false);
+      setPendingSubject(null);
+      setPendingPeriodName('');
+      setPendingDay(0);
+      setSelectedTeacherId('');
+      setSelectedClassroomId('');
       loadTimetable(selectedYearLevelId);
     } catch (err) {
       console.error('Error assigning subject:', err);
       setError('Failed to assign subject to timetable slot');
     }
+  };
+
+  const handleCancelAssignment = () => {
+    setShowAssignmentModal(false);
+    setPendingSubject(null);
+    setPendingPeriodName('');
+    setPendingDay(0);
+    setSelectedTeacherId('');
+    setSelectedClassroomId('');
   };
 
 
@@ -622,6 +714,148 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
           border: '1px solid var(--border)'
         }}>
           <p>No periods have been defined yet. Please create periods first.</p>
+        </div>
+      )}
+
+      {/* Modal for teacher and classroom selection */}
+      {showAssignmentModal && pendingSubject && (
+        <div className="modal">
+          <div className="modal__overlay" onClick={handleCancelAssignment}></div>
+          <div className="modal__dialog" style={{ maxWidth: '500px' }}>
+            <div className="modal__header">
+              <h3>Assign Teacher and Classroom</h3>
+              <button 
+                className="modal__close"
+                onClick={handleCancelAssignment}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal__content">
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 'var(--space-xs)',
+                  fontWeight: 600 
+                }}>
+                  Subject:
+                </label>
+                <input
+                  type="text"
+                  value={pendingSubject.subject_name}
+                  disabled
+                  style={{
+                    width: '100%',
+                    padding: 'var(--space-sm)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    color: 'var(--text-muted)',
+                    fontSize: 'var(--text-base)'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <label htmlFor="modal_teacher" style={{ 
+                  display: 'block', 
+                  marginBottom: 'var(--space-xs)',
+                  fontWeight: 600 
+                }}>
+                  Teacher: *
+                </label>
+                <select
+                  id="modal_teacher"
+                  value={selectedTeacherId}
+                  onChange={(e) => setSelectedTeacherId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: 'var(--space-sm)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    color: 'var(--text)',
+                    fontSize: 'var(--text-base)',
+                    WebkitAppearance: 'menulist',
+                    MozAppearance: 'menulist',
+                    appearance: 'menulist'
+                  }}
+                  required
+                >
+                  <option value="">-- Select Teacher --</option>
+                  {teachers
+                    .filter(teacher => 
+                      teacher.departments?.some(dept => dept._id === pendingSubject.department_id)
+                    )
+                    .map((teacher) => (
+                      <option 
+                        key={teacher._id} 
+                        value={teacher._id}
+                        style={{ background: 'var(--card)', color: 'var(--text)' }}
+                      >
+                        {teacher.given_name} {teacher.surname}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <label htmlFor="modal_classroom" style={{ 
+                  display: 'block', 
+                  marginBottom: 'var(--space-xs)',
+                  fontWeight: 600 
+                }}>
+                  Classroom: *
+                </label>
+                <select
+                  id="modal_classroom"
+                  value={selectedClassroomId}
+                  onChange={(e) => setSelectedClassroomId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: 'var(--space-sm)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    color: 'var(--text)',
+                    fontSize: 'var(--text-base)',
+                    WebkitAppearance: 'menulist',
+                    MozAppearance: 'menulist',
+                    appearance: 'menulist'
+                  }}
+                  required
+                >
+                  <option value="">-- Select Classroom --</option>
+                  {classrooms.map((classroom) => (
+                    <option 
+                      key={classroom._id} 
+                      value={classroom._id}
+                      style={{ background: 'var(--card)', color: 'var(--text)' }}
+                    >
+                      {classroom.room_name} (Capacity: {classroom.capacity})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-actions" style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button" 
+                  className="btn btn--secondary"
+                  onClick={handleCancelAssignment}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn--primary"
+                  onClick={handleAssignTeacherAndClassroom}
+                >
+                  Assign
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -210,12 +210,19 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
                 border: '1px solid var(--border)',
                 background: 'var(--surface)',
                 color: 'var(--text)',
-                fontSize: 'var(--text-base)'
+                fontSize: 'var(--text-base)',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
               }}
             >
-              <option value="">All Terms</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>All Terms</option>
               {terms.map((term) => (
-                <option key={term._id} value={term._id}>
+                <option 
+                  key={term._id} 
+                  value={term._id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
                   Term {term.term_number}
                 </option>
               ))}
