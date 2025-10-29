@@ -15,6 +15,7 @@ export interface Class {
   term_number?: number;
   period_name?: string;
   room_name?: string;
+  classroom_name?: string;
   year_level_name?: string;
 }
 
@@ -309,7 +310,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
                   <td>{classItem.teacher_name || 'N/A'}</td>
                   <td>Term {classItem.term_number || 'N/A'}</td>
                   <td>{classItem.period_name || 'N/A'}</td>
-                  <td>{classItem.room_name || 'N/A'}</td>
+                  <td>{classItem.classroom_name || classItem.room_name || 'N/A'}</td>
                   <td>
                     <div className="action-buttons">
                       <button 
