@@ -49,6 +49,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [draggedSubject, setDraggedSubject] = useState<Subject | null>(null);
   const [terms, setTerms] = useState<any[]>([]);
+  const [selectedTermId, setSelectedTermId] = useState<string>('');
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [subjectSearchQuery, setSubjectSearchQuery] = useState<string>('');
@@ -183,17 +184,26 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
         });
       } else {
         // Create new class for this slot
-        // Use first term if available, or require term selection
-        const termId = terms.length > 0 ? terms[0]._id : '';
-        if (!termId) {
-          setError('No terms available. Please create terms first.');
+        if (!selectedTermId) {
+          setError('Please select a term first.');
           return;
         }
         
+        // Generate class name from year level order and name (not including subject)
+        const selectedYearLevel = yearLevels.find(yl => yl._id === selectedYearLevelId);
+        if (!selectedYearLevel) {
+          setError('Year level not found');
+          return;
+        }
+        
+        const gradeNames = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+        const gradeName = gradeNames[selectedYearLevel.level_order] || `${selectedYearLevel.level_order}th`;
+        const class_name = `${gradeName} ${selectedYearLevel.level_name}`;
+        
         await apiService.createClass({
-          term_id: termId,
+          term_id: selectedTermId,
           year_level_id: selectedYearLevelId,
-          class_name: `${timetable.year_level_name} - ${draggedSubject.subject_name}`,
+          class_name: class_name,
           subject_id: draggedSubject._id,
           period_id: period._id,
           day_of_week: day
@@ -278,7 +288,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
   });
 
   return (
-    <div className="admin-content" style={{ paddingLeft: selectedYearLevelId ? '480px' : 'var(--space-lg)' }}>
+    <div className="admin-content" style={{ paddingLeft: 'var(--space-lg)' }}>
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
           ← Back to Classes
@@ -359,112 +369,153 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
         )}
       </div>
 
+      {/* Term selection - shown after year level is selected */}
+      {selectedYearLevelId && (
+        <div style={{ marginBottom: 'var(--space-lg)', maxWidth: '400px' }}>
+          <label htmlFor="term_select" style={{ 
+            display: 'block', 
+            marginBottom: 'var(--space-sm)',
+            fontWeight: 600 
+          }}>
+            Select Term:
+          </label>
+          <select
+            id="term_select"
+            value={selectedTermId}
+            onChange={(e) => setSelectedTermId(e.target.value)}
+            style={{
+              width: '100%',
+              padding: 'var(--space-sm)',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: 'var(--text-base)',
+              WebkitAppearance: 'menulist',
+              MozAppearance: 'menulist',
+              appearance: 'menulist'
+            }}
+          >
+            <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Term --</option>
+            {terms.map((term) => (
+              <option 
+                key={term._id} 
+                value={term._id}
+                style={{ background: 'var(--card)', color: 'var(--text)' }}
+              >
+                Term {term.term_number}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {error && (
         <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
           {error}
         </div>
       )}
 
-      {/* Subjects sidebar for dragging */}
-      {selectedYearLevelId && (
-        <div style={{ 
-          position: 'fixed',
-          left: '250px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '200px',
-          maxHeight: '80vh',
-          padding: 'var(--space-md)',
-          background: 'var(--card)',
-          borderRadius: '0.5rem',
-          border: '2px solid var(--primary)',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          zIndex: 1000,
-          overflowY: 'auto'
-        }}>
-          <h3 style={{ 
-            marginBottom: 'var(--space-sm)',
-            fontSize: '0.875rem',
-            color: 'var(--primary)',
-            fontWeight: 600
+      {/* Timetable container with subjects panel and timetable side by side */}
+      {selectedYearLevelId && selectedTermId && (timetable && grid && grid.periods.length > 0) && (
+        <div style={{ display: 'flex', gap: 'var(--space-lg)', marginTop: 'var(--space-lg)' }}>
+          {/* Subjects panel - integrated in same container */}
+          <div style={{ 
+            width: '220px',
+            flexShrink: 0,
+            padding: 'var(--space-md)',
+            background: 'var(--card)',
+            borderRadius: '0.5rem',
+            border: '1px solid var(--border)'
           }}>
-            📚 Subjects
-          </h3>
-          
-          {/* Search input */}
-          <input
-            type="text"
-            placeholder="Search subjects..."
-            value={subjectSearchQuery}
-            onChange={(e) => setSubjectSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: 'var(--space-xs)',
+            <h3 style={{ 
               marginBottom: 'var(--space-sm)',
-              borderRadius: '0.25rem',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              fontSize: '0.75rem'
-            }}
-          />
-          
-          {/* Department filter */}
-          <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            style={{
-              width: '100%',
-              padding: 'var(--space-xs)',
-              marginBottom: 'var(--space-sm)',
-              borderRadius: '0.25rem',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              fontSize: '0.75rem'
-            }}
-          >
-            <option value="">All Departments</option>
-            {departments.map((dept) => (
-              <option key={dept._id} value={dept._id}>
-                {dept.department_name}
-              </option>
-            ))}
-          </select>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', overflowY: 'auto', maxHeight: 'calc(80vh - 200px)' }}>
-            {filteredSubjects.map((subject) => (
-              <div
-                key={subject._id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, subject)}
-                onDragEnd={handleDragEnd}
-                style={{
-                  padding: 'var(--space-xs) var(--space-sm)',
-                  background: draggedSubject?._id === subject._id ? 'var(--primary)' : 'var(--surface)',
-                  color: draggedSubject?._id === subject._id ? 'white' : 'var(--text)',
-                  borderRadius: '0.25rem',
-                  cursor: 'grab',
-                  border: '1px solid var(--border)',
-                  fontWeight: 500,
-                  transition: 'all 0.2s',
-                  userSelect: 'none',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-              >
-                {subject.subject_name}
-              </div>
-            ))}
+              fontSize: '0.875rem',
+              color: 'var(--primary)',
+              fontWeight: 600
+            }}>
+              📚 Subjects
+            </h3>
+            
+            {/* Search input */}
+            <input
+              type="text"
+              placeholder="Search subjects..."
+              value={subjectSearchQuery}
+              onChange={(e) => setSubjectSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-xs)',
+                marginBottom: 'var(--space-sm)',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: '0.75rem'
+              }}
+            />
+            
+            {/* Department filter */}
+            <select
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-xs)',
+                marginBottom: 'var(--space-sm)',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: '0.75rem',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
+              }}
+            >
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>All Departments</option>
+              {departments.map((dept) => (
+                <option 
+                  key={dept._id} 
+                  value={dept._id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
+                  {dept.department_name}
+                </option>
+              ))}
+            </select>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', overflowY: 'auto', maxHeight: 'calc(80vh - 200px)' }}>
+              {filteredSubjects.map((subject) => (
+                <div
+                  key={subject._id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, subject)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    padding: 'var(--space-xs) var(--space-sm)',
+                    background: draggedSubject?._id === subject._id ? 'var(--primary)' : 'var(--surface)',
+                    color: draggedSubject?._id === subject._id ? 'white' : 'var(--text)',
+                    borderRadius: '0.25rem',
+                    cursor: 'grab',
+                    border: '1px solid var(--border)',
+                    fontWeight: 500,
+                    transition: 'all 0.2s',
+                    userSelect: 'none',
+                    fontSize: '0.75rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {subject.subject_name}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Show grid if we have timetable data OR if no classes exist but we have periods */}
-      {(timetable && grid && grid.periods.length > 0) && (
-        <div style={{ overflowX: 'auto', marginTop: 'var(--space-lg)' }}>
+          {/* Timetable grid */}
+          <div style={{ flex: 1, overflowX: 'auto' }}>
           <table style={{ 
             width: '100%',
             borderCollapse: 'collapse',
@@ -557,6 +608,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
