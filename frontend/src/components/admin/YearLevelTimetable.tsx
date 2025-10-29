@@ -1,0 +1,577 @@
+import { useState, useEffect } from 'react';
+import { apiService } from '../../services/apiService';
+
+interface YearLevelTimetableProps {
+  onBack: () => void;
+}
+
+interface YearLevel {
+  _id: string;
+  level_name: string;
+  level_order: number;
+}
+
+interface Subject {
+  _id: string;
+  subject_name: string;
+  department_id: string;
+}
+
+interface Class {
+  _id: string;
+  class_name: string;
+  subject_id?: string;
+  subject_name?: string;
+  teacher_name?: string;
+  period_name?: string;
+  day_of_week?: number;
+  period_start?: string;
+  period_end?: string;
+  classroom_name?: string;
+}
+
+interface TimetableData {
+  year_level_id: string;
+  year_level_name: string;
+  year_level_order: number;
+  timetable: Class[];
+  all_periods?: any[];
+}
+
+export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
+  const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
+  const [selectedLevelOrder, setSelectedLevelOrder] = useState<string>('');
+  const [availableYearLevels, setAvailableYearLevels] = useState<YearLevel[]>([]);
+  const [selectedYearLevelId, setSelectedYearLevelId] = useState<string>('');
+  const [timetable, setTimetable] = useState<TimetableData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [draggedSubject, setDraggedSubject] = useState<Subject | null>(null);
+  const [terms, setTerms] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [subjectSearchQuery, setSubjectSearchQuery] = useState<string>('');
+
+  useEffect(() => {
+    loadYearLevels();
+    loadSubjects();
+    loadTerms();
+    loadDepartments();
+  }, []);
+
+  const loadSubjects = async () => {
+    try {
+      const response = await apiService.getSubjects();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setSubjects(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading subjects:', err);
+    }
+  };
+
+  const loadTerms = async () => {
+    try {
+      const response = await apiService.getTerms();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setTerms(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading terms:', err);
+    }
+  };
+
+  const loadDepartments = async () => {
+    try {
+      const response = await apiService.getDepartments();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setDepartments(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading departments:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedLevelOrder) {
+      const filtered = yearLevels.filter(yl => yl.level_order.toString() === selectedLevelOrder);
+      setAvailableYearLevels(filtered);
+      setSelectedYearLevelId(''); // Reset selection when level order changes
+      setTimetable(null);
+    }
+  }, [selectedLevelOrder, yearLevels]);
+
+  const loadYearLevels = async () => {
+    try {
+      const response = await apiService.getYearLevels();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setYearLevels(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading year levels:', err);
+    }
+  };
+
+  const loadTimetable = async (yearLevelId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiService.getTimetable(yearLevelId);
+      
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setTimetable(data as TimetableData);
+      } else {
+        setError('Failed to load timetable');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error loading timetable:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLevelOrderChange = (levelOrder: string) => {
+    setSelectedLevelOrder(levelOrder);
+  };
+
+  const handleYearLevelChange = (yearLevelId: string) => {
+    setSelectedYearLevelId(yearLevelId);
+    if (yearLevelId) {
+      loadTimetable(yearLevelId);
+    } else {
+      setTimetable(null);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, subject: Subject) => {
+    setDraggedSubject(subject);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedSubject(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, periodName: string, day: number) => {
+    e.preventDefault();
+    
+    if (!draggedSubject || !timetable || !timetable.all_periods) return;
+    
+    // Find the period in all_periods to get its ID
+    const period = timetable.all_periods.find(p => p.name === periodName);
+    if (!period) return;
+    
+    try {
+      // Check if a class already exists for this year level, period, and day
+      const existingClass = timetable.timetable.find(
+        c => c.period_name === periodName && c.day_of_week === day
+      );
+      
+      if (existingClass) {
+        // Update existing class with subject
+        await apiService.updateClass(existingClass._id, {
+          ...existingClass,
+          subject_id: draggedSubject._id
+        });
+      } else {
+        // Create new class for this slot
+        // Use first term if available, or require term selection
+        const termId = terms.length > 0 ? terms[0]._id : '';
+        if (!termId) {
+          setError('No terms available. Please create terms first.');
+          return;
+        }
+        
+        await apiService.createClass({
+          term_id: termId,
+          year_level_id: selectedYearLevelId,
+          class_name: `${timetable.year_level_name} - ${draggedSubject.subject_name}`,
+          subject_id: draggedSubject._id,
+          period_id: period._id,
+          day_of_week: day
+        });
+      }
+      
+      // Reload timetable
+      loadTimetable(selectedYearLevelId);
+    } catch (err) {
+      console.error('Error assigning subject:', err);
+      setError('Failed to assign subject to timetable slot');
+    }
+  };
+
+
+  // Organize classes into a grid by period and day of week
+  const organizeTimetableGrid = (): { periods: string[]; periodMap: Map<string, { start: string; end: string }>; classes: Map<string, Class> } | null => {
+    if (!timetable) return null;
+
+    // Use all_periods from API to build the grid, or fall back to getting from classes
+    const periodMap = new Map<string, { start: string; end: string }>();
+    const classesByPeriodDay = new Map<string, Class>();
+
+    // If we have all_periods from API, use that for building the grid structure
+    if (timetable.all_periods && timetable.all_periods.length > 0) {
+      timetable.all_periods.forEach(period => {
+        periodMap.set(period.name, {
+          start: period.start_time,
+          end: period.end_time
+        });
+      });
+    }
+
+    // Map classes to their periods and days
+    if (timetable.timetable) {
+      timetable.timetable.forEach(classItem => {
+        if (classItem.period_name && classItem.day_of_week) {
+          const key = `${classItem.period_name}_${classItem.day_of_week}`;
+          classesByPeriodDay.set(key, classItem);
+          
+          // Add period info if not already added from all_periods
+          if (classItem.period_start && classItem.period_end && !periodMap.has(classItem.period_name)) {
+            periodMap.set(classItem.period_name, {
+              start: classItem.period_start,
+              end: classItem.period_end
+            });
+          }
+        }
+      });
+    }
+
+    // Get sorted list of periods
+    const periods = Array.from(periodMap.entries()).sort((a, b) => {
+      return new Date(a[1].start).getTime() - new Date(b[1].start).getTime();
+    });
+
+    return {
+      periods: periods.map(([name]) => name),
+      periodMap,
+      classes: classesByPeriodDay
+    };
+  };
+
+  if (loading && !timetable) {
+    return (
+      <div className="admin-content">
+        <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
+          <p>Loading timetable...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const grid = organizeTimetableGrid();
+  const daysOfWeek = [1, 2, 3, 4, 5]; // Monday to Friday
+
+  // Filter subjects based on search and department
+  const filteredSubjects = subjects.filter(subject => {
+    const matchesSearch = subject.subject_name.toLowerCase().includes(subjectSearchQuery.toLowerCase());
+    const matchesDepartment = !selectedDepartment || subject.department_id === selectedDepartment;
+    return matchesSearch && matchesDepartment;
+  });
+
+  return (
+    <div className="admin-content" style={{ paddingLeft: selectedYearLevelId ? '480px' : 'var(--space-lg)' }}>
+      <div style={{ marginBottom: 'var(--space-lg)' }}>
+        <button onClick={onBack} className="btn btn--secondary">
+          ← Back to Classes
+        </button>
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-lg)' }}>
+        <h2>Year Level Timetable</h2>
+        <p className="table-description">
+          View the complete schedule for a year level showing all classes organized by time periods.
+        </p>
+      </div>
+
+      {/* Two-step selection: First Grade, then Section */}
+      <div style={{ marginBottom: 'var(--space-lg)', display: 'flex', gap: 'var(--space-md)' }}>
+        <div style={{ flex: 1 }}>
+          <label htmlFor="level_order_select" style={{ 
+            display: 'block', 
+            marginBottom: 'var(--space-sm)',
+            fontWeight: 600 
+          }}>
+            Select Grade:
+          </label>
+          <select
+            id="level_order_select"
+            value={selectedLevelOrder}
+            onChange={(e) => handleLevelOrderChange(e.target.value)}
+            style={{
+              width: '100%',
+              padding: 'var(--space-sm)',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+              color: 'var(--text)',
+              fontSize: 'var(--text-base)'
+            }}
+          >
+            <option value="">-- Select Grade --</option>
+            {[...new Set(yearLevels.map(y => y.level_order))].sort().map((order) => (
+              <option key={order} value={order}>
+                Grade {order}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedLevelOrder && (
+          <div style={{ flex: 1 }}>
+            <label htmlFor="year_level_select" style={{ 
+              display: 'block', 
+              marginBottom: 'var(--space-sm)',
+              fontWeight: 600 
+            }}>
+              Select Section:
+            </label>
+            <select
+              id="year_level_select"
+              value={selectedYearLevelId}
+              onChange={(e) => handleYearLevelChange(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-sm)',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--text)',
+                fontSize: 'var(--text-base)'
+              }}
+            >
+              <option value="">-- Select Section --</option>
+              {availableYearLevels.map((yearLevel) => (
+                <option key={yearLevel._id} value={yearLevel._id}>
+                  {yearLevel.level_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
+          {error}
+        </div>
+      )}
+
+      {/* Subjects sidebar for dragging */}
+      {selectedYearLevelId && (
+        <div style={{ 
+          position: 'fixed',
+          left: '250px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: '200px',
+          maxHeight: '80vh',
+          padding: 'var(--space-md)',
+          background: 'var(--card)',
+          borderRadius: '0.5rem',
+          border: '2px solid var(--primary)',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          zIndex: 1000,
+          overflowY: 'auto'
+        }}>
+          <h3 style={{ 
+            marginBottom: 'var(--space-sm)',
+            fontSize: '0.875rem',
+            color: 'var(--primary)',
+            fontWeight: 600
+          }}>
+            📚 Subjects
+          </h3>
+          
+          {/* Search input */}
+          <input
+            type="text"
+            placeholder="Search subjects..."
+            value={subjectSearchQuery}
+            onChange={(e) => setSubjectSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: 'var(--space-xs)',
+              marginBottom: 'var(--space-sm)',
+              borderRadius: '0.25rem',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '0.75rem'
+            }}
+          />
+          
+          {/* Department filter */}
+          <select
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+            style={{
+              width: '100%',
+              padding: 'var(--space-xs)',
+              marginBottom: 'var(--space-sm)',
+              borderRadius: '0.25rem',
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '0.75rem'
+            }}
+          >
+            <option value="">All Departments</option>
+            {departments.map((dept) => (
+              <option key={dept._id} value={dept._id}>
+                {dept.department_name}
+              </option>
+            ))}
+          </select>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)', overflowY: 'auto', maxHeight: 'calc(80vh - 200px)' }}>
+            {filteredSubjects.map((subject) => (
+              <div
+                key={subject._id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, subject)}
+                onDragEnd={handleDragEnd}
+                style={{
+                  padding: 'var(--space-xs) var(--space-sm)',
+                  background: draggedSubject?._id === subject._id ? 'var(--primary)' : 'var(--surface)',
+                  color: draggedSubject?._id === subject._id ? 'white' : 'var(--text)',
+                  borderRadius: '0.25rem',
+                  cursor: 'grab',
+                  border: '1px solid var(--border)',
+                  fontWeight: 500,
+                  transition: 'all 0.2s',
+                  userSelect: 'none',
+                  fontSize: '0.75rem',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {subject.subject_name}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Show grid if we have timetable data OR if no classes exist but we have periods */}
+      {(timetable && grid && grid.periods.length > 0) && (
+        <div style={{ overflowX: 'auto', marginTop: 'var(--space-lg)' }}>
+          <table style={{ 
+            width: '100%',
+            borderCollapse: 'collapse',
+            background: 'var(--card)',
+            borderRadius: '0.5rem',
+            overflow: 'hidden'
+          }}>
+            <thead>
+              <tr style={{ background: 'var(--primary)', color: 'white' }}>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'left', minWidth: '120px', maxWidth: '120px' }}>
+                  Time
+                </th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Monday</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Tuesday</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Wednesday</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Thursday</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Friday</th>
+              </tr>
+            </thead>
+            <tbody>
+              {grid.periods.map((periodName: string, idx: number) => {
+                const periodInfo = grid.periodMap.get(periodName);
+                const timeRange = periodInfo 
+                  ? `${new Date(periodInfo.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${new Date(periodInfo.end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
+                  : '';
+                
+                return (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ 
+                      padding: 'var(--space-md)', 
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      maxWidth: '120px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {timeRange || '—'}
+                    </td>
+                      {daysOfWeek.map(day => {
+                      const classItem = grid.classes.get(`${periodName}_${day}`);
+                      return (
+                        <td 
+                          key={day} 
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.currentTarget.style.background = 'rgba(74, 144, 226, 0.1)';
+                          }}
+                          onDragLeave={(e) => {
+                            e.currentTarget.style.background = '';
+                          }}
+                          onDrop={(e) => {
+                            e.currentTarget.style.background = '';
+                            handleDrop(e, periodName, day);
+                          }}
+                          style={{ 
+                            padding: 'var(--space-sm)', 
+                            textAlign: 'center',
+                            verticalAlign: 'top',
+                            minHeight: '60px',
+                            cursor: 'pointer',
+                            maxWidth: '100px'
+                          }}
+                        >
+                          {classItem ? (
+                            <div style={{
+                              padding: 'var(--space-xs)',
+                              background: 'var(--surface)',
+                              borderRadius: '0.25rem',
+                              border: '1px solid var(--primary)',
+                              fontSize: '0.75rem'
+                            }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.75rem', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {classItem.subject_name || classItem.class_name}
+                              </div>
+                              {classItem.teacher_name && (
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {classItem.teacher_name}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                              —
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Show message if timetable is loaded but no periods exist */}
+      {timetable && (!grid || grid.periods.length === 0) && (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: 'var(--space-xl)',
+          background: 'var(--surface)',
+          borderRadius: '0.5rem',
+          border: '1px solid var(--border)'
+        }}>
+          <p>No periods have been defined yet. Please create periods first.</p>
+        </div>
+      )}
+    </div>
+  );
+}

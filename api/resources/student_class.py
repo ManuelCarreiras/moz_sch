@@ -11,8 +11,7 @@ class StudentClassResource(Resource):
         data = request.get_json()
 
         if (
-            not data.get('score')
-            or not data.get('student_id')
+            not data.get('student_id')
             or not data.get('class_id')
              ):
             response = {
@@ -22,6 +21,7 @@ class StudentClassResource(Resource):
             return Response(json.dumps(response), 400)
         student_id = data.get('student_id')
         class_id = data.get('class_id')
+        score = data.get('score', 0)  # Default score to 0 if not provided
 
         if not StudentModel.find_by_id(student_id):
             return {'message': 'Student Class not found'}, 400
@@ -29,7 +29,7 @@ class StudentClassResource(Resource):
         if not ClassModel.find_by_id(class_id):
             return {'message': 'Student Class not found'}, 400
 
-        new_student_class = StudentClassModel(**data)
+        new_student_class = StudentClassModel(student_id, class_id, score)
 
         new_student_class.save_to_db()
 
@@ -39,21 +39,33 @@ class StudentClassResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
-    def get(self, id):
-        student_class = StudentClassModel.find_by_id(id)
+    def get(self, id=None):
+        if id:
+            # Get single student class by ID
+            student_class = StudentClassModel.find_by_id(id)
 
-        if student_class is None:
+            if student_class is None:
+                response = {
+                    'success': False,
+                    'message': 'Student Class not found'
+                }
+                return Response(json.dumps(response), 404)
+
             response = {
-                'success': False,
-                'message': 'Student Class not found'
+                'success': True,
+                'message': student_class.json()
             }
-            return Response(json.dumps(response), 404)
-
-        response = {
-            'success': True,
-            'message': student_class.json()
-        }
-        return Response(json.dumps(response), 200)
+            return Response(json.dumps(response), 200)
+        else:
+            # Get all student classes
+            student_classes = StudentClassModel.find_all()
+            student_classes_list = [sc.json() for sc in student_classes]
+            
+            response = {
+                'success': True,
+                'message': student_classes_list
+            }
+            return Response(json.dumps(response), 200)
 
     def put(self):
         data = request.get_json()

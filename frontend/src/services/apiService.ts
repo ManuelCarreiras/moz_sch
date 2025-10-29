@@ -158,6 +158,36 @@ class ApiService {
     return this.delete(`/class/${id}`);
   }
 
+  // Student-Class Enrollments
+  async getStudentClasses() {
+    return this.get('/student_class');
+  }
+
+  async getStudentClass(id: string) {
+    return this.get(`/student_class/${id}`);
+  }
+
+  async createStudentClass(studentClassData: any) {
+    return this.post('/student_class', studentClassData);
+  }
+
+  async updateStudentClass(id: string, studentClassData: any) {
+    return this.put(`/student_class/${id}`, studentClassData);
+  }
+
+  async deleteStudentClass(id: string) {
+    return this.delete(`/student_class/${id}`);
+  }
+
+  // Timetable
+  async getTimetable(yearLevelId: string) {
+    return this.get(`/class/timetable/${yearLevelId}`);
+  }
+
+  async getConflicts(yearLevelId: string) {
+    return this.get(`/class/conflicts/${yearLevelId}`);
+  }
+
   // Subjects
   async getSubjects() {
     return this.get('/subject');

@@ -8,25 +8,14 @@ export interface Class {
   term_id: string;
   period_id: string;
   classroom_id: string;
+  year_level_id: string;
   class_name: string;
   subject_name?: string;
   teacher_name?: string;
   term_number?: number;
   period_name?: string;
   room_name?: string;
-}
-
-interface Subject {
-  _id: string;
-  subject_name: string;
-  department_id: string;
-}
-
-interface Teacher {
-  _id: string;
-  given_name: string;
-  surname: string;
-  email_address: string;
+  year_level_name?: string;
 }
 
 interface Term {
@@ -37,28 +26,21 @@ interface Term {
   end_date: string;
 }
 
-interface Period {
+interface YearLevel {
   _id: string;
-  year_id: string;
-  name: string;
-  start_time: string;
-  end_time: string;
+  level_name: string;
+  level_order: number;
 }
 
-interface Classroom {
-  _id: string;
-  room_name: string;
-  room_type: string;
-  capacity: number;
+interface ClassesTableProps {
+  onNavigateToEnrollments?: () => void;
+  onNavigateToTimetable?: () => void;
 }
 
-export function ClassesTable() {
+export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }: ClassesTableProps = {}) {
   const [classes, setClasses] = useState<Class[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
-  const [periods, setPeriods] = useState<Period[]>([]);
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,13 +48,11 @@ export function ClassesTable() {
   const [showModal, setShowModal] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [formData, setFormData] = useState({
-    subject_id: '',
-    teacher_id: '',
     term_id: '',
-    period_id: '',
-    classroom_id: '',
-    class_name: ''
+    year_level_id: ''
   });
+  
+  const [selectedLevelOrder, setSelectedLevelOrder] = useState<string>('');
 
   useEffect(() => {
     fetchAllData();
@@ -82,13 +62,10 @@ export function ClassesTable() {
     try {
       setLoading(true);
       
-      const [classesRes, subjectsRes, teachersRes, termsRes, periodsRes, classroomsRes] = await Promise.all([
+      const [classesRes, termsRes, yearLevelsRes] = await Promise.all([
         apiService.getClasses(),
-        apiService.getSubjects(),
-        apiService.getTeachers(),
         apiService.getTerms(),
-        apiService.getPeriods(),
-        apiService.getClassrooms()
+        apiService.getYearLevels()
       ]);
 
       if (classesRes.success) {
@@ -96,29 +73,14 @@ export function ClassesTable() {
         setClasses(Array.isArray(classesData) ? classesData : []);
       }
 
-      if (subjectsRes.success) {
-        const subjectsData = (subjectsRes.data as any)?.message || subjectsRes.data;
-        setSubjects(Array.isArray(subjectsData) ? subjectsData : []);
-      }
-
-      if (teachersRes.success) {
-        const teachersData = (teachersRes.data as any)?.message || teachersRes.data;
-        setTeachers(Array.isArray(teachersData) ? teachersData : []);
-      }
-
       if (termsRes.success) {
         const termsData = (termsRes.data as any)?.message || termsRes.data;
         setTerms(Array.isArray(termsData) ? termsData : []);
       }
 
-      if (periodsRes.success) {
-        const periodsData = (periodsRes.data as any)?.message || periodsRes.data;
-        setPeriods(Array.isArray(periodsData) ? periodsData : []);
-      }
-
-      if (classroomsRes.success) {
-        const classroomsData = (classroomsRes.data as any)?.message || classroomsRes.data;
-        setClassrooms(Array.isArray(classroomsData) ? classroomsData : []);
+      if (yearLevelsRes.success) {
+        const yearLevelsData = (yearLevelsRes.data as any)?.message || yearLevelsRes.data;
+        setYearLevels(Array.isArray(yearLevelsData) ? yearLevelsData : []);
       }
     } catch (err) {
       setError('Network error occurred');
@@ -130,18 +92,34 @@ export function ClassesTable() {
 
   const handleCreate = async () => {
     try {
-      const response = await apiService.createClass(formData);
+      // Generate class name from year level
+      const selectedYearLevel = yearLevels.find(yl => yl._id === formData.year_level_id);
+      if (!selectedYearLevel) {
+        setError('Please select a year level');
+        return;
+      }
+      
+      const gradeNames = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+      const gradeName = gradeNames[selectedYearLevel.level_order] || `${selectedYearLevel.level_order}th`;
+      const class_name = `${gradeName} ${selectedYearLevel.level_name}`;
+      
+      const classData = {
+        ...formData,
+        class_name: class_name,
+        subject_id: '',  // Will be assigned in timetable
+        teacher_id: '',  // Will be assigned later
+        period_id: '',   // Will be assigned in timetable
+        classroom_id: '' // Will be assigned later
+      };
+      
+      const response = await apiService.createClass(classData);
       
       if (response.success) {
         alert('Class created successfully!');
         setShowModal(false);
         setFormData({
-          subject_id: '',
-          teacher_id: '',
           term_id: '',
-          period_id: '',
-          classroom_id: '',
-          class_name: ''
+          year_level_id: ''
         });
         fetchAllData();
       } else {
@@ -156,13 +134,14 @@ export function ClassesTable() {
   const handleEdit = (classItem: Class) => {
     setEditingClass(classItem);
     setFormData({
-      subject_id: classItem.subject_id,
-      teacher_id: classItem.teacher_id,
       term_id: classItem.term_id,
-      period_id: classItem.period_id,
-      classroom_id: classItem.classroom_id,
-      class_name: classItem.class_name
+      year_level_id: classItem.year_level_id
     });
+    // Find and set the level order for editing
+    const yearLevel = yearLevels.find(y => y._id === classItem.year_level_id);
+    if (yearLevel) {
+      setSelectedLevelOrder(yearLevel.level_order.toString());
+    }
     setShowModal(true);
   };
 
@@ -177,12 +156,8 @@ export function ClassesTable() {
         setShowModal(false);
         setEditingClass(null);
         setFormData({
-          subject_id: '',
-          teacher_id: '',
           term_id: '',
-          period_id: '',
-          classroom_id: '',
-          class_name: ''
+          year_level_id: ''
         });
         fetchAllData();
       } else {
@@ -243,21 +218,34 @@ export function ClassesTable() {
           <h3>Class Management</h3>
           <p className="table-description">Create and manage classes with subject, teacher, term, period, and classroom assignments.</p>
         </div>
-        <div className="table-header__actions">
+        <div className="table-header__actions" style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+          {onNavigateToEnrollments && (
+            <button 
+              className="btn btn--secondary"
+              onClick={onNavigateToEnrollments}
+            >
+              Manage Enrollments
+            </button>
+          )}
+          {onNavigateToTimetable && (
+            <button 
+              className="btn btn--secondary"
+              onClick={onNavigateToTimetable}
+            >
+              View Timetables
+            </button>
+          )}
           <button 
             className="btn btn--primary"
-            onClick={() => {
-              setEditingClass(null);
-              setFormData({
-                subject_id: '',
-                teacher_id: '',
-                term_id: '',
-                period_id: '',
-                classroom_id: '',
-                class_name: ''
-              });
-              setShowModal(true);
-            }}
+              onClick={() => {
+                setEditingClass(null);
+                setFormData({
+                  term_id: '',
+                  year_level_id: ''
+                });
+                setSelectedLevelOrder('');
+                setShowModal(true);
+              }}
           >
             Add New Class
           </button>
@@ -328,62 +316,25 @@ export function ClassesTable() {
         <div className="modal">
           <div className="modal__overlay">
             <div className="modal__dialog">
+              <div className="modal__header">
+                <h3>{editingClass ? 'Edit Class' : 'Add New Class'}</h3>
+                <button 
+                  className="modal__close"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingClass(null);
+                    setSelectedLevelOrder('');
+                    setFormData({
+                      term_id: '',
+                      year_level_id: ''
+                    });
+                  }}
+                >
+                  ×
+                </button>
+              </div>
               <div className="modal__content">
-                <div className="modal__header">
-                  <h3>{editingClass ? 'Edit Class' : 'Add New Class'}</h3>
-                  <button 
-                    className="modal__close"
-                    onClick={() => {
-                      setShowModal(false);
-                      setEditingClass(null);
-                      setFormData({
-                        subject_id: '',
-                        teacher_id: '',
-                        term_id: '',
-                        period_id: '',
-                        classroom_id: '',
-                        class_name: ''
-                      });
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
                 <form onSubmit={handleSubmit} className="student-form">
-                  <div className="form-group">
-                    <label htmlFor="subject">Subject *</label>
-                    <select
-                      id="subject"
-                      value={formData.subject_id}
-                      onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Select a subject</option>
-                      {subjects.map((subject) => (
-                        <option key={subject._id} value={subject._id}>
-                          {subject.subject_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="teacher">Teacher *</label>
-                    <select
-                      id="teacher"
-                      value={formData.teacher_id}
-                      onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Select a teacher</option>
-                      {teachers.map((teacher) => (
-                        <option key={teacher._id} value={teacher._id}>
-                          {teacher.given_name} {teacher.surname}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="form-group">
                     <label htmlFor="term">Term *</label>
                     <select
@@ -402,50 +353,45 @@ export function ClassesTable() {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="period">Period *</label>
+                    <label htmlFor="level_order">Grade/Year *</label>
                     <select
-                      id="period"
-                      value={formData.period_id}
-                      onChange={(e) => setFormData({ ...formData, period_id: e.target.value })}
+                      id="level_order"
+                      value={selectedLevelOrder}
+                      onChange={(e) => {
+                        setSelectedLevelOrder(e.target.value);
+                        setFormData({ ...formData, year_level_id: '' }); // Reset year level selection
+                      }}
                       required
                     >
-                      <option value="">Select a period</option>
-                      {periods.map((period) => (
-                        <option key={period._id} value={period._id}>
-                          {period.name} ({period.start_time} - {period.end_time})
+                      <option value="">Select grade/year</option>
+                      {[...new Set(yearLevels.map(y => y.level_order))].sort().map((order) => (
+                        <option key={order} value={order}>
+                          Grade {order}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="classroom">Classroom *</label>
-                    <select
-                      id="classroom"
-                      value={formData.classroom_id}
-                      onChange={(e) => setFormData({ ...formData, classroom_id: e.target.value })}
-                      required
-                    >
-                      <option value="">Select a classroom</option>
-                      {classrooms.map((classroom) => (
-                        <option key={classroom._id} value={classroom._id}>
-                          {classroom.room_name} ({classroom.capacity} seats)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="className">Class Name *</label>
-                    <input
-                      type="text"
-                      id="className"
-                      value={formData.class_name}
-                      onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
-                      placeholder="e.g., Math 101 - Section A"
-                      required
-                    />
-                  </div>
+                  {selectedLevelOrder && (
+                    <div className="form-group">
+                      <label htmlFor="year_level">Section (A, B, C...) *</label>
+                      <select
+                        id="year_level"
+                        value={formData.year_level_id}
+                        onChange={(e) => setFormData({ ...formData, year_level_id: e.target.value })}
+                        required
+                      >
+                        <option value="">Select a section</option>
+                        {yearLevels
+                          .filter(y => y.level_order === parseInt(selectedLevelOrder))
+                          .map((yearLevel) => (
+                            <option key={yearLevel._id} value={yearLevel._id}>
+                              {yearLevel.level_name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div className="form-actions">
                     <button type="submit" className="btn btn-primary">
@@ -457,13 +403,10 @@ export function ClassesTable() {
                       onClick={() => {
                         setShowModal(false);
                         setEditingClass(null);
+                        setSelectedLevelOrder('');
                         setFormData({
-                          subject_id: '',
-                          teacher_id: '',
                           term_id: '',
-                          period_id: '',
-                          classroom_id: '',
-                          class_name: ''
+                          year_level_id: ''
                         });
                       }}
                     >

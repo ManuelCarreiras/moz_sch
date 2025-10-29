@@ -33,7 +33,11 @@ class PeriodModel(db.Model):
 
     @classmethod
     def find_by_year_id(cls, year_id):
-        return cls.query.filter_by(year_id=year_id).first()
+        return cls.query.filter_by(year_id=year_id).all()
+    
+    @classmethod
+    def find_all_ordered(cls):
+        return cls.query.order_by(cls.start_time).all()
 
     def save_to_db(self):
         db.session.add(self)
@@ -46,7 +50,7 @@ class PeriodModel(db.Model):
             self.start_time = data['start_time']
         if data.get('end_time') is not None:
             self.end_time = data['end_time']
-
+        
         self.save_to_db()
 
     def delete_by_id(self, record_id):

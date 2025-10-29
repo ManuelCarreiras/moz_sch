@@ -1073,11 +1073,12 @@ body {
   background: var(--card);
   border-radius: 0.75rem;
   border: 1px solid var(--border);
-  max-width: 700px;
-  width: 100%;
+  max-width: 550px;
+  width: 90%;
   max-height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
@@ -1118,16 +1119,11 @@ body {
 }
 
 .modal__content {
-  padding: var(--space-lg);
+  padding: var(--space-md);
   overflow-y: auto;
   flex: 1;
 }
 
-.modal__content input,
-.modal__content select {
-  max-width: 100%;
-  box-sizing: border-box;
-}
 
 
 .icon-btn {
@@ -1151,6 +1147,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  min-width: 0;
+}
+
+.student-form .form-group {
+  min-width: 0;
 }
 
 .form-row {
@@ -1173,12 +1174,14 @@ body {
 
 .form-group input,
 .form-group select {
+  width: 100%;
   padding: var(--space-sm);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: var(--card);
   color: var(--text);
   font-size: var(--text-base);
+  box-sizing: border-box;
 }
 
 .form-group input:focus,

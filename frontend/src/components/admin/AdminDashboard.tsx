@@ -12,11 +12,14 @@ import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
 import { SchoolYearManagement } from './SchoolYearManagement';
 import AcademicFoundationManagement from './AcademicFoundationManagement';
 import AcademicSetupWizard from './AcademicSetupWizard';
+import { StudentClassEnrollment } from './StudentClassEnrollment';
+import { YearLevelTimetable } from './YearLevelTimetable';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
 type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
+type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
 
 export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
@@ -25,6 +28,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
   const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
+  const [activeClassTab, setActiveClassTab] = useState<ClassManagementTab>('classes');
 
   const handleSignOut = async () => {
     try {
@@ -346,7 +350,18 @@ export function AdminDashboard() {
       case 'academic-wizard':
         return <AcademicSetupWizard />;
       case 'classes':
-        return <ClassesTable />;
+        if (activeClassTab === 'enrollments') {
+          return <StudentClassEnrollment onBack={() => setActiveClassTab('classes')} />;
+        }
+        if (activeClassTab === 'timetable') {
+          return <YearLevelTimetable onBack={() => setActiveClassTab('classes')} />;
+        }
+        return (
+          <ClassesTable 
+            onNavigateToEnrollments={() => setActiveClassTab('enrollments')}
+            onNavigateToTimetable={() => setActiveClassTab('timetable')}
+          />
+        );
       case 'reports':
         return <ReportsView />;
       case 'portals':

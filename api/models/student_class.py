@@ -10,7 +10,7 @@ class StudentClassModel(db.Model):
     class_id = db.Column(UUID(as_uuid=True), db.ForeignKey('class._id'))
     score = db.Column(db.Float, nullable=False)
 
-    def __init__(self, student_id, class_id, score):
+    def __init__(self, student_id, class_id, score=0):
         self.student_id = student_id
         self.class_id = class_id
         self.score = score
@@ -26,6 +26,10 @@ class StudentClassModel(db.Model):
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(_id=id).first()
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
 
     def save_to_db(self):
         db.session.add(self)
