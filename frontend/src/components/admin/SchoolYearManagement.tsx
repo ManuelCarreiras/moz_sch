@@ -1,21 +1,19 @@
 import { useState } from 'react';
 import { YearLevelTable } from './YearLevelTable';
 import { SchoolYearTable } from './SchoolYearTable';
-import { StudentYearLevelAssignment } from './StudentYearLevelAssignment';
 
 interface SchoolYearManagementProps {
   onBack: () => void;
 }
 
-type SchoolYearTab = 'year-levels' | 'school-years' | 'student-assignments';
+type SchoolYearTab = 'year-levels' | 'school-years';
 
 export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
   const [activeTab, setActiveTab] = useState<SchoolYearTab>('year-levels');
 
   const tabs = [
     { id: 'year-levels' as SchoolYearTab, label: 'Year Levels', description: 'Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)' },
-    { id: 'school-years' as SchoolYearTab, label: 'School Years', description: 'Manage academic years (2026, 2027, etc.)' },
-    { id: 'student-assignments' as SchoolYearTab, label: 'Student Assignments', description: 'Assign students to year levels and school years (format: "1st A", "2nd B")' }
+    { id: 'school-years' as SchoolYearTab, label: 'School Years', description: 'Manage academic years (2026, 2027, etc.)' }
   ];
 
   const renderTabContent = () => {
@@ -24,8 +22,6 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
         return <YearLevelTable onBack={() => setActiveTab('year-levels')} />;
       case 'school-years':
         return <SchoolYearTable onBack={() => setActiveTab('school-years')} />;
-      case 'student-assignments':
-        return <StudentYearLevelAssignment onBack={() => setActiveTab('student-assignments')} />;
       default:
         return <YearLevelTable onBack={() => setActiveTab('year-levels')} />;
     }
@@ -42,7 +38,7 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
       <div style={{ marginBottom: 'var(--space-xl)' }}>
         <h2>School Year Management</h2>
         <p className="table-description">
-          Complete academic structure management. Set up year levels, school years, and assign students.
+          Complete academic structure management. Set up year levels and school years.
         </p>
       </div>
 
@@ -90,27 +86,6 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
         </p>
       </div>
 
-      {/* Workflow Steps */}
-      {activeTab === 'student-assignments' && (
-        <div style={{ 
-          marginBottom: 'var(--space-lg)', 
-          padding: 'var(--space-md)', 
-          backgroundColor: 'var(--warning-light)', 
-          borderRadius: 'var(--border-radius)',
-          border: '1px solid var(--warning)'
-        }}>
-          <h4 style={{ margin: '0 0 var(--space-sm) 0', color: 'var(--warning-dark)' }}>
-            📋 Setup Requirements
-          </h4>
-          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-            Before assigning students to year levels, ensure you have:
-          </p>
-          <ul style={{ margin: 'var(--space-xs) 0 0 0', paddingLeft: 'var(--space-lg)', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
-            <li>Created at least one <strong>Year Level</strong> (e.g., Letter A with 1st Grade)</li>
-            <li>Created at least one <strong>School Year</strong> (e.g., 2026)</li>
-          </ul>
-        </div>
-      )}
 
       {/* Tab Content */}
       {renderTabContent()}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
+import { StudentSchedule } from './StudentSchedule';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
@@ -137,15 +138,7 @@ export function StudentDashboard() {
           </div>
         );
       case 'schedule':
-        return (
-          <div className="student-content">
-            <h2>Schedule</h2>
-            <p>Check your class schedule and upcoming assignments.</p>
-            <div className="placeholder-content">
-              <p>Schedule functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <StudentSchedule />;
       case 'profile':
         return (
           <div className="student-content">
