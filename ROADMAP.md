@@ -333,6 +333,14 @@ frontend/src/components/
 - [ ] Consider mobile-responsive design improvements
 - [ ] Plan for advanced reporting and analytics features
 
+### **Teacher Portal Implementation Plan**
+- 📝 **See `TEACHER_IMPLEMENTATION_NOTES.md`** for detailed implementation checklist
+- **Next Step**: After student portal testing, implement teacher username integration and schedule view
+- **Key Differences**: Teachers use `email_address` (not `email`), no `middle_name` field
+- **Username Format**: First initial + surname (e.g., "John Smith" → "jsmith")
+- **Cognito Group**: 'teacher' or 'teachers' group
+- **Schedule Query**: Classes where `teacher_id` matches authenticated teacher
+
 ---
 
 **Last Updated**: October 31, 2025
