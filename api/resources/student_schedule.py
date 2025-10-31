@@ -169,8 +169,8 @@ class StudentScheduleResource(Resource):
             # Get year level info
             year_level = YearLevelModel.find_by_id(class_obj.year_level_id)
             if year_level:
-                class_data['year_level_name'] = year_level.year_level_name
-                class_data['year_level_order'] = year_level.year_level_order
+                class_data['year_level_name'] = year_level.level_name
+                class_data['year_level_order'] = year_level.level_order
             
             all_classes.append(class_data)
         
