@@ -71,6 +71,10 @@ class ClassModel(db.Model):
         return cls.query.filter_by(class_name=class_name).first()
     
     @classmethod
+    def list_by_class_name(cls, class_name):
+        return cls.query.filter_by(class_name=class_name).all()
+    
+    @classmethod
     def find_by_year_level_and_period(cls, year_level_id, period_id):
         return cls.query.filter_by(year_level_id=year_level_id, period_id=period_id).first()
     
@@ -81,6 +85,37 @@ class ClassModel(db.Model):
     @classmethod
     def find_by_year_level(cls, year_level_id):
         return cls.query.filter_by(year_level_id=year_level_id).all()
+    
+    @classmethod
+    def find_teacher_conflicts(cls, teacher_id, term_id, period_id, day_of_week, exclude_class_id=None):
+        """
+        Check if a teacher has a conflict in the same term, period, and day.
+        Excludes the current class if exclude_class_id is provided (for updates).
+        
+        Returns True if conflict exists, False otherwise.
+        """
+        import logging
+        
+        if not teacher_id or not term_id or not period_id or not day_of_week:
+            return False
+        
+        query = cls.query.filter_by(
+            teacher_id=teacher_id,
+            term_id=term_id,
+            period_id=period_id,
+            day_of_week=day_of_week
+        )
+        
+        # Exclude current class if updating
+        if exclude_class_id:
+            query = query.filter(cls._id != exclude_class_id)
+        
+        existing_class = query.first()
+        
+        if existing_class:
+            logging.warning(f"Teacher conflict detected: teacher_id={teacher_id}, term_id={term_id}, period_id={period_id}, day={day_of_week}, existing_class={existing_class._id}")
+        
+        return existing_class is not None
 
     def save_to_db(self):
         db.session.add(self)

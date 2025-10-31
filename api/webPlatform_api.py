@@ -17,6 +17,7 @@ from resources.student_year_level import StudentYearLevelResourceStudent, Studen
 from resources.year_level import YearLevelResource
 from resources.student_class import StudentClassResource
 from resources.student_schedule import StudentScheduleResource
+from resources.teacher_schedule import TeacherScheduleResource
 from resources.class_model import ClassModelResource, ClassResourceSubjectList, ClassResourceTeacherList, ClassResourceTermList, ClassResourcePeriodList, ClassResourceClassroomList  # noqa
 from resources.class_timetable import ClassTimetableResource, ClassConflictsResource
 from resources.classroom_types import ClassroomTypesResource
@@ -136,6 +137,7 @@ api.add_resource(StudentYearLevelResourceStudent, "/student_year_level/student/<
 api.add_resource(StudentClassResource, "/student_class",
                                        "/student_class/<id>")
 api.add_resource(StudentScheduleResource, "/student/schedule", "/student/schedule/<student_id>")
+api.add_resource(TeacherScheduleResource, "/teacher/schedule", "/teacher/schedule/<teacher_id>")
 
 api.add_resource(ClassroomTypesResource, "/classroom_types",
                                          "/classroom_types/<id>")

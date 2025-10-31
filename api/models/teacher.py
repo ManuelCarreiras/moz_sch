@@ -17,15 +17,17 @@ class TeacherModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     email_address = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.VARCHAR(20), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=True)
     # department_id removed - now using junction table for many-to-many relationship
 
     def __init__(self, given_name, surname, gender, email_address,
-                 phone_number):
+                 phone_number, username=None):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
+        self.username = username
 
     def json(self):
         return {
@@ -34,7 +36,8 @@ class TeacherModel(db.Model):
             'surname': self.surname,
             'gender': self.gender,
             'email_address': self.email_address,
-            'phone_number': self.phone_number
+            'phone_number': self.phone_number,
+            'username': self.username
         }
 
     def json_with_departments(self):
@@ -67,6 +70,10 @@ class TeacherModel(db.Model):
     @classmethod
     def find_by_email(cls, email_address):
         return cls.query.filter_by(email_address=email_address).first()
+    
+    @classmethod
+    def find_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
 
     @classmethod
     def find_all(cls):
@@ -98,6 +105,8 @@ class TeacherModel(db.Model):
             self.surname = data['surname']
         if data.get('phone_number') is not None:
             self.phone_number = data['phone_number']
+        if data.get('username') is not None:
+            self.username = data['username']
         # department_id handling removed - now managed through junction table
 
         self.save_to_db()

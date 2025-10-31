@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, request
 from flask_restful import Resource
 from models.class_model import ClassModel
 from models.year_level import YearLevelModel
@@ -6,6 +6,8 @@ from models.period import PeriodModel
 from models.teacher import TeacherModel
 from models.subject import SubjectModel
 from models.classroom import ClassroomModel
+from models.term import TermModel
+from models.school_year import SchoolYearModel
 import json
 
 
@@ -13,6 +15,10 @@ class ClassTimetableResource(Resource):
     """Get timetable for a specific year level"""
 
     def get(self, year_level_id):
+        # Get optional filters from query parameters
+        term_id = request.args.get('term_id')
+        year_id = request.args.get('year_id')  # School year filter
+        
         # Verify year level exists
         year_level = YearLevelModel.find_by_id(year_level_id)
         if not year_level:
@@ -25,9 +31,26 @@ class ClassTimetableResource(Resource):
         # Get all classes for this year level
         classes = ClassModel.find_by_year_level(year_level_id)
         
-        # Get all periods to build the full grid structure
-        # Assuming all periods share the same year_id, we'll fetch all periods
-        all_periods = PeriodModel.query.all()
+        # Filter by term if specified
+        if term_id:
+            classes = [cls for cls in classes if str(cls.term_id) == term_id]
+        
+        # Filter by school year if specified (through term.year_id)
+        if year_id:
+            filtered_classes = []
+            for cls in classes:
+                term = TermModel.find_by_id(cls.term_id)
+                if term and str(term.year_id) == year_id:
+                    filtered_classes.append(cls)
+            classes = filtered_classes
+        
+        # Get periods to build the full grid structure
+        # If year_id is provided, only get periods for that year
+        if year_id:
+            all_periods = PeriodModel.find_by_year_id(year_id)
+        else:
+            # Get all periods if no year filter
+            all_periods = PeriodModel.query.all()
         
         # Build timetable with enhanced data
         timetable = []

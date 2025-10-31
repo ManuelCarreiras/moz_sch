@@ -180,8 +180,15 @@ class ApiService {
   }
 
   // Timetable
-  async getTimetable(yearLevelId: string) {
-    return this.get(`/class/timetable/${yearLevelId}`);
+  async getTimetable(yearLevelId: string, termId?: string, yearId?: string) {
+    const params = new URLSearchParams();
+    if (termId) params.append('term_id', termId);
+    if (yearId) params.append('year_id', yearId);
+    const queryString = params.toString();
+    const url = queryString 
+      ? `/class/timetable/${yearLevelId}?${queryString}`
+      : `/class/timetable/${yearLevelId}`;
+    return this.get(url);
   }
 
   async getConflicts(yearLevelId: string) {

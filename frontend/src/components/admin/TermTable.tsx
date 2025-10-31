@@ -23,6 +23,7 @@ const TermTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
+  const [selectedYearFilter, setSelectedYearFilter] = useState<string>('');
   const [formData, setFormData] = useState({
     year_id: '',
     term_number: 1,
@@ -124,6 +125,11 @@ const TermTable: React.FC = () => {
     return year ? year.year_name : 'Unknown Year';
   };
 
+  // Filter terms by selected year
+  const filteredTerms = selectedYearFilter 
+    ? terms.filter(t => t.year_id === selectedYearFilter)
+    : terms;
+
   if (loading) {
     return <div>Loading terms...</div>;
   }
@@ -141,6 +147,46 @@ const TermTable: React.FC = () => {
         </button>
       </div>
 
+      {/* Year Filter */}
+      <div style={{ marginBottom: 'var(--space-md)', maxWidth: '400px' }}>
+        <label htmlFor="year_filter" style={{ 
+          display: 'block', 
+          marginBottom: 'var(--space-xs)',
+          fontSize: '0.875rem',
+          fontWeight: 500 
+        }}>
+          Filter by School Year:
+        </label>
+        <select
+          id="year_filter"
+          value={selectedYearFilter}
+          onChange={(e) => setSelectedYearFilter(e.target.value)}
+          style={{
+            width: '100%',
+            padding: 'var(--space-sm)',
+            borderRadius: '0.5rem',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            fontSize: 'var(--text-base)',
+            WebkitAppearance: 'menulist',
+            MozAppearance: 'menulist',
+            appearance: 'menulist'
+          }}
+        >
+          <option value="">-- All Years --</option>
+          {schoolYears.map((year) => (
+            <option 
+              key={year._id} 
+              value={year._id}
+              style={{ background: 'var(--card)', color: 'var(--text)' }}
+            >
+              {year.year_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="table-container">
         <table className="data-table">
           <thead>
@@ -153,12 +199,12 @@ const TermTable: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {terms.length === 0 ? (
+            {filteredTerms.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center">No terms found</td>
               </tr>
             ) : (
-              terms.map((term) => (
+              filteredTerms.map((term) => (
                 <tr key={term._id}>
                   <td>Term {term.term_number}</td>
                   <td>{getSchoolYearName(term.year_id)}</td>

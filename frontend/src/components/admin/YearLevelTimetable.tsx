@@ -63,6 +63,8 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
   const [draggedSubject, setDraggedSubject] = useState<Subject | null>(null);
   const [terms, setTerms] = useState<any[]>([]);
   const [selectedTermId, setSelectedTermId] = useState<string>('');
+  const [schoolYears, setSchoolYears] = useState<any[]>([]);
+  const [selectedYearId, setSelectedYearId] = useState<string>('');
   const [departments, setDepartments] = useState<any[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [subjectSearchQuery, setSubjectSearchQuery] = useState<string>('');
@@ -81,6 +83,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     loadYearLevels();
     loadSubjects();
     loadTerms();
+    loadSchoolYears();
     loadDepartments();
     loadTeachers();
     loadClassrooms();
@@ -107,6 +110,18 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
       }
     } catch (err) {
       console.error('Error loading terms:', err);
+    }
+  };
+
+  const loadSchoolYears = async () => {
+    try {
+      const response = await apiService.getSchoolYears();
+      if (response.success) {
+        const data = (response.data as any)?.message || response.data;
+        setSchoolYears(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error loading school years:', err);
     }
   };
 
@@ -155,6 +170,14 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     }
   }, [selectedLevelOrder, yearLevels]);
 
+  // Reload timetable when term or year selection changes
+  useEffect(() => {
+    if (selectedYearLevelId) {
+      loadTimetable(selectedYearLevelId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTermId, selectedYearId]);
+
   const loadYearLevels = async () => {
     try {
       const response = await apiService.getYearLevels();
@@ -172,7 +195,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
       setLoading(true);
       setError(null);
       
-      const response = await apiService.getTimetable(yearLevelId);
+      const response = await apiService.getTimetable(yearLevelId, selectedTermId, selectedYearId);
       
       if (response.success) {
         const data = (response.data as any)?.message || response.data;
@@ -461,44 +484,84 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
         )}
       </div>
 
-      {/* Term selection - shown after year level is selected */}
+      {/* Year and Term selection - shown after year level is selected */}
       {selectedYearLevelId && (
-        <div style={{ marginBottom: 'var(--space-lg)', maxWidth: '400px' }}>
-          <label htmlFor="term_select" style={{ 
-            display: 'block', 
-            marginBottom: 'var(--space-sm)',
-            fontWeight: 600 
-          }}>
-            Select Term:
-          </label>
-          <select
-            id="term_select"
-            value={selectedTermId}
-            onChange={(e) => setSelectedTermId(e.target.value)}
-            style={{
-              width: '100%',
-              padding: 'var(--space-sm)',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              fontSize: 'var(--text-base)',
-              WebkitAppearance: 'menulist',
-              MozAppearance: 'menulist',
-              appearance: 'menulist'
-            }}
-          >
-            <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Term --</option>
-            {terms.map((term) => (
-              <option 
-                key={term._id} 
-                value={term._id}
-                style={{ background: 'var(--card)', color: 'var(--text)' }}
-              >
-                Term {term.term_number}
-              </option>
-            ))}
-          </select>
+        <div style={{ marginBottom: 'var(--space-lg)', display: 'flex', gap: 'var(--space-md)', maxWidth: '800px' }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="year_select" style={{ 
+              display: 'block', 
+              marginBottom: 'var(--space-sm)',
+              fontWeight: 600 
+            }}>
+              Select School Year:
+            </label>
+            <select
+              id="year_select"
+              value={selectedYearId}
+              onChange={(e) => setSelectedYearId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-sm)',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: 'var(--text-base)',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
+              }}
+            >
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Year --</option>
+              {schoolYears.map((year) => (
+                <option 
+                  key={year._id} 
+                  value={year._id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
+                  {year.year_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <label htmlFor="term_select" style={{ 
+              display: 'block', 
+              marginBottom: 'var(--space-sm)',
+              fontWeight: 600 
+            }}>
+              Select Term:
+            </label>
+            <select
+              id="term_select"
+              value={selectedTermId}
+              onChange={(e) => setSelectedTermId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-sm)',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: 'var(--text-base)',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
+              }}
+            >
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Term --</option>
+              {terms.map((term) => (
+                <option 
+                  key={term._id} 
+                  value={term._id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
+                  Term {term.term_number}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 

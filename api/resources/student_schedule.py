@@ -74,7 +74,7 @@ class StudentScheduleResource(Resource):
             }
             return Response(json.dumps(response), 404)
 
-        # Get all student class enrollments
+        # Get all student class enrollments to find which class names the student is enrolled in
         student_classes = StudentClassModel.find_by_student_id(student_id)
         
         if not student_classes:
@@ -90,89 +90,109 @@ class StudentScheduleResource(Resource):
             }
             return Response(json.dumps(response), 200)
 
-        # Build list of class IDs
-        class_ids = [sc.class_id for sc in student_classes]
+        # Get unique class names the student is enrolled in
+        enrolled_class_names = set()
+        for sc in student_classes:
+            class_obj = ClassModel.find_by_id(sc.class_id)
+            if class_obj:
+                enrolled_class_names.add(class_obj.class_name)
         
-        # Get all class details
+        if not enrolled_class_names:
+            response = {
+                'success': True,
+                'message': {
+                    'student_id': student_id,
+                    'student_name': f"{student.given_name} {student.surname}",
+                    'timetable': [],
+                    'available_terms': [],
+                    'available_years': []
+                }
+            }
+            return Response(json.dumps(response), 200)
+        
+        # For each enrolled class name, get ALL classes with that name across all terms
         all_classes = []
         available_terms_map = {}
         available_years_map = {}
         
-        for class_item in class_ids:
-            class_obj = ClassModel.find_by_id(class_item)
-            if not class_obj:
-                continue
+        for class_name in enrolled_class_names:
+            # Get all classes with this name
+            classes_with_name = ClassModel.list_by_class_name(class_name)
             
-            # Get term info
-            term = TermModel.find_by_id(class_obj.term_id)
-            if not term:
-                continue
-            
-            # If filtering by term, skip if doesn't match
-            if term_id and str(term._id) != term_id:
-                continue
-            
-            # Get year info
-            year = SchoolYearModel.find_by_id(term.year_id)
-            if not year:
-                continue
-            
-            # If filtering by year, skip if doesn't match
-            if year_id and str(year._id) != year_id:
-                continue
-            
-            # Store available terms and years for filter dropdowns
-            available_terms_map[str(term._id)] = {
-                '_id': str(term._id),
-                'term_number': term.term_number,
-                'year_id': str(term.year_id),
-                'year_name': year.year_name if year else None,
-                'start_date': term.start_date.isoformat() if term.start_date else None,
-                'end_date': term.end_date.isoformat() if term.end_date else None
-            }
-            available_years_map[str(year._id)] = {
-                '_id': str(year._id),
-                'year_name': year.year_name,
-                'start_date': year.start_date.isoformat() if year.start_date else None,
-                'end_date': year.end_date.isoformat() if year.end_date else None
-            }
-            
-            # Enhance class data
-            class_data = class_obj.json()
-            class_data['subject_name'] = None
-            class_data['teacher_name'] = None
-            class_data['period_name'] = None
-            class_data['day_of_week'] = class_obj.day_of_week
-            class_data['period_start'] = None
-            class_data['period_end'] = None
-            class_data['classroom_name'] = None
-            class_data['term_number'] = term.term_number
-            class_data['year_name'] = year.year_name if year else None
-            
-            # Get related entities
-            subject = SubjectModel.find_by_id(class_obj.subject_id) if class_obj.subject_id else None
-            teacher = TeacherModel.find_by_id(class_obj.teacher_id) if class_obj.teacher_id else None
-            period = PeriodModel.find_by_id(class_obj.period_id) if class_obj.period_id else None
-            classroom = ClassroomModel.find_by_id(class_obj.classroom_id) if class_obj.classroom_id else None
-            
-            if subject:
-                class_data['subject_name'] = subject.subject_name
-            if teacher:
-                class_data['teacher_name'] = f"{teacher.given_name} {teacher.surname}"
-            if period:
-                class_data['period_name'] = period.name
-                class_data['period_start'] = period.start_time.isoformat() if period.start_time else None
-                class_data['period_end'] = period.end_time.isoformat() if period.end_time else None
-            if classroom:
-                class_data['classroom_name'] = classroom.room_name
-            
-            # Get year level info
-            year_level = YearLevelModel.find_by_id(class_obj.year_level_id)
-            if year_level:
-                class_data['year_level_name'] = year_level.level_name
-                class_data['year_level_order'] = year_level.level_order
-            
-            all_classes.append(class_data)
+            for class_obj in classes_with_name:
+                if not class_obj:
+                    continue
+                
+                # Get term info
+                term = TermModel.find_by_id(class_obj.term_id)
+                if not term:
+                    continue
+                
+                # If filtering by term, skip if doesn't match
+                if term_id and str(term._id) != term_id:
+                    continue
+                
+                # Get year info
+                year = SchoolYearModel.find_by_id(term.year_id)
+                if not year:
+                    continue
+                
+                # If filtering by year, skip if doesn't match
+                if year_id and str(year._id) != year_id:
+                    continue
+                
+                # Store available terms and years for filter dropdowns
+                available_terms_map[str(term._id)] = {
+                    '_id': str(term._id),
+                    'term_number': term.term_number,
+                    'year_id': str(term.year_id),
+                    'year_name': year.year_name if year else None,
+                    'start_date': term.start_date.isoformat() if term.start_date else None,
+                    'end_date': term.end_date.isoformat() if term.end_date else None
+                }
+                available_years_map[str(year._id)] = {
+                    '_id': str(year._id),
+                    'year_name': year.year_name,
+                    'start_date': year.start_date.isoformat() if year.start_date else None,
+                    'end_date': year.end_date.isoformat() if year.end_date else None
+                }
+                
+                # Enhance class data
+                class_data = class_obj.json()
+                class_data['subject_name'] = None
+                class_data['teacher_name'] = None
+                class_data['period_name'] = None
+                class_data['day_of_week'] = class_obj.day_of_week
+                class_data['period_start'] = None
+                class_data['period_end'] = None
+                class_data['classroom_name'] = None
+                class_data['term_number'] = term.term_number
+                class_data['year_name'] = year.year_name if year else None
+                
+                # Get related entities
+                subject = SubjectModel.find_by_id(class_obj.subject_id) if class_obj.subject_id else None
+                teacher = TeacherModel.find_by_id(class_obj.teacher_id) if class_obj.teacher_id else None
+                period = PeriodModel.find_by_id(class_obj.period_id) if class_obj.period_id else None
+                classroom = ClassroomModel.find_by_id(class_obj.classroom_id) if class_obj.classroom_id else None
+                
+                if subject:
+                    class_data['subject_name'] = subject.subject_name
+                if teacher:
+                    class_data['teacher_name'] = f"{teacher.given_name} {teacher.surname}"
+                if period:
+                    class_data['period_name'] = period.name
+                    class_data['period_start'] = period.start_time.isoformat() if period.start_time else None
+                    class_data['period_end'] = period.end_time.isoformat() if period.end_time else None
+                if classroom:
+                    class_data['classroom_name'] = classroom.room_name
+                
+                # Get year level info
+                year_level = YearLevelModel.find_by_id(class_obj.year_level_id)
+                if year_level:
+                    class_data['year_level_name'] = year_level.level_name
+                    class_data['year_level_order'] = year_level.level_order
+                
+                all_classes.append(class_data)
         
         # Sort by period start time if available
         all_classes.sort(key=lambda x: x.get('period_start', '') if x.get('period_start') else '')

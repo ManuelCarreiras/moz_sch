@@ -18,6 +18,10 @@ interface Class {
   subject_id?: string;
   subject_name?: string;
   teacher_name?: string;
+  year_id?: string;
+  year_name?: string;
+  term_id?: string;
+  term_number?: number;
 }
 
 interface StudentClass {
@@ -39,6 +43,8 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [selectedYearId, setSelectedYearId] = useState<string>('');
+  const [selectedTermId, setSelectedTermId] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -49,6 +55,13 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
     setSelectedStudentIds(new Set());
     setShowConfirmation(false);
   }, [selectedClassId]);
+
+  useEffect(() => {
+    // Reset class selection when year or term filter changes
+    setSelectedClassId('');
+    setSelectedStudentIds(new Set());
+    setShowConfirmation(false);
+  }, [selectedYearId, selectedTermId]);
 
   const loadData = async () => {
     try {
@@ -83,9 +96,28 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
     }
   };
 
-  // Get students with no class assigned
+  // Get students with no class assigned in the selected year/term
   const getUnassignedStudents = (): Student[] => {
-    const enrolledStudentIds = new Set(studentClasses.map(sc => sc.student_id));
+    // Build a set of enrolled student IDs, but only for classes matching the current filters
+    const enrolledStudentIds = new Set<string>();
+    
+    studentClasses.forEach(sc => {
+      const classObj = classes.find(c => c._id === sc.class_id);
+      if (classObj) {
+        // Check if this class matches the current filters
+        let matches = true;
+        if (selectedYearId && classObj.year_id !== selectedYearId) {
+          matches = false;
+        }
+        if (selectedTermId && classObj.term_id !== selectedTermId) {
+          matches = false;
+        }
+        if (matches) {
+          enrolledStudentIds.add(sc.student_id);
+        }
+      }
+    });
+    
     return students.filter(student => !enrolledStudentIds.has(student._id));
   };
 
@@ -112,10 +144,48 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
     }
   };
 
-  // Get unique class names
+  // Get unique years from classes
+  const getUniqueYears = (): { year_id: string; year_name: string }[] => {
+    const yearMap = new Map<string, string>();
+    classes.forEach(cls => {
+      if (cls.year_id && cls.year_name) {
+        yearMap.set(cls.year_id, cls.year_name);
+      }
+    });
+    return Array.from(yearMap.entries())
+      .map(([year_id, year_name]) => ({ year_id, year_name }))
+      .sort((a, b) => b.year_name.localeCompare(a.year_name)); // Most recent first
+  };
+
+  // Get unique terms from classes, optionally filtered by year
+  const getUniqueTerms = (): { term_id: string; term_number: number; year_id: string }[] => {
+    const termMap = new Map<string, { term_number: number; year_id: string }>();
+    classes.forEach(cls => {
+      if (cls.term_id && cls.term_number) {
+        // If year filter is selected, only include terms from that year
+        if (!selectedYearId || cls.year_id === selectedYearId) {
+          termMap.set(cls.term_id, { term_number: cls.term_number!, year_id: cls.year_id! });
+        }
+      }
+    });
+    return Array.from(termMap.entries())
+      .map(([term_id, { term_number, year_id }]) => ({ term_id, term_number, year_id }))
+      .sort((a, b) => a.term_number - b.term_number);
+  };
+
+  // Get unique class names, filtered by year and term if selected
   const getUniqueClassNames = (): { name: string; classes: Class[] }[] => {
     const classMap = new Map<string, Class[]>();
     classes.forEach(cls => {
+      // Filter by year if selected
+      if (selectedYearId && cls.year_id !== selectedYearId) {
+        return;
+      }
+      // Filter by term if selected
+      if (selectedTermId && cls.term_id !== selectedTermId) {
+        return;
+      }
+      
       if (!classMap.has(cls.class_name)) {
         classMap.set(cls.class_name, []);
       }
@@ -249,6 +319,91 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
         <h3 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', fontWeight: 600 }}>
           Step 1: Select Class
         </h3>
+        
+        {/* Year and Term Filters */}
+        <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-md)', maxWidth: '800px' }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="year_filter" style={{ 
+              display: 'block', 
+              marginBottom: 'var(--space-xs)',
+              fontSize: '0.875rem',
+              fontWeight: 500 
+            }}>
+              School Year:
+            </label>
+            <select
+              id="year_filter"
+              value={selectedYearId}
+              onChange={(e) => {
+                setSelectedYearId(e.target.value);
+                setSelectedTermId(''); // Reset term when year changes
+              }}
+              style={{
+                width: '100%',
+                padding: 'var(--space-sm)',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: 'var(--text-base)',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
+              }}
+            >
+              <option value="">-- All Years --</option>
+              {getUniqueYears().map((year) => (
+                <option 
+                  key={year.year_id} 
+                  value={year.year_id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
+                  {year.year_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <label htmlFor="term_filter" style={{ 
+              display: 'block', 
+              marginBottom: 'var(--space-xs)',
+              fontSize: '0.875rem',
+              fontWeight: 500 
+            }}>
+              Term:
+            </label>
+            <select
+              id="term_filter"
+              value={selectedTermId}
+              onChange={(e) => setSelectedTermId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: 'var(--space-sm)',
+                borderRadius: '0.25rem',
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontSize: 'var(--text-base)',
+                WebkitAppearance: 'menulist',
+                MozAppearance: 'menulist',
+                appearance: 'menulist'
+              }}
+            >
+              <option value="">-- All Terms --</option>
+              {getUniqueTerms().map((term) => (
+                <option 
+                  key={term.term_id} 
+                  value={term.term_id}
+                  style={{ background: 'var(--card)', color: 'var(--text)' }}
+                >
+                  Term {term.term_number}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <div style={{ maxWidth: '400px' }}>
           <label htmlFor="class_selection" style={{ 
             display: 'block', 

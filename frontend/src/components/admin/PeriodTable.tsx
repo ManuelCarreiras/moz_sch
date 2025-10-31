@@ -23,6 +23,7 @@ const PeriodTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingPeriod, setEditingPeriod] = useState<Period | null>(null);
+  const [selectedYearFilter, setSelectedYearFilter] = useState<string>('');
   const [formData, setFormData] = useState({
     year_id: '',
     name: '',
@@ -128,6 +129,11 @@ const PeriodTable: React.FC = () => {
     });
   };
 
+  // Filter periods by selected year
+  const filteredPeriods = selectedYearFilter 
+    ? periods.filter(p => p.year_id === selectedYearFilter)
+    : periods;
+
   if (loading) {
     return <div>Loading periods...</div>;
   }
@@ -145,6 +151,46 @@ const PeriodTable: React.FC = () => {
         </button>
       </div>
 
+      {/* Year Filter */}
+      <div style={{ marginBottom: 'var(--space-md)', maxWidth: '400px' }}>
+        <label htmlFor="year_filter" style={{ 
+          display: 'block', 
+          marginBottom: 'var(--space-xs)',
+          fontSize: '0.875rem',
+          fontWeight: 500 
+        }}>
+          Filter by School Year:
+        </label>
+        <select
+          id="year_filter"
+          value={selectedYearFilter}
+          onChange={(e) => setSelectedYearFilter(e.target.value)}
+          style={{
+            width: '100%',
+            padding: 'var(--space-sm)',
+            borderRadius: '0.5rem',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            fontSize: 'var(--text-base)',
+            WebkitAppearance: 'menulist',
+            MozAppearance: 'menulist',
+            appearance: 'menulist'
+          }}
+        >
+          <option value="">-- All Years --</option>
+          {schoolYears.map((year) => (
+            <option 
+              key={year._id} 
+              value={year._id}
+              style={{ background: 'var(--card)', color: 'var(--text)' }}
+            >
+              {year.year_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="table-container">
         <table className="data-table">
           <thead>
@@ -157,12 +203,12 @@ const PeriodTable: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {periods.length === 0 ? (
+            {filteredPeriods.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center">No periods found</td>
               </tr>
             ) : (
-              periods.map((period) => (
+              filteredPeriods.map((period) => (
                 <tr key={period._id}>
                   <td>{period.name}</td>
                   <td>{getSchoolYearName(period.year_id)}</td>

@@ -3,6 +3,7 @@ import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
 import { TeacherWizard } from './admin/TeacherWizard';
+import { TeacherSchedule } from './TeacherSchedule';
 
 type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
 
@@ -12,6 +13,7 @@ export function TeacherDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TeacherTab>('overview');
   const [showCreateTeacher, setShowCreateTeacher] = useState(false);
+  const isAdmin = user?.role === 'admin';
 
   const handleSignOut = async () => {
     try {
@@ -70,15 +72,7 @@ export function TeacherDashboard() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'classes':
-        return (
-          <div className="teacher-content">
-            <h2>My Classes</h2>
-            <p>View your assigned classes and teaching schedule.</p>
-            <div className="placeholder-content">
-              <p>Classes functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <TeacherSchedule />;
       case 'students':
         return (
           <div className="teacher-content">
@@ -197,13 +191,15 @@ export function TeacherDashboard() {
                   <h2>Teacher Portal</h2>
                   <p>Manage your classes, students, and teaching resources.</p>
                 </div>
-                <button 
-                  className="btn btn--primary"
-                  onClick={() => setShowCreateTeacher(true)}
-                  style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
-                >
-                  Create New Teacher
-                </button>
+                {isAdmin && (
+                  <button 
+                    className="btn btn--primary"
+                    onClick={() => setShowCreateTeacher(true)}
+                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
+                  >
+                    Create New Teacher
+                  </button>
+                )}
               </div>
               <div className="welcome-message">
                 <p>Welcome to your teacher portal! Use the sidebar to navigate to different sections.</p>

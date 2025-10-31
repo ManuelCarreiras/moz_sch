@@ -21,9 +21,6 @@ interface Class {
 }
 
 interface TimetableData {
-  year_level_id: string;
-  year_level_name: string;
-  year_level_order: number;
   timetable: Class[];
   all_periods?: any[];
 }
@@ -53,7 +50,7 @@ function getOrdinalSuffix(num: number): string {
   return 'th';
 }
 
-export function StudentSchedule() {
+export function TeacherSchedule() {
   const user = useUser();
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,20 +60,18 @@ export function StudentSchedule() {
   const [selectedTermId, setSelectedTermId] = useState<string>('');
   const [selectedYearId, setSelectedYearId] = useState<string>('');
 
-  const loadStudentTimetable = useCallback(async (termId?: string, yearId?: string) => {
+  const loadTeacherTimetable = useCallback(async (termId?: string, yearId?: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get user info
       if (!user?.id) {
-        setError('Unable to identify student. Please contact your administrator.');
+        setError('Unable to identify teacher. Please contact your administrator.');
         setLoading(false);
         return;
       }
 
-      // Call the new student schedule API - let the API find the student by email
-      let url = `/student/schedule`;
+      let url = `/teacher/schedule`;
       const params = new URLSearchParams();
       if (termId) params.append('term_id', termId);
       if (yearId) params.append('year_id', yearId);
@@ -85,22 +80,13 @@ export function StudentSchedule() {
       const response = await apiService.get<any>(url);
 
       if (response.success && response.data) {
-        // API returns data in message field
         const data: any = (response.data as any).message || response.data;
         
-        // Extract year level info from first class if available
-        const firstClass = data.timetable && data.timetable.length > 0 ? data.timetable[0] : null;
-        
-        // Set timetable data
         setTimetable({
-          year_level_id: firstClass?.year_level_id || '',
-          year_level_name: firstClass?.year_level_name || '',
-          year_level_order: firstClass?.year_level_order || 0,
           timetable: data.timetable || [],
           all_periods: data.all_periods || []
         });
         
-        // Set available filters
         setAvailableTerms(data.available_terms || []);
         setAvailableYears(data.available_years || []);
       } else {
@@ -108,25 +94,22 @@ export function StudentSchedule() {
       }
     } catch (err) {
       setError('Network error occurred');
-      console.error('Error loading student timetable:', err);
+      console.error('Error loading teacher timetable:', err);
     } finally {
       setLoading(false);
     }
   }, [user?.id]);
 
-  // Load timetable on mount or when filters change
   useEffect(() => {
-    loadStudentTimetable(selectedTermId || undefined, selectedYearId || undefined);
-  }, [selectedTermId, selectedYearId, loadStudentTimetable]);
+    loadTeacherTimetable(selectedTermId || undefined, selectedYearId || undefined);
+  }, [selectedTermId, selectedYearId, loadTeacherTimetable]);
 
-  // Organize classes into a grid by period and day of week
   const organizeTimetableGrid = (): { periods: string[]; periodMap: Map<string, { start: string; end: string }>; classes: Map<string, Class> } | null => {
     if (!timetable) return null;
 
     const periodMap = new Map<string, { start: string; end: string }>();
     const classesByPeriodDay = new Map<string, Class>();
 
-    // Use all_periods from API to build the grid
     if (timetable.all_periods && timetable.all_periods.length > 0) {
       timetable.all_periods.forEach(period => {
         periodMap.set(period.name, {
@@ -136,14 +119,12 @@ export function StudentSchedule() {
       });
     }
 
-    // Map classes to their periods and days
     if (timetable.timetable) {
       timetable.timetable.forEach(classItem => {
         if (classItem.period_name && classItem.day_of_week) {
           const key = `${classItem.period_name}_${classItem.day_of_week}`;
           classesByPeriodDay.set(key, classItem);
           
-          // Add period info if not already added
           if (classItem.period_start && classItem.period_end && !periodMap.has(classItem.period_name)) {
             periodMap.set(classItem.period_name, {
               start: classItem.period_start,
@@ -154,7 +135,6 @@ export function StudentSchedule() {
       });
     }
 
-    // Get sorted list of periods
     const periods = Array.from(periodMap.entries()).sort((a, b) => {
       return new Date(a[1].start).getTime() - new Date(b[1].start).getTime();
     });
@@ -168,7 +148,7 @@ export function StudentSchedule() {
 
   if (loading) {
     return (
-      <div className="student-content">
+      <div className="teacher-content">
         <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
           <p>Loading your schedule...</p>
         </div>
@@ -178,9 +158,9 @@ export function StudentSchedule() {
 
   if (error) {
     return (
-      <div className="student-content">
-        <h2>Schedule</h2>
-        <p>Check your class schedule and upcoming assignments.</p>
+      <div className="teacher-content">
+        <h2>My Classes</h2>
+        <p>View your assigned classes and teaching schedule.</p>
         <div className="error-message" style={{ marginTop: 'var(--space-md)' }}>
           {error}
         </div>
@@ -189,25 +169,25 @@ export function StudentSchedule() {
   }
 
   const grid = organizeTimetableGrid();
-  const daysOfWeek = [1, 2, 3, 4, 5]; // Monday to Friday
+  const daysOfWeek = [1, 2, 3, 4, 5];
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   if (!timetable || !grid || grid.periods.length === 0) {
     return (
-      <div className="student-content">
-        <h2>Schedule</h2>
-        <p>Check your class schedule and upcoming assignments.</p>
+      <div className="teacher-content">
+        <h2>My Classes</h2>
+        <p>View your assigned classes and teaching schedule.</p>
         <div className="placeholder-content" style={{ marginTop: 'var(--space-md)' }}>
-          <p>No schedule available yet. Please contact your administrator.</p>
+          <p>No classes assigned yet. Please contact your administrator.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="student-content">
-      <h2>Schedule</h2>
-      <p>Check your class schedule and upcoming assignments.</p>
+    <div className="teacher-content">
+      <h2>My Classes</h2>
+      <p>View your assigned classes and teaching schedule.</p>
 
       {timetable && (
         <div style={{ marginTop: 'var(--space-lg)' }}>
@@ -298,18 +278,6 @@ export function StudentSchedule() {
             )}
           </div>
 
-          <div style={{ 
-            marginBottom: 'var(--space-md)',
-            padding: 'var(--space-md)',
-            background: 'var(--card)',
-            borderRadius: '0.5rem',
-            border: '1px solid var(--border)'
-          }}>
-            <strong>Class:</strong> {timetable.year_level_order > 0 
-              ? `${timetable.year_level_order}${getOrdinalSuffix(timetable.year_level_order)} ${timetable.year_level_name}` 
-              : timetable.year_level_name || 'No class assigned'}
-          </div>
-
           <div style={{ overflowX: 'auto', marginTop: 'var(--space-lg)' }}>
             <table style={{ 
               width: '100%',
@@ -372,9 +340,11 @@ export function StudentSchedule() {
                                 <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                   {classItem.subject_name || classItem.class_name}
                                 </div>
-                                {classItem.teacher_name && (
+                                {classItem.year_level_name && (
                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    👨‍🏫 {classItem.teacher_name}
+                                    📚 {classItem.year_level_order && classItem.year_level_order > 0 
+                                      ? `${classItem.year_level_order}${getOrdinalSuffix(classItem.year_level_order)} ${classItem.year_level_name}` 
+                                      : classItem.year_level_name}
                                   </div>
                                 )}
                                 {classItem.classroom_name && (
@@ -402,3 +372,4 @@ export function StudentSchedule() {
     </div>
   );
 }
+

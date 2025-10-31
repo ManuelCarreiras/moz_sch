@@ -5,6 +5,7 @@ from models.teacher import TeacherModel
 from models.subject import SubjectModel
 from models.period import PeriodModel
 from models.term import TermModel
+from models.school_year import SchoolYearModel
 from models.classroom import ClassroomModel
 from utils.auth_middleware import require_role
 
@@ -87,9 +88,9 @@ class ClassModelResource(Resource):
                 }
                 return Response(json.dumps(response), 400)
         
-        # Check for conflict only if period_id is provided
-        # Now conflicts are checked by year_level + period + day_of_week
+        # Check for conflicts only if period_id and day_of_week are provided
         if period_id and day_of_week:
+            # Check year level conflict: same year_level + period + day
             existing_class = ClassModel.find_by_year_level_period_and_day(year_level_id, period_id, day_of_week)
             if existing_class:
                 response = {
@@ -97,6 +98,16 @@ class ClassModelResource(Resource):
                     'message': 'This period and day is already assigned to another class in this year level'
                 }
                 return Response(json.dumps(response), 400)
+            
+            # Check teacher conflict: same teacher + term + period + day
+            if teacher_id:
+                has_conflict = ClassModel.find_teacher_conflicts(teacher_id, term_id, period_id, day_of_week)
+                if has_conflict:
+                    response = {
+                        'success': False,
+                        'message': 'This teacher is already assigned to another class in this term at the same time'
+                    }
+                    return Response(json.dumps(response), 400)
 
         # Convert empty strings to None for optional fields
         cleaned_data = data.copy()
@@ -139,6 +150,12 @@ class ClassModelResource(Resource):
                 class_data['teacher_name'] = f"{teacher.given_name} {teacher.surname}"
             if term:
                 class_data['term_number'] = term.term_number
+                class_data['term_id'] = str(term._id)
+                # Get school year info
+                year = SchoolYearModel.find_by_id(term.year_id)
+                if year:
+                    class_data['year_id'] = str(year._id)
+                    class_data['year_name'] = year.year_name
             if period:
                 class_data['period_name'] = period.name
             if classroom:
@@ -170,6 +187,12 @@ class ClassModelResource(Resource):
                     class_data['teacher_name'] = f"{teacher.given_name} {teacher.surname}"
                 if term:
                     class_data['term_number'] = term.term_number
+                    class_data['term_id'] = str(term._id)
+                    # Get school year info
+                    year = SchoolYearModel.find_by_id(term.year_id)
+                    if year:
+                        class_data['year_id'] = str(year._id)
+                        class_data['year_name'] = year.year_name
                 if period:
                     class_data['period_name'] = period.name
                 if classroom:
@@ -203,16 +226,30 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), 404)
 
-        # Check for conflict if year_level_id or period_id is being changed
-        if data.get('year_level_id') or data.get('period_id'):
-            check_year_level_id = data.get('year_level_id', class_id.year_level_id)
-            check_period_id = data.get('period_id', class_id.period_id)
-            
-            existing_class = ClassModel.find_by_year_level_and_period(check_year_level_id, check_period_id)
+        # Get values to check (use new values or existing ones)
+        check_year_level_id = data.get('year_level_id', class_id.year_level_id)
+        check_period_id = data.get('period_id', class_id.period_id)
+        check_day_of_week = data.get('day_of_week', class_id.day_of_week)
+        check_term_id = data.get('term_id', class_id.term_id)
+        check_teacher_id = data.get('teacher_id', class_id.teacher_id)
+        
+        # Check for year level conflict if period or day is being changed
+        if (data.get('period_id') or data.get('day_of_week') or data.get('year_level_id')):
+            existing_class = ClassModel.find_by_year_level_period_and_day(check_year_level_id, check_period_id, check_day_of_week)
             if existing_class and str(existing_class._id) != data['_id']:
                 response = {
                     'success': False,
-                    'message': 'This period is already assigned to another class in this year level'
+                    'message': 'This period and day is already assigned to another class in this year level'
+                }
+                return Response(json.dumps(response), 400)
+        
+        # Check for teacher conflict if teacher, term, period, or day is being changed
+        if check_teacher_id and check_term_id and check_period_id and check_day_of_week:
+            has_conflict = ClassModel.find_teacher_conflicts(check_teacher_id, check_term_id, check_period_id, check_day_of_week, exclude_class_id=data['_id'])
+            if has_conflict:
+                response = {
+                    'success': False,
+                    'message': 'This teacher is already assigned to another class in this term at the same time'
                 }
                 return Response(json.dumps(response), 400)
 
