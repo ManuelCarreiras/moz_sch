@@ -12,14 +12,18 @@ class StudentModel(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     enrollment_date = db.Column(db.Date, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=True)
+    username = db.Column(db.String(100), unique=True, nullable=True)
 
-    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date):     # noqa501
+    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date, email=None, username=None):     # noqa501
         self.given_name = given_name
         self.middle_name = middle_name
         self.surname = surname
         self.date_of_birth = date_of_birth
         self.gender = gender
         self.enrollment_date = enrollment_date
+        self.email = email
+        self.username = username
 
     def json(self):
         return {
@@ -29,7 +33,9 @@ class StudentModel(db.Model):
             'surname': self.surname,
             'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,  # noqa501
             'gender': self.gender,
-            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None  # noqa501
+            'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,  # noqa501
+            'email': self.email,
+            'username': self.username
         }
 
     def json_with_year_levels(self):
@@ -65,6 +71,14 @@ class StudentModel(db.Model):
     @classmethod
     def find_all(cls):
         return cls.query.all()
+    
+    @classmethod
+    def find_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
+    
+    @classmethod
+    def find_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
 
     def save_to_db(self):
         db.session.add(self)
@@ -83,6 +97,10 @@ class StudentModel(db.Model):
             self.gender = data['gender']
         if data.get('enrollment_date') is not None:
             self.enrollment_date = data['enrollment_date']
+        if data.get('email') is not None:
+            self.email = data['email']
+        if data.get('username') is not None:
+            self.username = data['username']
         self.save_to_db()
 
     def delete_by_id(self, record_id):

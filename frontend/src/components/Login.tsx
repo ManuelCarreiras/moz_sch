@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, useUser } from '../contexts/AuthContext';
 import logoSrc from '../assets/Santa_Isabel.png';
 import watermarkSrc from '../assets/Escola_marca_de_água.png';
 
@@ -8,8 +8,21 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, error } = useAuth();
+  const { signIn, error, isAuthenticated, getAccessToken, signInStep, completeNewPassword } = useAuth();
+  const user = useUser();
   const navigate = useNavigate();
+
+  const requiresNewPassword = useMemo(() => {
+    return signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED' || signInStep === 'NEW_PASSWORD_REQUIRED';
+  }, [signInStep]);
+
+  // After authentication succeeds, route based on role
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'admin' ? '/dashboard' : `/${user.role}`;
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,8 +31,14 @@ export function Login() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      // The redirect will be handled by the PublicRoute component
-      // which will redirect authenticated users to their appropriate dashboard
+      // Try to immediately verify session and route
+      const token = await getAccessToken?.();
+      // Fallback if hook shape changes
+      const resolvedToken = token || null;
+      if (resolvedToken) {
+        const target = (user && user.role === 'admin') ? '/dashboard' : `/${user?.role || 'student'}`;
+        navigate(target, { replace: true });
+      }
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
@@ -29,6 +48,26 @@ export function Login() {
 
   const handleBackToLanding = () => {
     navigate('/landing');
+  };
+
+  // NEW PASSWORD REQUIRED handlers
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwSubmitting, setPwSubmitting] = useState(false);
+
+  const handleCompleteNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword !== confirmPassword) return;
+    setPwSubmitting(true);
+    try {
+      await completeNewPassword(newPassword);
+      const target = (user && user.role === 'admin') ? '/dashboard' : `/${user?.role || 'student'}`;
+      navigate(target, { replace: true });
+    } catch (err) {
+      console.error('Failed to set new password:', err);
+    } finally {
+      setPwSubmitting(false);
+    }
   };
 
   return (
@@ -62,7 +101,7 @@ export function Login() {
               fontSize: 'var(--text-2xl)',
               fontWeight: '600'
             }}>Sign In</h1>
-            
+            {!requiresNewPassword ? (
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
@@ -110,6 +149,46 @@ export function Login() {
                 </button>
               </div>
             </form>
+            ) : (
+            <form onSubmit={handleCompleteNewPassword}>
+              <div className="form-group">
+                <label htmlFor="new_password">New Password</label>
+                <input
+                  id="new_password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  placeholder="Enter a new password"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="confirm_password">Confirm Password</label>
+                <input
+                  id="confirm_password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="Confirm your new password"
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="submit"
+                  disabled={pwSubmitting || !newPassword || newPassword !== confirmPassword}
+                  className="btn btn--primary"
+                  style={{ 
+                    width: '100%',
+                    fontSize: 'var(--text-base)',
+                    padding: 'var(--space-sm) var(--space-md)'
+                  }}
+                >
+                  {pwSubmitting ? 'Updating...' : 'Set New Password'}
+                </button>
+              </div>
+            </form>
+            )}
           </div>
         </main>
 

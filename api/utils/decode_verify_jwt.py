@@ -23,7 +23,7 @@ from jwt import PyJWKClient
 
 
 USER_POOL_ID = os.getenv("AWS_COGNITO_USERPOOL_ID")
-CLIENT_ID = os.getenv("AWS_COGNITO_APPCLIENT_ID")
+CLIENT_ID = os.getenv("AWS_COGNITO_APP_CLIENT_ID") or os.getenv("AWS_COGNITO_APPCLIENT_ID")
 API_KEY = os.getenv("API_KEY")
 
 # CLIENT_SECRET = os.getenv("COGNITO_CLIENT_SECRET")  # noqa:E501
@@ -33,6 +33,21 @@ REGION_NAME = os.getenv("COGNITO_REGION_NAME", 'eu-west-1')
 jwks_url = f'https://cognito-idp.{REGION_NAME}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json'
 jwks_client = PyJWKClient(jwks_url)
 
+
+def decode_token_without_verification(accessToken):
+    """Decode JWT token without verification (for DEBUG mode only)"""
+    try:
+        # Decode without verification - this is UNSAFE and only for development
+        # Provide empty key and disable all verification
+        claims = jwt.decode(
+            accessToken,
+            key="",
+            options={"verify_signature": False, "verify_exp": False, "verify_aud": False}
+        )
+        return claims
+    except Exception as e:
+        print(f'Token decode failed: {e}')
+        return None
 
 def verify_accessToken(accessToken):
     try:

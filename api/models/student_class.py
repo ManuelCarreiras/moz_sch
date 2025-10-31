@@ -30,6 +30,10 @@ class StudentClassModel(db.Model):
     @classmethod
     def find_all(cls):
         return cls.query.all()
+    
+    @classmethod
+    def find_by_student_id(cls, student_id):
+        return cls.query.filter_by(student_id=student_id).all()
 
     def save_to_db(self):
         db.session.add(self)

@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { AdminDashboard } from './admin/AdminDashboard';
 
 export function Dashboard() {
   const { isLoading } = useAuth();
   const user = useUser();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -35,7 +38,19 @@ export function Dashboard() {
     );
   }
 
-  // No role restrictions for now - any authenticated user can access admin dashboard
+  // Redirect non-admin users to their respective portals
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      const target = `/${user.role}`;
+      navigate(target, { replace: true });
+    }
+  }, [user, navigate]);
 
-  return <AdminDashboard />;
+  // Only admins see the admin dashboard
+  if (user.role === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  // Fallback while redirecting
+  return null;
 }

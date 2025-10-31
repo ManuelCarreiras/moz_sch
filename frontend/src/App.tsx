@@ -11,6 +11,11 @@ import { GuardianDashboard } from './components/GuardianDashboard'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
+  // If we're already authenticated, render children even if loading state is true
+  if (isAuthenticated) {
+    return <>{children}</>
+  }
+
   if (isLoading) {
     return (
       <div style={{ 
@@ -31,23 +36,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // Public Route component (redirects to appropriate dashboard if already authenticated)
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated } = useAuth()
   const user = useUser()
-
-  if (isLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: 'var(--text-lg)',
-        color: 'var(--muted)'
-      }}>
-        Loading...
-      </div>
-    )
-  }
 
   if (isAuthenticated && user) {
     // Redirect to appropriate dashboard based on user role

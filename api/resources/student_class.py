@@ -4,9 +4,11 @@ from models.student_class import StudentClassModel
 from models.student import StudentModel
 from models.class_model import ClassModel
 import json
+from utils.auth_middleware import require_role
 
 
 class StudentClassResource(Resource):
+    @require_role('admin')
     def post(self):
         data = request.get_json()
 
@@ -67,6 +69,7 @@ class StudentClassResource(Resource):
             }
             return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def put(self):
         data = request.get_json()
 
@@ -88,6 +91,7 @@ class StudentClassResource(Resource):
 
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def delete(self, id):
         student_class = StudentClassModel.find_by_id(id)
 

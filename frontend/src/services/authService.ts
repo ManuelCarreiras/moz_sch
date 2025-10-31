@@ -1,4 +1,4 @@
-import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { signIn, signOut, getCurrentUser, fetchAuthSession, confirmSignIn } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
 
 export interface User {
@@ -14,6 +14,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  signInStep?: string | null; // e.g., CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED
 }
 
 class AuthService {
@@ -22,6 +23,7 @@ class AuthService {
     isAuthenticated: false,
     isLoading: true,
     error: null,
+    signInStep: null,
   };
 
   private listeners: ((state: AuthState) => void)[] = [];
@@ -35,7 +37,9 @@ class AuthService {
     try {
       const user = await getCurrentUser();
       if (user) {
-        await this.loadUserData();
+        // Mark as authenticated immediately; load details in background
+        this.updateAuthState({ isAuthenticated: true, isLoading: true, error: null });
+        this.loadUserData();
       } else {
         this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
       }
@@ -49,10 +53,12 @@ class AuthService {
     Hub.listen('auth', ({ payload }) => {
       switch (payload.event) {
         case 'signedIn':
+          // Immediately flip to authenticated to unblock routing, then enrich
+          this.updateAuthState({ isAuthenticated: true, isLoading: true, error: null, signInStep: null });
           this.loadUserData();
           break;
         case 'signedOut':
-          this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+          this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false, signInStep: null });
           break;
         case 'tokenRefresh':
           this.loadUserData();
@@ -107,9 +113,10 @@ class AuthService {
   }
 
   private determineRole(groups: string[]): 'admin' | 'teacher' | 'student' {
-    if (groups.includes('admin')) return 'admin';
-    if (groups.includes('teacher')) return 'teacher';
-    if (groups.includes('student')) return 'student';
+    const normalized = (groups || []).map(g => g.toLowerCase());
+    if (normalized.includes('admin')) return 'admin';
+    if (normalized.includes('teacher') || normalized.includes('teachers')) return 'teacher';
+    if (normalized.includes('student') || normalized.includes('students')) return 'student';
     return 'student'; // default role
   }
 
@@ -122,15 +129,44 @@ class AuthService {
   async signIn(email: string, password: string) {
     try {
       this.updateAuthState({ isLoading: true, error: null });
-      await signIn({ username: email, password });
-      // User data will be loaded via Auth Hub
+      const result = await signIn({ username: email, password });
+
+      // Amplify v6 returns isSignedIn or nextStep
+      if ((result as any)?.isSignedIn) {
+        // User data will be loaded via Auth Hub
+        this.updateAuthState({ signInStep: null });
+        return;
+      }
+
+      const nextStep = (result as any)?.nextStep?.signInStep as string | undefined;
+      if (nextStep) {
+        // Store next step (e.g., CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED)
+        this.updateAuthState({ isLoading: false, isAuthenticated: false, signInStep: nextStep });
+        return;
+      }
     } catch (error: any) {
       const errorMessage = this.getErrorMessage(error);
       this.updateAuthState({ 
         isLoading: false, 
-        error: errorMessage 
+        error: errorMessage,
+        signInStep: null,
       });
       throw new Error(errorMessage);
+    }
+  }
+
+  async completeNewPassword(newPassword: string) {
+    try {
+      this.updateAuthState({ isLoading: true, error: null });
+      // In NEW_PASSWORD_REQUIRED, confirmSignIn expects the new password as challengeResponse
+      await confirmSignIn({ challengeResponse: newPassword });
+      // After success, load user data
+      await this.loadUserData();
+      this.updateAuthState({ isAuthenticated: true, isLoading: false, signInStep: null });
+    } catch (error: any) {
+      const message = this.getErrorMessage(error);
+      this.updateAuthState({ isLoading: false, error: message });
+      throw new Error(message);
     }
   }
 

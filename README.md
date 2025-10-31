@@ -44,10 +44,15 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 
 ### Authentication & Security
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
-- **Multi-Portal Access**: Admin, Teacher, and Student portals with unified access
-- **Role-Based Routing**: Client-side navigation with protected routes (role restrictions temporarily disabled for development)
+- **Cognito User Creation**: Automatic user creation when students are created by admin
+- **Username Generation**: Cognito usernames generated from student names (first initial + middle initial + surname)
+- **Force Password Change**: Handles NEW_PASSWORD_REQUIRED challenge for first-time logins
+- **Username-Based Lookup**: Student records store Cognito username for authentication mapping
+- **Multi-Portal Access**: Admin, Teacher, and Student portals with role-based access
+- **Role-Based Access Control**: Admin-only restrictions on write operations (POST, PUT, DELETE)
 - **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
 - **Session Management**: Automatic token refresh and secure logout
+- **JWT Token Parsing**: Extracts username and email from access tokens for student lookup
 
 ### Technical Features
 - **Frontend**: React 19 with TypeScript, AWS Amplify, and React Router DOM
@@ -112,7 +117,7 @@ moz_sch/
 The system uses a comprehensive relational database design with the following key entities:
 
 ### Core Educational Entities
-- **Students**: Personal information, enrollment dates, academic progress
+- **Students**: Personal information, enrollment dates, academic progress, Cognito username integration
 - **Teachers**: Professional profiles, contact details, subject assignments
 - **Subjects**: Academic courses organized by departments
 - **Classes**: Scheduled courses with teacher, classroom, and time assignments
@@ -140,11 +145,19 @@ The system uses a comprehensive relational database design with the following ke
 
 ### Student Management
 ```
-POST   /student              # Create new student (integrated with frontend form)
+POST   /student              # Create new student (integrated with frontend form, creates Cognito user)
 GET    /student/<id>         # Get student by ID
 PUT    /student              # Update student
 DELETE /student/<id>         # Delete student
+GET    /student/schedule     # Get student's class schedule (read-only, filtered by term/year)
+GET    /student/schedule/<id> # Get specific student's schedule
 ```
+
+**Note**: Student creation automatically:
+- Creates a Cognito user with generated username (first initial + middle initial + surname)
+- Adds user to 'student' Cognito group
+- Stores username in student record for authentication lookup
+- Sends welcome email with temporary password (NEW_PASSWORD_REQUIRED challenge)
 
 ### Teacher Management
 ```
@@ -215,7 +228,17 @@ GET    /student_year_level/student/<id>  # Get student's year level info
 
 GET    /student_class/student/<id>       # Get student's classes
 GET    /student_class/class/<id>         # Get class enrollment
+
+GET    /student/schedule                 # Get authenticated student's schedule (uses JWT username)
+GET    /student/schedule/<id>            # Get specific student's schedule
 ```
+
+**Student Schedule Endpoint**:
+- Authenticates via JWT token (extracts username or email)
+- Looks up student by username (Cognito username) or email
+- Returns timetable with subject, teacher, period, classroom information
+- Supports filtering by `term_id` and `year_id` query parameters
+- Returns available terms and years for frontend dropdowns
 
 ### Infrastructure Management
 ```
@@ -279,6 +302,23 @@ DELETE /classroom_types/<id> # Delete classroom type
    open http://localhost:8080
    ```
 
+### Database Migration
+
+**Important**: Before using the student schedule feature, you must add the `username` column to the student table:
+
+```bash
+# Run the migration script
+docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_username_to_student.sql
+
+# Or manually run:
+docker-compose exec postgres psql -U postgres -d santa_isabel_db
+# Then execute:
+ALTER TABLE student ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE;
+CREATE INDEX IF NOT EXISTS idx_student_username ON student(username);
+```
+
+The migration script (`add_username_to_student.sql`) is included in the project root. Existing students will have NULL username values until they are updated or new students are created.
+
 ### Configuration (Doppler Secrets)
 
 Add these secrets to your Doppler project:
@@ -311,15 +351,24 @@ VITE_API_BASE_URL=http://localhost:5000
 ```bash
 curl -X POST http://localhost:5000/student \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <admin_jwt_token>" \
   -d '{
     "given_name": "John",
     "middle_name": "Michael",
     "surname": "Doe",
     "date_of_birth": "2010-05-15T00:00:00",
     "gender": "Male",
-    "enrollment_date": "2023-09-01"
+    "enrollment_date": "2023-09-01",
+    "email": "jdoe@example.com"
   }'
 ```
+
+**Note**: Student creation requires:
+- Admin authentication (JWT token in Authorization header)
+- Email field (required for Cognito user creation)
+- Automatically creates Cognito user with username format: `jmdoe` (first initial + middle initial + surname)
+- Adds user to 'student' Cognito group
+- Sends welcome email with temporary password (NEW_PASSWORD_REQUIRED challenge)
 
 ### Creating a Teacher
 
@@ -358,6 +407,29 @@ curl -X POST http://localhost:5000/score_range \
     "max_score": 100
   }'
 ```
+
+### Getting Student Schedule
+
+```bash
+# Get authenticated student's schedule
+curl -X GET "http://localhost:5000/student/schedule" \
+  -H "Authorization: Bearer <student_jwt_token>"
+
+# Get schedule filtered by term and year
+curl -X GET "http://localhost:5000/student/schedule?term_id=<term_uuid>&year_id=<year_uuid>" \
+  -H "Authorization: Bearer <student_jwt_token>"
+
+# Get specific student's schedule (admin only)
+curl -X GET "http://localhost:5000/student/schedule/<student_uuid>?term_id=<term_uuid>" \
+  -H "Authorization: Bearer <admin_jwt_token>"
+```
+
+**Note**: The student schedule endpoint:
+- Authenticates via JWT token (extracts username or email from token)
+- Looks up student by Cognito username or email
+- Returns timetable with subject, teacher, period, classroom information
+- Supports optional filtering by `term_id` and `year_id` query parameters
+- Returns available terms and years for frontend dropdowns
 
 ## 🧪 Testing
 
@@ -419,10 +491,13 @@ The system runs the following services:
 
 ### Current Development Status
 
-- **Role Restrictions**: Temporarily disabled for development - any authenticated user can access all portals
-- **Student Management**: Fully functional with frontend form integration
+- **Role-Based Access Control**: Admin-only restrictions enabled for write operations (POST, PUT, DELETE) on all resources
+- **Student Management**: Fully functional with frontend form integration and Cognito user creation
+- **Student Portal**: Read-only schedule view for students to view their class timetables
 - **Navigation**: Complete bidirectional navigation between all portals
-- **API Integration**: Student creation form directly connected to Flask backend
+- **API Integration**: Student creation form directly connected to Flask backend with Cognito integration
+- **Authentication**: JWT token-based authentication with username/email extraction for student lookup
+- **Database Migration**: Username field added to student table (see `add_username_to_student.sql`)
 
 ## 🤝 Contributing
 

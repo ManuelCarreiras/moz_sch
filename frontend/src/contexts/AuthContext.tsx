@@ -5,6 +5,7 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
+  completeNewPassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,11 +54,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return await authService.getAccessToken();
   };
 
+  const completeNewPassword = async (newPassword: string) => {
+    await authService.completeNewPassword(newPassword);
+  };
+
   const value: AuthContextType = {
     ...authState,
     signIn,
     signOut,
     getAccessToken,
+    completeNewPassword,
   };
 
   return (

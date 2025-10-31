@@ -24,6 +24,9 @@ services:
     restart: always
     environment: 
       - DOPPLER_TOKEN=${DOPPLER_TOKEN_TEMP}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ~/.aws:/root/.aws:ro
 
     deploy:
       resources:
@@ -63,6 +66,13 @@ services:
         limits:
           cpus: '0.1'
           memory: 128M
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
 
 volumes:
   postgres-db:

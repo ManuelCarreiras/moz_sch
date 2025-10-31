@@ -6,12 +6,14 @@ from models.subject import SubjectModel
 from models.period import PeriodModel
 from models.term import TermModel
 from models.classroom import ClassroomModel
+from utils.auth_middleware import require_role
 
 import json
 
 
 class ClassModelResource(Resource):
 
+    @require_role('admin')
     def post(self):
         data = request.get_json()
 
@@ -181,6 +183,7 @@ class ClassModelResource(Resource):
             }
             return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def put(self):
         data = request.get_json()
 
@@ -222,6 +225,7 @@ class ClassModelResource(Resource):
 
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def delete(self, id):
         class_id = ClassModel.find_by_id(id)
 

@@ -21,9 +21,11 @@ This is the frontend application for the Santa Isabel Escola school management p
 
 ### Authentication System
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
-- **Multi-Role Access**: Admin, Teacher, and Student portals with unified access (role restrictions temporarily disabled for development)
+- **Force Password Change Flow**: Handles NEW_PASSWORD_REQUIRED challenge for first-time student logins
+- **Multi-Role Access**: Admin, Teacher, and Student portals with role-based navigation
 - **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
 - **Session Management**: Automatic token refresh and secure logout
+- **Username-Based Authentication**: Extracts username from JWT tokens for student lookup
 
 ### Navigation & Routing
 - **Client-Side Routing**: React Router DOM for seamless navigation
@@ -36,11 +38,19 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Bidirectional Navigation**: Easy navigation between all portals
 
 ### Student Portal Features
-- **Student Management**: Create new students with full form validation
-- **API Integration**: Direct integration with Flask backend (`POST /student`)
-- **Form Handling**: Complete student registration with required fields:
-  - Given Name, Middle Name, Surname
-  - Date of Birth, Gender, Enrollment Date
+- **Student Schedule View**: Read-only timetable displaying enrolled classes
+  - Grid-based timetable with days of week (Monday-Friday) as columns
+  - Period rows with time intervals
+  - Filter by school year and term
+  - Displays subject, teacher, period, and classroom information
+  - Automatic authentication via JWT token (uses username lookup)
+- **Student Management**: Create new students with full form validation (admin-only)
+  - Email field required for Cognito user creation
+  - API Integration: Direct integration with Flask backend (`POST /student`)
+  - Automatically creates Cognito user with generated username
+  - Form Handling: Complete student registration with required fields:
+    - Given Name, Middle Name, Surname, Email
+    - Date of Birth, Gender, Enrollment Date
 - **Real-time Feedback**: Success/error messages and loading states
 - **Modal Interface**: Clean, accessible form design
 
@@ -104,12 +114,14 @@ This is the frontend application for the Santa Isabel Escola school management p
 ### Technical Features
 - **React 19** with TypeScript for type safety
 - **AWS Amplify** for Cognito authentication
+- **Force Password Change**: Complete NEW_PASSWORD_REQUIRED challenge flow
 - **React Router DOM** for client-side routing
 - **Vite** for fast development and optimized builds
 - **CSS Grid & Flexbox** for responsive layouts
 - **Viewport Units** for true responsive scaling
 - **Docker** containerization for production deployment
 - **API Integration**: Full backend connectivity with error handling
+- **Student Schedule Component**: Grid-based timetable with filtering capabilities
 
 ## 🛠 Technology Stack
 
@@ -232,6 +244,7 @@ frontend/
 │   │   ├── Login.tsx             # Login page component
 │   │   ├── LoginModal.tsx        # Modal login component (legacy)
 │   │   ├── StudentDashboard.tsx  # Student portal component
+│   │   ├── StudentSchedule.tsx  # Student schedule/timetable view component
 │   │   ├── TeacherDashboard.tsx  # Teacher portal component
 │   │   └── GuardianDashboard.tsx # Guardian portal component
 │   ├── contexts/                 # React contexts
@@ -307,8 +320,10 @@ The authentication system uses:
 - AWS Amplify for Cognito integration
 - React Context for global auth state management
 - JWT token handling with automatic refresh
+- Force password change flow for NEW_PASSWORD_REQUIRED challenge
 - Role-based access control (Admin, Teacher, Student)
 - Multiple authentication methods for flexibility
+- Username extraction from JWT tokens for student lookup
 
 ### Responsive Implementation
 The responsive system uses:
@@ -339,11 +354,14 @@ The responsive system uses:
 - Academic foundation management (terms, periods, score ranges)
 - Subject-score range integration with flexible assignment workflow
 - Score range creation integrated into subject creation process
+- Student schedule API integration (`GET /student/schedule`)
+- Username-based student lookup for authentication
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
 - Consistent modal styling and form field widths across all interfaces
 - Tabbed interface for academic foundation management
 - Modal UI consistency fixes across all components
+- Force password change flow for first-time student logins
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation

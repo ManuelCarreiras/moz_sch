@@ -44,6 +44,11 @@ A comprehensive school management system with React frontend and Flask backend, 
 - [x] **Modal UI Consistency**: Fixed modal close button styling across all components
 - [x] **Workflow Optimization**: Score range creation integrated into subject creation workflow
 - [x] **Academic Setup Wizard**: Guided school year and term creation
+- [x] **Student Username Integration**: Cognito username stored in student records for authentication
+- [x] **Student Schedule View**: Read-only timetable view for students with year/term filtering
+- [x] **Cognito User Creation**: Automatic Cognito user creation with username generation (first initial + middle initial + surname)
+- [x] **Force Password Change Flow**: NEW_PASSWORD_REQUIRED challenge handling for first-time logins
+- [x] **Role-Based Access Control**: Admin-only restrictions for write operations across all resources
 - [ ] **Integration Testing**: Full system testing of academic foundation features
 
 ---
@@ -311,6 +316,10 @@ frontend/src/components/
 - ✅ Subject-Score Range Integration with flexible assignment system
 - ✅ Modal UI consistency fixes across all components
 - ✅ Score range creation integrated into subject creation workflow
+- ✅ Student username field added to database for Cognito authentication mapping
+- ✅ Username-based student lookup for schedule and authentication
+- ✅ Force password change flow for first-time student logins
+- ✅ Student schedule endpoint with JWT-based authentication
 
 ### **Technical Decisions**
 - ✅ Reuse StudentWizard/TeacherWizard patterns for consistency
@@ -326,6 +335,6 @@ frontend/src/components/
 
 ---
 
-**Last Updated**: January 8, 2025
-**Next Review**: Week 3 Check-in
+**Last Updated**: October 31, 2025
+**Next Review**: After database volume reset and testing
 **Project Status**: 🎉 Phase 2 - 100% Complete | Academic Foundation Complete! Ready for Phase 3

@@ -7,7 +7,7 @@ import { StudentSchedule } from './StudentSchedule';
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
 export function StudentDashboard() {
-  const { signOut, isLoading } = useAuth();
+  const { signOut, getAccessToken } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StudentTab>('overview');
@@ -18,9 +18,11 @@ export function StudentDashboard() {
     surname: '',
     date_of_birth: '',
     gender: '',
-    enrollment_date: ''
+    enrollment_date: '',
+    email: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isAdmin = user?.role === 'admin';
 
   const handleSignOut = async () => {
     try {
@@ -47,10 +49,12 @@ export function StudentDashboard() {
       // Get the API base URL from environment or use default
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       
+      const token = await getAccessToken();
       const response = await fetch(`${apiBaseUrl}/student`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(studentForm)
       });
@@ -66,7 +70,8 @@ export function StudentDashboard() {
           surname: '',
           date_of_birth: '',
           gender: '',
-          enrollment_date: ''
+          enrollment_date: '',
+          email: ''
         });
         setShowCreateStudent(false);
         
@@ -84,21 +89,6 @@ export function StudentDashboard() {
       setIsSubmitting(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: 'var(--text-lg)',
-        color: 'var(--muted)'
-      }}>
-        Loading...
-      </div>
-    );
-  }
 
   if (!user) {
     return (
@@ -247,13 +237,15 @@ export function StudentDashboard() {
                   <h2>Student Portal</h2>
                   <p>Access your academic information, grades, and schedule.</p>
                 </div>
-                <button 
-                  className="btn btn--primary"
-                  onClick={() => setShowCreateStudent(true)}
-                  style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
-                >
-                  Create New Student
-                </button>
+                {isAdmin && (
+                  <button 
+                    className="btn btn--primary"
+                    onClick={() => setShowCreateStudent(true)}
+                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
+                  >
+                    Create New Student
+                  </button>
+                )}
               </div>
               <div className="welcome-message">
                 <p>Welcome to your student portal! Use the sidebar to navigate to different sections.</p>
@@ -265,7 +257,7 @@ export function StudentDashboard() {
       </div>
 
       {/* Create Student Modal */}
-      {showCreateStudent && (
+      {isAdmin && showCreateStudent && (
         <div className="modal" role="dialog" aria-modal="true" onClick={() => setShowCreateStudent(false)}>
           <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
@@ -326,6 +318,20 @@ export function StudentDashboard() {
                       onChange={handleInputChange}
                       required
                       disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="email">Email (for Cognito invite)</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={studentForm.email}
+                      onChange={handleInputChange}
+                      disabled={isSubmitting}
+                      placeholder="student@example.com"
                     />
                   </div>
                 </div>

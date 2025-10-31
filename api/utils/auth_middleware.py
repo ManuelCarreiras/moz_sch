@@ -2,7 +2,10 @@ import os
 import secrets
 from flask import request, g, Response
 from utils.jwt_auth import jwt_auth
-from services.auth_redis_service import auth_redis_service
+try:
+    from services.auth_redis_service import auth_redis_service
+except Exception:
+    auth_redis_service = None
 import json
 
 
@@ -86,8 +89,21 @@ def valid_auth():
         user_id = payload.get('sub')
         email = payload.get('email')
         username = payload.get('username')
-        admin = payload.get('admin', False)
-        role = payload.get('role', 'analista')
+        # Derive role/admin from Cognito groups if not explicitly present
+        groups = payload.get('cognito:groups') or payload.get('groups') or []
+        groups_norm = [str(g).lower() for g in groups]
+        # If token has explicit role/admin, use them; otherwise infer from groups
+        admin = bool(payload.get('admin', False)) or ('admin' in groups_norm)
+        role = payload.get('role')
+        if not role:
+            if 'admin' in groups_norm:
+                role = 'admin'
+            elif 'teacher' in groups_norm or 'teachers' in groups_norm:
+                role = 'teacher'
+            elif 'student' in groups_norm or 'students' in groups_norm:
+                role = 'student'
+            else:
+                role = None
 
         if not user_id or not email or not username:
             response = {
@@ -99,7 +115,7 @@ def valid_auth():
 
         # Check if session exists in Redis (optional for stateless JWT)
         session_id = request.headers.get('X-Session-ID')
-        if session_id:
+        if session_id and auth_redis_service is not None:
             session_data = auth_redis_service.get_session(session_id)
             if not session_data:
                 response = {

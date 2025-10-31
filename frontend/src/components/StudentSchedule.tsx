@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/apiService';
 import { useUser } from '../contexts/AuthContext';
 
@@ -13,6 +13,11 @@ interface Class {
   period_start?: string;
   period_end?: string;
   classroom_name?: string;
+  term_number?: number;
+  year_name?: string;
+  year_level_id?: string;
+  year_level_name?: string;
+  year_level_order?: number;
 }
 
 interface TimetableData {
@@ -23,86 +28,72 @@ interface TimetableData {
   all_periods?: any[];
 }
 
+interface Term {
+  _id: string;
+  term_number: number;
+  year_id: string;
+  year_name: string;
+  start_date: string;
+  end_date: string;
+}
+
+interface Year {
+  _id: string;
+  year_name: string;
+  start_date: string;
+  end_date: string;
+}
+
 export function StudentSchedule() {
   const user = useUser();
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
+  const [availableYears, setAvailableYears] = useState<Year[]>([]);
+  const [selectedTermId, setSelectedTermId] = useState<string>('');
+  const [selectedYearId, setSelectedYearId] = useState<string>('');
 
-  useEffect(() => {
-    loadStudentTimetable();
-  }, []);
-
-  const loadStudentTimetable = async () => {
+  const loadStudentTimetable = useCallback(async (termId?: string, yearId?: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Step 1: Get student's year level assignment
-      // Try to get student year level assignments using user email or ID
-      if (!user?.email) {
+      // Get user info
+      if (!user?.id) {
         setError('Unable to identify student. Please contact your administrator.');
         setLoading(false);
         return;
       }
 
-      // Step 2: Get all students and find one matching the user email (if there's a mapping)
-      // OR: Get student classes directly - but we need student_id
-      // For now, let's try getting all student classes and filtering
-      // Actually, a better approach: get student year level assignments
-      
-      // Try to get student year levels - if user.id maps to student._id
-      let studentYearLevels;
-      let yearLevelId: string | null = null;
-      
-      try {
-        // Try using user.id as student_id
-        const yearLevelResponse = await apiService.getStudentYearLevelAssignments(user.id);
-        if (yearLevelResponse.success) {
-          studentYearLevels = (yearLevelResponse.data as any)?.message || yearLevelResponse.data;
-          if (Array.isArray(studentYearLevels) && studentYearLevels.length > 0) {
-            // Use the level_id from the first assignment
-            yearLevelId = studentYearLevels[0]._id; // This is the year level _id
-          }
-        }
-      } catch (err) {
-        console.log('Could not get student year level by user ID, trying alternative...');
-      }
+      // Call the new student schedule API - let the API find the student by email
+      let url = `/student/schedule`;
+      const params = new URLSearchParams();
+      if (termId) params.append('term_id', termId);
+      if (yearId) params.append('year_id', yearId);
+      if (params.toString()) url += `?${params.toString()}`;
 
-      // Alternative: Get student's enrolled classes if year level not found
-      if (!yearLevelId) {
-        // Fallback: Get student classes and extract year_level_id from classes
-        const studentClassesResponse = await apiService.getStudentClasses();
+      const response = await apiService.get<any>(url);
+
+      if (response.success && response.data) {
+        // API returns data in message field
+        const data: any = (response.data as any).message || response.data;
         
-        if (studentClassesResponse.success) {
-          const studentClasses = (studentClassesResponse.data as any)?.message || studentClassesResponse.data;
-          const classesArray = Array.isArray(studentClasses) ? studentClasses : [];
-
-          if (classesArray.length > 0) {
-            // Get the class details to find year_level_id
-            const firstClassId = classesArray[0].class_id;
-            const classResponse = await apiService.getClass(firstClassId);
-
-            if (classResponse.success) {
-              const classData = (classResponse.data as any)?.message || classResponse.data;
-              yearLevelId = classData.year_level_id;
-            }
-          }
-        }
-      }
-
-      if (!yearLevelId) {
-        setError('You are not enrolled in any classes yet. Please contact your administrator.');
-        setLoading(false);
-        return;
-      }
-
-      // Step 3: Load timetable for that year level
-      const timetableResponse = await apiService.getTimetable(yearLevelId);
-
-      if (timetableResponse.success) {
-        const timetableData = (timetableResponse.data as any)?.message || timetableResponse.data;
-        setTimetable(timetableData);
+        // Extract year level info from first class if available
+        const firstClass = data.timetable && data.timetable.length > 0 ? data.timetable[0] : null;
+        
+        // Set timetable data
+        setTimetable({
+          year_level_id: firstClass?.year_level_id || '',
+          year_level_name: firstClass?.year_level_name || '',
+          year_level_order: firstClass?.year_level_order || 0,
+          timetable: data.timetable || [],
+          all_periods: data.all_periods || []
+        });
+        
+        // Set available filters
+        setAvailableTerms(data.available_terms || []);
+        setAvailableYears(data.available_years || []);
       } else {
         setError('Unable to load timetable.');
       }
@@ -112,7 +103,12 @@ export function StudentSchedule() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  // Load timetable on mount or when filters change
+  useEffect(() => {
+    loadStudentTimetable(selectedTermId || undefined, selectedYearId || undefined);
+  }, [selectedTermId, selectedYearId, loadStudentTimetable]);
 
   // Organize classes into a grid by period and day of week
   const organizeTimetableGrid = (): { periods: string[]; periodMap: Map<string, { start: string; end: string }>; classes: Map<string, Class> } | null => {
@@ -206,6 +202,93 @@ export function StudentSchedule() {
 
       {timetable && (
         <div style={{ marginTop: 'var(--space-lg)' }}>
+          {/* Filter controls */}
+          <div style={{ 
+            marginBottom: 'var(--space-md)',
+            padding: 'var(--space-md)',
+            background: 'var(--card)',
+            borderRadius: '0.5rem',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            gap: 'var(--space-md)',
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+              <label htmlFor="year-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                Year:
+              </label>
+              <select
+                id="year-filter"
+                value={selectedYearId}
+                onChange={(e) => setSelectedYearId(e.target.value)}
+                style={{
+                  padding: 'var(--space-sm) var(--space-md)',
+                  borderRadius: '0.25rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--card)',
+                  color: 'var(--text)',
+                  fontSize: '0.875rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">All Years</option>
+                {availableYears.map((year) => (
+                  <option key={year._id} value={year._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
+                    {year.year_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+              <label htmlFor="term-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                Term:
+              </label>
+              <select
+                id="term-filter"
+                value={selectedTermId}
+                onChange={(e) => setSelectedTermId(e.target.value)}
+                style={{
+                  padding: 'var(--space-sm) var(--space-md)',
+                  borderRadius: '0.25rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--card)',
+                  color: 'var(--text)',
+                  fontSize: '0.875rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">All Terms</option>
+                {availableTerms.map((term) => (
+                  <option key={term._id} value={term._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
+                    {term.year_name} - Term {term.term_number}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {(selectedTermId || selectedYearId) && (
+              <button
+                onClick={() => {
+                  setSelectedTermId('');
+                  setSelectedYearId('');
+                }}
+                style={{
+                  padding: 'var(--space-sm) var(--space-md)',
+                  borderRadius: '0.25rem',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  color: 'var(--text)',
+                  fontSize: '0.875rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+
           <div style={{ 
             marginBottom: 'var(--space-md)',
             padding: 'var(--space-md)',
@@ -213,7 +296,7 @@ export function StudentSchedule() {
             borderRadius: '0.5rem',
             border: '1px solid var(--border)'
           }}>
-            <strong>Class:</strong> {timetable.year_level_name}
+            <strong>Class:</strong> {timetable.year_level_name || 'No class assigned'}
           </div>
 
           <div style={{ overflowX: 'auto', marginTop: 'var(--space-lg)' }}>

@@ -8,9 +8,11 @@ from db import db
 
 import json
 from uuid import UUID
+from utils.auth_middleware import require_role
 
 
 class StudentYearLevelResourceLevel(Resource):
+    @require_role('admin')
     def post(self):
         data = request.get_json()
 
@@ -95,6 +97,7 @@ class StudentYearLevelResourceLevel(Resource):
         }
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def put(self):
         data = request.get_json()
 
@@ -130,6 +133,7 @@ class StudentYearLevelResourceLevel(Resource):
 
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def delete(self, id):
         student_year_level = StudentYearLevelModel.find_by_level_id(id)
 
@@ -169,6 +173,7 @@ class StudentYearLevelResourceStudent(Resource):
         }
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def delete(self, id):
         student_year_level = StudentYearLevelModel.find_by_student_id(
                                                 id)
@@ -208,6 +213,7 @@ class StudentYearLevelResourceYear(Resource):
         }
         return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def delete(self, id):
         student_year_level = StudentYearLevelModel.find_by_level_id(id)
 
@@ -267,6 +273,7 @@ class StudentYearLevelAssignmentResource(Resource):
             }
             return Response(json.dumps(response), 200)
 
+    @require_role('admin')
     def post(self):
         data = request.get_json()
 
@@ -323,6 +330,7 @@ class StudentYearLevelAssignmentResource(Resource):
         }
         return Response(json.dumps(response), 201)
 
+    @require_role('admin')
     def delete(self, student_id, level_id=None):
         if level_id:
             # Delete specific student-year level assignment
