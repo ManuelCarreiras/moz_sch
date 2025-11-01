@@ -24,7 +24,14 @@ class TermResource(Resource):
         else:
             # Get all terms
             terms = TermModel.query.all()
-            terms_list = [term.json() for term in terms]
+            terms_list = []
+            for term in terms:
+                term_data = term.json()
+                # Enhance with school year name
+                year = SchoolYearModel.find_by_id(term.year_id)
+                if year:
+                    term_data['year_name'] = year.year_name
+                terms_list.append(term_data)
             response = {
                 'success': True,
                 'message': terms_list

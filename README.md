@@ -27,8 +27,10 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 ✅ **Assignment Interfaces** - All relationship management interfaces complete  
 ✅ **UI/UX Excellence** - Consistent, responsive design across all components  
 ✅ **Student Portal** - Authentication, schedule view, and Cognito integration fully working  
+✅ **Teacher Portal** - Authentication, schedule view, username integration fully working  
+✅ **Filtering System** - Comprehensive year/term filtering with smart cascading across all interfaces  
 
-**Next Phase**: Teacher Portal Enhancements, Academic Operations (Class Management, Enrollment, Grades)
+**Next Phase**: Academic Operations (Class Management, Enrollment, Grades, Advanced Scheduling)
 
 ## ✨ Features
 
@@ -162,11 +164,19 @@ GET    /student/schedule/<id> # Get specific student's schedule
 
 ### Teacher Management
 ```
-POST   /teacher              # Create new teacher
+POST   /teacher              # Create new teacher (integrated with frontend form, creates Cognito user)
 GET    /teacher/<id>         # Get teacher by ID
 PUT    /teacher              # Update teacher
 DELETE /teacher/<id>         # Delete teacher
+GET    /teacher/schedule     # Get teacher's class schedule (read-only, filtered by term/year)
+GET    /teacher/schedule/<id> # Get specific teacher's schedule
 ```
+
+**Note**: Teacher creation automatically:
+- Creates a Cognito user with generated username (first initial + surname)
+- Adds user to 'teachers' Cognito group
+- Stores username in teacher record for authentication lookup
+- Sends welcome email with temporary password (NEW_PASSWORD_REQUIRED challenge)
 
 ### Academic Structure
 ```
@@ -240,6 +250,15 @@ GET    /student/schedule/<id>            # Get specific student's schedule
 - Returns timetable with subject, teacher, period, classroom information
 - Supports filtering by `term_id` and `year_id` query parameters
 - Returns available terms and years for frontend dropdowns
+- Terms automatically filter by selected school year
+
+**Teacher Schedule Endpoint**:
+- Authenticates via JWT token (extracts username or email)
+- Looks up teacher by username (Cognito username) or email
+- Returns all classes assigned to the teacher
+- Supports filtering by `term_id` and `year_id` query parameters
+- Returns available terms and years for frontend dropdowns
+- Smart filter cascading with auto-reset
 
 ### Infrastructure Management
 ```
@@ -305,20 +324,23 @@ DELETE /classroom_types/<id> # Delete classroom type
 
 ### Database Migration
 
-**Important**: Before using the student schedule feature, you must add the `username` column to the student table:
+**Important**: Before using the student/teacher portal features, you must add the `username` column to both student and teacher tables:
 
 ```bash
-# Run the migration script
+# Run the migration scripts
 docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_username_to_student.sql
+docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_username_to_teacher.sql
 
 # Or manually run:
 docker-compose exec postgres psql -U postgres -d santa_isabel_db
 # Then execute:
 ALTER TABLE student ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE;
 CREATE INDEX IF NOT EXISTS idx_student_username ON student(username);
+ALTER TABLE professor ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE;
+CREATE INDEX IF NOT EXISTS idx_professor_username ON professor(username);
 ```
 
-The migration script (`add_username_to_student.sql`) is included in the project root. Existing students will have NULL username values until they are updated or new students are created.
+The migration scripts (`add_username_to_student.sql` and `add_username_to_teacher.sql`) are included in the project root. Existing records will have NULL username values until they are updated or new records are created.
 
 ### Configuration (Doppler Secrets)
 
@@ -494,15 +516,19 @@ The system runs the following services:
 
 - **Role-Based Access Control**: Admin-only restrictions enabled for write operations (POST, PUT, DELETE) on all resources
 - **Student Management**: Fully functional with frontend form integration and Cognito user creation
+- **Teacher Management**: Fully functional with frontend form integration and Cognito user creation
 - **Student Portal**: ✅ **Complete** - Read-only schedule view with authentication and JWT-based username lookup working
-- **Cognito Integration**: ✅ **Working** - Automatic user creation, username generation, and force password change implemented
-- **Authentication**: JWT token-based authentication with username/email extraction for student lookup
-- **Database Migration**: Username field added to student table (see `add_username_to_student.sql`)
+- **Teacher Portal**: ✅ **Complete** - Read-only schedule view with authentication and JWT-based username lookup working
+- **Cognito Integration**: ✅ **Working** - Automatic user creation for students and teachers, username generation, and force password change implemented
+- **Authentication**: JWT token-based authentication with username/email extraction for student and teacher lookup
+- **Database Migration**: Username field added to student and teacher tables (see `add_username_to_student.sql` and `add_username_to_teacher.sql`)
+- **Filtering System**: ✅ **Complete** - Comprehensive year/term filtering across all management interfaces with smart cascading
+- **UX Enhancements**: Terms auto-filter by year, auto-reset on year change, persistent filter options, clean UI without redundant labels
 - **Navigation**: Complete bidirectional navigation between all portals
-- **API Integration**: Student creation form directly connected to Flask backend with Cognito integration
-- **Recent Fixes**: Resolved YearLevelModel attribute naming issue (`year_level_name` → `level_name`)
+- **API Integration**: Student and teacher creation forms directly connected to Flask backend with Cognito integration
+- **Backend Validation**: Teacher conflict detection prevents double-booking (same teacher, term, period, day)
 
-**Latest Update**: October 31, 2025 - Student portal fully operational with Cognito username integration
+**Latest Update**: November 1, 2025 - Student and Teacher portals fully operational with comprehensive filtering system
 
 ## 🤝 Contributing
 

@@ -41,7 +41,11 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Student Schedule View**: Read-only timetable displaying enrolled classes
   - Grid-based timetable with days of week (Monday-Friday) as columns
   - Period rows with time intervals
-  - Filter by school year and term
+  - Filter by school year and term (with smart cascading)
+  - Terms automatically filter by selected school year
+  - Auto-reset term selection when year changes
+  - Clean UI with no redundant year labels
+  - Persistent filter options - all years/terms remain visible for easy switching
   - Displays subject, teacher, period, and classroom information
   - Automatic authentication via JWT token (uses username lookup)
 - **Student Management**: Create new students with full form validation (admin-only)
@@ -55,14 +59,25 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Modal Interface**: Clean, accessible form design
 
 ### Teacher Portal Features
-- **Teacher Management**: Create new teachers with full form validation
-- **API Integration**: Direct integration with Flask backend (`POST /teacher`)
+- **Teacher Schedule View**: Read-only timetable displaying assigned classes
+  - Grid-based timetable showing all classes taught by the teacher
+  - Filter by school year and term (with smart cascading)
+  - Terms automatically filter by selected school year
+  - Auto-reset term selection when year changes
+  - Clean UI with no redundant year labels
+  - Persistent filter options - all years/terms remain visible for easy switching
+  - Displays subject, period, classroom, and class name information
+  - Automatic authentication via JWT token (uses username lookup)
+- **Teacher Management**: Create new teachers with full form validation (admin-only)
+- **API Integration**: Direct integration with Flask backend (`POST /teacher`, `GET /teacher/schedule`)
 - **Form Handling**: Complete teacher registration with required fields:
   - Given Name, Surname, Gender
   - Email Address, Phone Number
+- **Cognito User Creation**: Automatically creates Cognito user with generated username (first initial + surname)
 - **Real-time Feedback**: Success/error messages and loading states
 - **Modal Interface**: Clean, accessible single-column form design
 - **Consistent UI**: Matches student portal design and behavior
+- **Role-Based Access**: "Create New Teacher" button only visible to admin users
 
 ### Guardian Portal Features
 - **Guardian Management**: Create new guardians with full form validation
@@ -93,10 +108,13 @@ This is the frontend application for the Santa Isabel Escola school management p
       - **School Years**: Manage academic years (2026, 2027, etc.)
       - **Student Assignments**: Assign students to year levels and school years with combined format ("1st A", "2nd B")
   - **Academic Foundation**: Complete academic foundation management system with guided setup wizard
-    - **Term Management**: Manage academic terms (semesters/quarters) with school year integration
-    - **Period Management**: Manage daily class periods and scheduling with time-based organization
+    - **Term Management**: Manage academic terms (semesters/quarters) with school year filtering
+    - **Period Management**: Manage daily class periods and scheduling with school year filtering
     - **Score Range Management**: Manage grading scales and letter grades integrated with subject creation
     - **Tabbed Interface**: Unified management interface for all academic foundation components
+    - **Smart Filtering**: School year filter on Period and Term management tables
+    - **Classes Search**: Year and term filtering with cascading dropdowns
+    - **Year Level Timetable**: Comprehensive filtering by grade, section, school year, and term
   - **Academic Setup Wizard** 🧙‍♂️: Comprehensive guided setup for academic infrastructure
     - **6-Step Process**: Welcome → Academic Years → Terms → Periods → Departments → Completion
     - **Auto-Generation**: Smart term date calculation and distribution
@@ -121,7 +139,9 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Viewport Units** for true responsive scaling
 - **Docker** containerization for production deployment
 - **API Integration**: Full backend connectivity with error handling
-- **Student Schedule Component**: Grid-based timetable with filtering capabilities
+- **Student Schedule Component**: Grid-based timetable with smart year/term filtering
+- **Teacher Schedule Component**: Grid-based timetable with smart year/term filtering
+- **Filtering System**: Comprehensive cascading filters across all management interfaces
 
 ## 🛠 Technology Stack
 
@@ -233,19 +253,22 @@ frontend/
 │   │   │   ├── YearLevelTable.tsx
 │   │   │   ├── SchoolYearTable.tsx
 │   │   │   ├── StudentYearLevelAssignment.tsx
-│   │   │   ├── TermTable.tsx
-│   │   │   ├── PeriodTable.tsx
+│   │   │   ├── TermTable.tsx (with school year filtering)
+│   │   │   ├── PeriodTable.tsx (with school year filtering)
 │   │   │   ├── ScoreRangeTable.tsx
 │   │   │   ├── AcademicFoundationManagement.tsx
 │   │   │   ├── AcademicSetupWizard.tsx
-│   │   │   └── ClassesTable.tsx
+│   │   │   ├── ClassesTable.tsx (with year/term filtering)
+│   │   │   ├── YearLevelTimetable.tsx (with comprehensive filtering)
+│   │   │   └── StudentClassEnrollment.tsx (with year/term filtering)
 │   │   ├── Dashboard.tsx         # Main dashboard component
 │   │   ├── Landing.tsx           # Landing page component
 │   │   ├── Login.tsx             # Login page component
 │   │   ├── LoginModal.tsx        # Modal login component (legacy)
 │   │   ├── StudentDashboard.tsx  # Student portal component
-│   │   ├── StudentSchedule.tsx  # Student schedule/timetable view component
+│   │   ├── StudentSchedule.tsx  # Student schedule/timetable view (with smart filtering)
 │   │   ├── TeacherDashboard.tsx  # Teacher portal component
+│   │   ├── TeacherSchedule.tsx  # Teacher schedule/timetable view (with smart filtering)
 │   │   └── GuardianDashboard.tsx # Guardian portal component
 │   ├── contexts/                 # React contexts
 │   │   └── AuthContext.tsx       # Authentication context
@@ -355,13 +378,19 @@ The responsive system uses:
 - Subject-score range integration with flexible assignment workflow
 - Score range creation integrated into subject creation process
 - Student schedule API integration (`GET /student/schedule`)
-- Username-based student lookup for authentication
+- Teacher schedule API integration (`GET /teacher/schedule`)
+- Username-based student and teacher lookup for authentication
 - Real-time API communication with Flask backend
 - Consistent success/error notifications across all forms
 - Consistent modal styling and form field widths across all interfaces
 - Tabbed interface for academic foundation management
 - Modal UI consistency fixes across all components
-- Force password change flow for first-time student logins
+- Force password change flow for first-time student/teacher logins
+- Smart filtering system: Cascading year/term filters across all management interfaces
+- Filter persistence: All available years/terms remain visible for easy switching
+- Auto-reset filters: Term selection resets when year changes for better UX
+- Clean UI: Redundant year labels removed from term dropdowns when year is selected
+- Comprehensive filtering: Applied to Period Table, Term Table, Classes Search, Student/Teacher Schedules, Year Level Timetable
 
 ### Navigation & Routing Implementation
 - React Router DOM for client-side navigation

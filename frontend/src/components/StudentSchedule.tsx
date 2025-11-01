@@ -58,8 +58,8 @@ export function StudentSchedule() {
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
-  const [availableYears, setAvailableYears] = useState<Year[]>([]);
+  const [allAvailableTerms, setAllAvailableTerms] = useState<Term[]>([]);
+  const [allAvailableYears, setAllAvailableYears] = useState<Year[]>([]);
   const [selectedTermId, setSelectedTermId] = useState<string>('');
   const [selectedYearId, setSelectedYearId] = useState<string>('');
 
@@ -100,9 +100,12 @@ export function StudentSchedule() {
           all_periods: data.all_periods || []
         });
         
-        // Set available filters
-        setAvailableTerms(data.available_terms || []);
-        setAvailableYears(data.available_years || []);
+        // Set available filters - only update if we're loading without filters (initial load)
+        // This preserves all available options even when filtering
+        if (!termId && !yearId) {
+          setAllAvailableTerms(data.available_terms || []);
+          setAllAvailableYears(data.available_years || []);
+        }
       } else {
         setError('Unable to load timetable.');
       }
@@ -113,6 +116,11 @@ export function StudentSchedule() {
       setLoading(false);
     }
   }, [user?.id]);
+
+  // Reset term selection when year changes
+  useEffect(() => {
+    setSelectedTermId('');
+  }, [selectedYearId]);
 
   // Load timetable on mount or when filters change
   useEffect(() => {
@@ -242,7 +250,7 @@ export function StudentSchedule() {
                 }}
               >
                 <option value="">All Years</option>
-                {availableYears.map((year) => (
+                {allAvailableYears.map((year) => (
                   <option key={year._id} value={year._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
                     {year.year_name}
                   </option>
@@ -269,11 +277,13 @@ export function StudentSchedule() {
                 }}
               >
                 <option value="">All Terms</option>
-                {availableTerms.map((term) => (
-                  <option key={term._id} value={term._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
-                    {term.year_name} - Term {term.term_number}
-                  </option>
-                ))}
+                {allAvailableTerms
+                  .filter(term => !selectedYearId || String(term.year_id) === String(selectedYearId))
+                  .map((term) => (
+                    <option key={term._id} value={term._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
+                      Term {term.term_number}
+                    </option>
+                  ))}
               </select>
             </div>
 

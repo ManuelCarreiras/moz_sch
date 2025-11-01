@@ -170,6 +170,11 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     }
   }, [selectedLevelOrder, yearLevels]);
 
+  // Reset term selection when year changes
+  useEffect(() => {
+    setSelectedTermId('');
+  }, [selectedYearId]);
+
   // Reload timetable when term or year selection changes
   useEffect(() => {
     if (selectedYearLevelId) {
@@ -551,15 +556,20 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               }}
             >
               <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Term --</option>
-              {terms.map((term) => (
-                <option 
-                  key={term._id} 
-                  value={term._id}
-                  style={{ background: 'var(--card)', color: 'var(--text)' }}
-                >
-                  Term {term.term_number}
-                </option>
-              ))}
+              {terms
+                .filter(term => {
+                  if (!selectedYearId) return true;
+                  return String(term.year_id) === String(selectedYearId);
+                })
+                .map((term) => (
+                  <option 
+                    key={term._id} 
+                    value={term._id}
+                    style={{ background: 'var(--card)', color: 'var(--text)' }}
+                  >
+                    Term {term.term_number}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
