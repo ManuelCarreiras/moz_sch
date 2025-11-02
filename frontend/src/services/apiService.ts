@@ -503,6 +503,91 @@ class ApiService {
     return this.post('/student_guardian', studentGuardianData);
   }
 
+  // ========== Phase 3: Grading System ==========
+
+  // Assessment Types
+  async getAssessmentTypes() {
+    return this.get('/assessment_type');
+  }
+
+  async getAssessmentType(id: string) {
+    return this.get(`/assessment_type/${id}`);
+  }
+
+  async createAssessmentType(assessmentTypeData: any) {
+    return this.post('/assessment_type', assessmentTypeData);
+  }
+
+  async updateAssessmentType(id: string, assessmentTypeData: any) {
+    const data = { ...assessmentTypeData, _id: id };
+    return this.put('/assessment_type', data);
+  }
+
+  async deleteAssessmentType(id: string) {
+    return this.delete(`/assessment_type/${id}`);
+  }
+
+  // Assignments
+  async getAssignments(filters?: { class_id?: string; term_id?: string; subject_id?: string; status?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.class_id) params.append('class_id', filters.class_id);
+    if (filters?.term_id) params.append('term_id', filters.term_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.status) params.append('status', filters.status);
+    const queryString = params.toString();
+    return this.get(queryString ? `/assignment?${queryString}` : '/assignment');
+  }
+
+  async getAssignment(id: string) {
+    return this.get(`/assignment/${id}`);
+  }
+
+  async getTeacherAssignments() {
+    return this.get('/assignment/teacher');
+  }
+
+  async createAssignment(assignmentData: any) {
+    return this.post('/assignment', assignmentData);
+  }
+
+  async updateAssignment(id: string, assignmentData: any) {
+    const data = { ...assignmentData, _id: id };
+    return this.put('/assignment', data);
+  }
+
+  async deleteAssignment(id: string) {
+    return this.delete(`/assignment/${id}`);
+  }
+
+  // Grades (Student Assignments)
+  async getGrades(filters?: { assignment_id?: string; student_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.assignment_id) params.append('assignment_id', filters.assignment_id);
+    if (filters?.student_id) params.append('student_id', filters.student_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/grade?${queryString}` : '/grade');
+  }
+
+  async getGrade(id: string) {
+    return this.get(`/grade/${id}`);
+  }
+
+  async createOrUpdateGrade(gradeData: any) {
+    return this.post('/grade', gradeData);
+  }
+
+  async deleteGrade(id: string) {
+    return this.delete(`/grade/${id}`);
+  }
+
+  // Gradebook
+  async getGradebook(classId: string, termId?: string) {
+    const params = new URLSearchParams();
+    if (termId) params.append('term_id', termId);
+    const queryString = params.toString();
+    return this.get(queryString ? `/gradebook/class/${classId}?${queryString}` : `/gradebook/class/${classId}`);
+  }
+
 }
 
 // Export singleton instance

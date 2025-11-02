@@ -32,6 +32,9 @@ from resources.student_guardian import StudentGuardianResource
 from resources.guardian_type import GuardianTypeResource
 from resources.teacher_department import TeacherDepartmentResource
 from resources.auth import AuthLoginResource, AuthMeResource
+from resources.assessment_type import AssessmentTypeResource
+from resources.assignment import AssignmentResource, TeacherAssignmentResource
+from resources.grade import GradeResource, GradebookResource
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -177,6 +180,13 @@ api.add_resource(StudentYearLevelAssignmentResource, "/student-year-level-assign
 # Authentication endpoints
 api.add_resource(AuthLoginResource, "/auth/login")
 api.add_resource(AuthMeResource, "/auth/me")
+
+# Phase 3: Grading System endpoints
+api.add_resource(AssessmentTypeResource, "/assessment_type", "/assessment_type/<type_id>")
+api.add_resource(AssignmentResource, "/assignment", "/assignment/<assignment_id>")
+api.add_resource(TeacherAssignmentResource, "/assignment/teacher")
+api.add_resource(GradeResource, "/grade", "/grade/<grade_id>")
+api.add_resource(GradebookResource, "/gradebook/class/<class_id>")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

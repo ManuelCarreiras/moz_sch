@@ -108,24 +108,141 @@ A comprehensive school management system with React frontend and Flask backend, 
 
 ---
 
-### **Phase 3: Class Operations**
-**Timeline: Weeks 5-6** | **Priority: MEDIUM**
+### **Phase 3: Assignments, Evaluations & Grading System**
+**Timeline: Weeks 5-8** | **Priority: HIGH**
 
-#### **Class Management**
-- [ ] **Classes** - Core scheduling entity
-- [ ] **Class Creation Wizard** - Subject + Teacher + Schedule + Room
-- [ ] **Student-Class Enrollment** - Class enrollment with grades
-- [ ] **Class Scheduling** - Time and room assignments
+#### **Foundation: Assessment Types & Structure**
+- [ ] **Assessment Types** - Define evaluation methods (Homework, Quiz, Test, Project, Lab, Presentation, Midterm, Final)
+- [ ] **Assessment Type Management** - CRUD interface for assessment types
+- [ ] **Database Schema** - Create assessment_type, assignment, student_assignment, student_term_grade tables
 
-#### **Class Portals**
-- [ ] **Class Management Portal** - Create and manage classes
-- [ ] **Enrollment Portal** - Student class enrollment
-- [ ] **Grade Management** - Score tracking and reporting
+#### **Tier 1: Assignment Management**
+- [ ] **Assignment Model** - Create assignment entity with all relationships
+  - [ ] Link to subject, class, term, assessment_type
+  - [ ] Fields: title, description, due_date, max_score, weight, status
+- [ ] **Assignment Creation Wizard** - Teacher interface to create assignments
+  - [ ] Select class and subject
+  - [ ] Choose assessment type
+  - [ ] Set due date and max score
+  - [ ] Define weight (% of final grade)
+  - [ ] Status management (draft, published, closed)
+- [ ] **Assignment List View** - Display all assignments per class/subject
+  - [ ] Filter by term, subject, status
+  - [ ] Sort by due date, assessment type
+  - [ ] Bulk operations (publish multiple, close multiple)
+- [ ] **Assignment Details** - View/edit assignment information
+- [ ] **Assignment API Endpoints** - Full CRUD for assignments
 
-#### **Class Operations**
-- [ ] **Bulk Enrollment** - Mass student enrollment
-- [ ] **Schedule Validation** - Conflict detection
-- [ ] **Room Availability** - Classroom booking system
+#### **Tier 2: Grade Entry & Management**
+- [ ] **Student Assignment Model** - Link students to assignments with scores
+  - [ ] Fields: score, submission_date, graded_date, feedback, status
+  - [ ] Status tracking (not_submitted, submitted, graded, late)
+- [ ] **Gradebook Interface** - Spreadsheet-like grade entry
+  - [ ] Grid view: students as rows, assignments as columns
+  - [ ] Quick entry: click cell, type score, auto-save
+  - [ ] Visual indicators: late submissions, missing grades, grade distribution
+  - [ ] Bulk operations: copy grades, apply curve, drop lowest scores
+- [ ] **Individual Grade Entry** - Detailed grading for single student
+  - [ ] Score entry with feedback
+  - [ ] Submission date tracking
+  - [ ] File attachment support (future)
+- [ ] **Grade Calculation Engine** - Automated grade computation
+  - [ ] Weighted average calculation
+  - [ ] Category-based grading (optional)
+  - [ ] Letter grade conversion using score_range
+  - [ ] Term grade caching (student_term_grade table)
+- [ ] **Grade Analytics** - Teacher insights
+  - [ ] Class average per assignment
+  - [ ] Grade distribution charts
+  - [ ] Student performance trends
+  - [ ] Identify struggling students
+
+#### **Tier 3: Student & Parent Views**
+- [ ] **Student Assignment View** - See all assignments
+  - [ ] Filter by subject, status (upcoming, past due, graded)
+  - [ ] Sort by due date
+  - [ ] Assignment details and requirements
+- [ ] **Student Grades View** - See scores and feedback
+  - [ ] View grades per subject
+  - [ ] Current term average calculation
+  - [ ] Overall grade display with letter grade
+  - [ ] Grade history and trends
+- [ ] **Student Dashboard Widget** - Quick grade overview
+  - [ ] "Your current grade: 85%" per subject
+  - [ ] Upcoming assignments
+  - [ ] Recent feedback
+- [ ] **What-If Calculator** - Grade projection tool
+  - [ ] "If I get X on the final, my grade will be Y"
+  - [ ] Identify required scores for target grade
+- [ ] **Parent/Guardian Grade Access** - View student progress
+  - [ ] All grades and assignments
+  - [ ] Performance alerts
+  - [ ] Teacher comments
+
+#### **Tier 4: Advanced Features**
+- [ ] **Report Card Generation** - Automated term reports
+  - [ ] PDF export with school branding
+  - [ ] All subjects with grades and comments
+  - [ ] Attendance integration (future)
+  - [ ] Signature fields for parent/teacher
+- [ ] **Grade Import/Export** - Bulk operations
+  - [ ] CSV import for bulk grade entry
+  - [ ] Excel export for external processing
+  - [ ] Grade backup and restore
+- [ ] **Grading Policies** - Flexible configuration
+  - [ ] Extra credit allowance
+  - [ ] Drop lowest N scores
+  - [ ] Curve/scale options
+  - [ ] Rounding rules
+  - [ ] Late submission penalties
+- [ ] **Grade History** - Audit trail
+  - [ ] Track grade changes
+  - [ ] Teacher who made changes
+  - [ ] Timestamp of modifications
+  - [ ] Reason for change (optional)
+- [ ] **Alert System** - Notifications
+  - [ ] Email parents when grade drops below threshold
+  - [ ] Notify students of new grades
+  - [ ] Alert teachers to missing assignments
+  - [ ] Upcoming deadline reminders
+
+#### **Integration Points**
+- [ ] **Score Range Integration** - Use existing score_range for letter grades
+- [ ] **Subject Integration** - Assignments belong to subjects
+- [ ] **Class Integration** - Assignments assigned to specific class instances
+- [ ] **Term Integration** - Grades calculated per term
+- [ ] **Student Integration** - Link grades to student records
+- [ ] **Teacher Integration** - Teachers create/grade assignments for their classes
+
+#### **API Endpoints (Phase 3)**
+```
+POST   /assessment_type              # Create assessment type
+GET    /assessment_type              # Get all assessment types
+GET    /assessment_type/<id>         # Get assessment type
+PUT    /assessment_type              # Update assessment type
+DELETE /assessment_type/<id>         # Delete assessment type
+
+POST   /assignment                   # Create assignment
+GET    /assignment                   # Get all assignments (filterable by class, term, subject)
+GET    /assignment/<id>              # Get assignment details
+PUT    /assignment                   # Update assignment
+DELETE /assignment/<id>              # Delete assignment
+GET    /assignment/class/<class_id>  # Get assignments for class
+GET    /assignment/teacher           # Get assignments for authenticated teacher
+
+POST   /grade                        # Create/update student grade
+GET    /grade/<id>                   # Get specific grade
+GET    /grade/assignment/<id>        # Get all grades for assignment
+GET    /grade/student/<id>           # Get all grades for student
+GET    /grade/student/term/<term_id> # Get student grades for term
+DELETE /grade/<id>                   # Delete grade
+
+GET    /gradebook/class/<class_id>   # Get gradebook view for class
+POST   /gradebook/bulk               # Bulk grade entry
+GET    /report_card/student/<id>     # Generate report card (PDF)
+GET    /grade/analytics/class/<id>   # Grade analytics for class
+GET    /grade/calculate/student/<id> # Calculate current grade for student
+```
 
 ---
 
@@ -214,11 +331,16 @@ frontend/src/components/
 - [x] Academic setup wizard functional
 
 ### **Phase 3 Goals**
-- [ ] Classes can be created and scheduled
-- [ ] Student enrollment in classes working
-- [ ] Grade management operational
-- [ ] Schedule conflict detection active
-- [ ] Bulk operations implemented
+- [ ] Assessment types defined and manageable
+- [ ] Teachers can create and manage assignments
+- [ ] Teachers can enter grades efficiently via gradebook
+- [ ] Grade calculations working (weighted averages)
+- [ ] Students can view assignments and grades
+- [ ] Letter grades automatically calculated from score ranges
+- [ ] Report cards can be generated
+- [ ] Grade analytics available for teachers
+- [ ] Parent/guardian grade access working
+- [ ] Bulk import/export functional
 
 ### **Phase 4 Goals**
 - [ ] Visual timetables displayed
@@ -254,44 +376,50 @@ frontend/src/components/
 - [ ] Academic setup wizard functional
 
 ### **Week 5 Check-in**
-- [ ] Class creation wizard complete
-- [ ] Student enrollment system working
-- [ ] Grade management operational
+- [ ] Assessment types and assignment models complete
+- [ ] Assignment creation wizard functional
+- [ ] Database schema implemented and tested
+- [ ] Basic API endpoints working
 
 ### **Week 6 Check-in**
-- [ ] Schedule validation active
-- [ ] Bulk operations implemented
-- [ ] Class operations phase complete
+- [ ] Gradebook interface complete
+- [ ] Grade entry and calculation working
+- [ ] Student assignment view functional
+- [ ] Teacher analytics available
 
 ### **Week 7 Check-in**
-- [ ] Visual timetables displayed
-- [ ] Schedule optimization working
-- [ ] Conflict resolution automated
+- [ ] Student grade views complete
+- [ ] Parent/guardian access working
+- [ ] Grade calculations verified
+- [ ] Report card generation functional
 
 ### **Week 8 Check-in**
-- [ ] Full system integration complete
-- [ ] All features tested and working
-- [ ] Documentation updated
-- [ ] Deployment ready
+- [ ] Bulk import/export working
+- [ ] Advanced features implemented
+- [ ] Alert system functional
+- [ ] Full grading system tested
+
 
 ---
 
 ## 🎯 **Current Sprint Focus**
 
-**Sprint Goal**: Complete Phase 1 - Personnel Management
-**Duration**: Current sprint
+**Sprint Goal**: Plan Phase 3 - Assignments, Evaluations & Grading System
+**Duration**: Planning phase (November 1-2, 2025)
 **Key Deliverables**:
-1. ✅ Academic Setup section in Admin Dashboard
-2. ✅ Department management interface
-3. ✅ Subject management interface
-4. ✅ Classroom management interface
-5. ✅ Classroom Types management interface
-6. ✅ Teacher Department Assignment interface
-7. ✅ Student Year Level Assignment interface
-8. ✅ School Year Management system
-9. ✅ Year Level Management system
+1. ✅ Database schema design for grading system
+2. ✅ API endpoint specification
+3. ✅ UI/UX wireframes for gradebook
+4. ✅ Grade calculation algorithm design
+5. ✅ Integration strategy with existing system
 
-**Next Sprint**: Phase 3 - Academic Operations & Class Management
+**Previous Sprint**: ✅ Phase 2 - Academic Foundation (100% Complete)
+
+**Next Sprint**: Phase 3 Implementation - Weeks 5-8
+- Week 5: Foundation & Assignment Management
+- Week 6: Grade Entry & Gradebook
+- Week 7: Student Views & Analytics
+- Week 8: Advanced Features & Reports
 
 ---
 
@@ -345,6 +473,57 @@ frontend/src/components/
 - [ ] Plan for multi-language support (Portuguese/English)
 - [ ] Consider mobile-responsive design improvements
 - [ ] Plan for advanced reporting and analytics features
+- [ ] File upload for assignment submissions
+- [ ] Plagiarism detection integration
+- [ ] Mobile app for grade checking
+- [ ] Integration with learning management systems (LMS)
+
+### **Phase 3 Design Decisions**
+
+#### **Grading Strategy**
+- ✅ **3-Tier System**: Assessment Types → Assignments → Grades
+- ✅ **Weighted Averages**: Teachers define weight (%) for each assignment
+- ✅ **Flexible Assessment Types**: Customizable evaluation methods per subject
+- ✅ **Score Range Integration**: Use existing score_range for letter grade conversion
+- ✅ **Term-Based Grading**: Grades calculated per term, not annually
+- ✅ **Caching Strategy**: Cache calculated grades in student_term_grade table for performance
+
+#### **Data Model Decisions**
+- ✅ **Assignment belongs to Class**: Not just subject, but specific class instance
+- ✅ **Unique constraint**: One grade per student per assignment
+- ✅ **Status tracking**: Both assignment status (draft/published) and grade status (submitted/graded)
+- ✅ **Decimal precision**: DECIMAL(5,2) for scores (allows 100.00 max)
+- ✅ **Weight as percentage**: Store as decimal (10.00 = 10%)
+- ✅ **Feedback field**: TEXT type for unlimited teacher comments
+
+#### **UX Decisions**
+- ✅ **Gradebook as primary interface**: Spreadsheet-like for efficiency
+- ✅ **Auto-save**: No save button, changes persist immediately
+- ✅ **Visual indicators**: Color-code late, missing, and low grades
+- ✅ **Quick filters**: By term, subject, status
+- ✅ **Bulk operations**: Select multiple cells, apply grade or curve
+- ✅ **What-If calculator**: Student-facing tool for grade projection
+
+#### **Calculation Rules**
+- ✅ **Weighted average formula**: Σ(score × weight) / Σ(weight)
+- ✅ **Exclude ungraded**: Don't count assignments without grades in average
+- ✅ **Late penalty**: Optional per-assignment setting (future)
+- ✅ **Extra credit**: Allow scores > max_score (future)
+- ✅ **Rounding**: Round to 2 decimal places, then apply score_range
+
+#### **Security & Permissions**
+- ✅ **Teachers**: Can create/grade assignments for their classes only
+- ✅ **Students**: Read-only access to their own grades
+- ✅ **Parents/Guardians**: Read-only access to linked student grades
+- ✅ **Admin**: Full access to all grades and analytics
+- ✅ **Grade history**: Audit trail for all grade changes (future)
+
+#### **Performance Considerations**
+- ✅ **Caching**: Cache term averages in student_term_grade table
+- ✅ **Lazy loading**: Load gradebook data on-demand, not all at once
+- ✅ **Pagination**: Limit students/assignments shown per page
+- ✅ **Debounced saves**: Wait 500ms after typing before saving
+- ✅ **Optimistic UI**: Show changes immediately, sync in background
 
 ### **Teacher Portal Implementation Plan**
 - 📝 **See `TEACHER_IMPLEMENTATION_NOTES.md`** for detailed implementation checklist
@@ -357,5 +536,76 @@ frontend/src/components/
 ---
 
 **Last Updated**: November 1, 2025
-**Next Review**: After Phase 3 planning and class enrollment implementation
-**Project Status**: 🎉 Phase 2 - 100% Complete | Student & Teacher Portals Complete! Ready for Phase 3
+**Next Review**: Week 5 check-in (Phase 3 implementation start)
+**Project Status**: 🎉 Phase 2 - 100% Complete | Phase 3 Planned | Ready for Grading System Implementation
+
+---
+
+## 📊 **Phase 3 Database Schema Preview**
+
+```sql
+-- Assessment Types (Foundation)
+CREATE TABLE assessment_type (
+    _id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    type_name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Assignments
+CREATE TABLE assignment (
+    _id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    subject_id UUID NOT NULL REFERENCES subject(_id),
+    class_id UUID NOT NULL REFERENCES class(_id),
+    assessment_type_id UUID NOT NULL REFERENCES assessment_type(_id),
+    term_id UUID NOT NULL REFERENCES term(_id),
+    due_date TIMESTAMP,
+    max_score DECIMAL(5,2) NOT NULL DEFAULT 100.00,
+    weight DECIMAL(5,2) NOT NULL DEFAULT 10.00,  -- percentage
+    status VARCHAR(20) DEFAULT 'draft',  -- draft, published, closed
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID REFERENCES professor(_id),
+    CONSTRAINT valid_max_score CHECK (max_score > 0),
+    CONSTRAINT valid_weight CHECK (weight >= 0 AND weight <= 100)
+);
+
+-- Student Grades
+CREATE TABLE student_assignment (
+    _id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID NOT NULL REFERENCES student(_id),
+    assignment_id UUID NOT NULL REFERENCES assignment(_id),
+    score DECIMAL(5,2),
+    submission_date TIMESTAMP,
+    graded_date TIMESTAMP,
+    feedback TEXT,
+    status VARCHAR(20) DEFAULT 'not_submitted',  -- not_submitted, submitted, graded, late
+    UNIQUE(student_id, assignment_id),
+    CONSTRAINT valid_score CHECK (score >= 0)
+);
+
+-- Calculated Term Grades (Cache)
+CREATE TABLE student_term_grade (
+    _id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID NOT NULL REFERENCES student(_id),
+    class_id UUID NOT NULL REFERENCES class(_id),
+    term_id UUID NOT NULL REFERENCES term(_id),
+    calculated_average DECIMAL(5,2),
+    letter_grade VARCHAR(2),
+    score_range_id UUID REFERENCES score_range(_id),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(student_id, class_id, term_id),
+    CONSTRAINT valid_average CHECK (calculated_average >= 0 AND calculated_average <= 100)
+);
+
+-- Indexes for performance
+CREATE INDEX idx_assignment_class ON assignment(class_id);
+CREATE INDEX idx_assignment_term ON assignment(term_id);
+CREATE INDEX idx_assignment_teacher ON assignment(created_by);
+CREATE INDEX idx_student_assignment_student ON student_assignment(student_id);
+CREATE INDEX idx_student_assignment_assignment ON student_assignment(assignment_id);
+CREATE INDEX idx_student_term_grade_student ON student_term_grade(student_id);
+CREATE INDEX idx_student_term_grade_class ON student_term_grade(class_id);
+CREATE INDEX idx_student_term_grade_term ON student_term_grade(term_id);
+```
