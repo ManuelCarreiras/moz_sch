@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
 import { TeacherWizard } from './admin/TeacherWizard';
 import { TeacherSchedule } from './TeacherSchedule';
+import AssignmentList from './teacher/AssignmentList';
 
 type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
 
@@ -114,15 +115,7 @@ export function TeacherDashboard() {
           </div>
         );
       case 'assignments':
-        return (
-          <div className="teacher-content">
-            <h2>Assignments</h2>
-            <p>Create and manage assignments and homework.</p>
-            <div className="placeholder-content">
-              <p>Assignment management functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <AssignmentList />;
       default:
         return (
           <div className="teacher-content">
