@@ -599,6 +599,11 @@ class ApiService {
     return this.get(queryString ? `/student/assignments?${queryString}` : '/student/assignments');
   }
 
+  // Teacher Schedule
+  async getTeacherSchedule() {
+    return this.get('/teacher/schedule');
+  }
+
 }
 
 // Export singleton instance

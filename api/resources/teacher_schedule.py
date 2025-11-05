@@ -163,6 +163,7 @@ class TeacherScheduleResource(Resource):
                 class_data['year_level_order'] = year_level.level_order
             
             # Add term and year info
+            class_data['term_id'] = str(term._id) if term else None
             class_data['term_number'] = term.term_number if term else None
             class_data['year_id'] = str(year._id) if year else None
             class_data['year_name'] = year.year_name if year else None

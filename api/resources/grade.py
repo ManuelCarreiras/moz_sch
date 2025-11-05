@@ -113,8 +113,8 @@ class GradeResource(Resource):
             return {'message': 'Assignment not found'}, 404
         
         # Teachers can only grade assignments they created (admin can grade any)
-        username = get_username_from_token()
-        user_role = request.environ.get('user_role')
+        username = g.username if hasattr(g, 'username') else None
+        user_role = g.role if hasattr(g, 'role') else None
         if user_role == 'teacher':
             teacher = TeacherModel.find_by_username(username) if username else None
             if teacher and assignment.created_by and str(assignment.created_by) != str(teacher._id):
@@ -208,8 +208,8 @@ class GradeResource(Resource):
             return {'message': 'Assignment not found'}, 404
         
         # Teachers can only delete grades for their own assignments
-        username = get_username_from_token()
-        user_role = request.environ.get('user_role')
+        username = g.username if hasattr(g, 'username') else None
+        user_role = g.role if hasattr(g, 'role') else None
         if user_role == 'teacher':
             teacher = TeacherModel.find_by_username(username) if username else None
             if teacher and assignment.created_by and str(assignment.created_by) != str(teacher._id):
@@ -378,15 +378,24 @@ class GradebookResource(Resource):
                 student_row['grades'].append(grade_data)
             
             # Get cached year average if available (0-20 scale)
+            from models.term import TermModel
+            year_id = None
+            if assignments and len(assignments) > 0:
+                first_term = TermModel.find_by_id(assignments[0].term_id)
+                if first_term:
+                    year_id = first_term.year_id
+            
             class_obj = ClassModel.find_by_id(class_id)
-            if class_obj:
+            if class_obj and year_id:
                 cached_grade = StudentYearGradeModel.find_by_student_subject_year(
-                    student._id, class_obj.subject_id, None  # TODO: get year_id properly
+                    student._id, class_obj.subject_id, year_id
                 )
                 if cached_grade:
                     student_row['year_average'] = float(cached_grade.calculated_average) if cached_grade.calculated_average else None
                 else:
                     student_row['year_average'] = None
+            else:
+                student_row['year_average'] = None
             
             gradebook.append(student_row)
         

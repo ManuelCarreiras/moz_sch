@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
 import { StudentSchedule } from './StudentSchedule';
 import StudentAssignments from './student/StudentAssignments';
+import StudentGrades from './student/StudentGrades';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
@@ -119,15 +120,7 @@ export function StudentDashboard() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'grades':
-        return (
-          <div className="student-content">
-            <h2>My Grades</h2>
-            <p>View your academic grades and performance across all subjects.</p>
-            <div className="placeholder-content">
-              <p>Grades functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <StudentGrades />;
       case 'schedule':
         return <StudentSchedule />;
       case 'profile':
