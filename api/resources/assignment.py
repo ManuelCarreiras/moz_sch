@@ -41,7 +41,7 @@ class AssignmentResource(Resource):
             # Add subject info
             subject = SubjectModel.find_by_id(assignment.subject_id)
             if subject:
-                assignment_data['subject_name'] = subject.name
+                assignment_data['subject_name'] = subject.subject_name
             
             # Add class info
             class_obj = ClassModel.find_by_id(assignment.class_id)
@@ -95,7 +95,7 @@ class AssignmentResource(Resource):
             # Add subject
             subject = SubjectModel.find_by_id(assignment.subject_id)
             if subject:
-                assignment_data['subject_name'] = subject.name
+                assignment_data['subject_name'] = subject.subject_name
             
             # Add class
             class_obj = ClassModel.find_by_id(assignment.class_id)
@@ -329,7 +329,7 @@ class TeacherAssignmentResource(Resource):
             # Add subject
             subject = SubjectModel.find_by_id(assignment.subject_id)
             if subject:
-                assignment_data['subject_name'] = subject.name
+                assignment_data['subject_name'] = subject.subject_name
             
             # Add class
             class_obj = ClassModel.find_by_id(assignment.class_id)

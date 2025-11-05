@@ -8,6 +8,7 @@ from models.period import PeriodModel
 from models.subject import SubjectModel
 from models.classroom import ClassroomModel
 from models.year_level import YearLevelModel
+from utils.auth_middleware import require_any_role
 import json
 import logging
 
@@ -15,6 +16,7 @@ import logging
 class TeacherScheduleResource(Resource):
     """Get teacher schedule filtered by term and year"""
 
+    @require_any_role(['admin', 'teacher', 'student'])
     def get(self, teacher_id=None):
         # Get query parameters for filtering
         term_id = request.args.get('term_id')
@@ -162,6 +164,7 @@ class TeacherScheduleResource(Resource):
             
             # Add term and year info
             class_data['term_number'] = term.term_number if term else None
+            class_data['year_id'] = str(year._id) if year else None
             class_data['year_name'] = year.year_name if year else None
             
             all_classes.append(class_data)
