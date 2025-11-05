@@ -3,6 +3,7 @@ import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
 import { StudentSchedule } from './StudentSchedule';
+import StudentAssignments from './student/StudentAssignments';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
@@ -162,11 +163,7 @@ export function StudentDashboard() {
       case 'assignments':
         return (
           <div className="student-content">
-            <h2>Assignments</h2>
-            <p>Track your homework and project deadlines.</p>
-            <div className="placeholder-content">
-              <p>Assignment tracking coming soon...</p>
-            </div>
+            <StudentAssignments />
           </div>
         );
       default:

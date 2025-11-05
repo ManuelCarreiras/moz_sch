@@ -6,10 +6,53 @@ from models.class_model import ClassModel
 from models.assessment_type import AssessmentTypeModel
 from models.term import TermModel
 from models.teacher import TeacherModel
+from models.student_class import StudentClassModel
+from models.student_assignment import StudentAssignmentModel
 from utils.auth_middleware import require_role, require_any_role
 from flask import g
 import json
 from datetime import datetime
+
+
+def create_student_assignments_for_class(assignment_id, class_name, subject_id, term_id):
+    """
+    Auto-create student_assignment records for all students enrolled in this class
+    Matches students by class_name, subject_id, and term
+    """
+    try:
+        # Get all class instances matching this class_name, subject_id, and term
+        all_classes = ClassModel.query.filter_by(
+            class_name=class_name,
+            subject_id=subject_id,
+            term_id=term_id
+        ).all()
+        
+        if not all_classes:
+            return
+        
+        # Get all unique students enrolled in any of these class instances
+        student_ids = set()
+        for class_obj in all_classes:
+            enrollments = StudentClassModel.query.filter_by(class_id=class_obj._id).all()
+            for enrollment in enrollments:
+                student_ids.add(str(enrollment.student_id))
+        
+        # Create student_assignment record for each student
+        for student_id in student_ids:
+            # Check if record already exists
+            existing = StudentAssignmentModel.find_by_student_and_assignment(student_id, assignment_id)
+            if not existing:
+                student_assignment = StudentAssignmentModel(
+                    student_id=student_id,
+                    assignment_id=assignment_id,
+                    status='not_submitted'
+                )
+                student_assignment.save_to_db()
+        
+        return len(student_ids)
+    except Exception as e:
+        print(f"Error creating student assignments: {str(e)}")
+        return 0
 
 
 class AssignmentResource(Resource):
@@ -182,10 +225,21 @@ class AssignmentResource(Resource):
             )
             new_assignment.save_to_db()
             
+            # Auto-create student_assignment records if status is 'published'
+            students_created = 0
+            if data.get('status') == 'published':
+                students_created = create_student_assignments_for_class(
+                    str(new_assignment._id),
+                    class_obj.class_name,
+                    data['subject_id'],
+                    data['term_id']
+                )
+            
             response = {
                 'success': True,
-                'message': 'Assignment created successfully',
-                'assignment': new_assignment.json()
+                'message': f'Assignment created successfully. {students_created} student records created.' if students_created > 0 else 'Assignment created successfully',
+                'assignment': new_assignment.json(),
+                'students_affected': students_created
             }
             return Response(json.dumps(response), 201, mimetype='application/json')
         
@@ -223,6 +277,10 @@ class AssignmentResource(Resource):
                 return {'message': 'You can only update your own assignments'}, 403
         
         try:
+            # Track if status is changing to 'published'
+            old_status = assignment.status
+            status_changed_to_published = False
+            
             # Update fields
             if 'title' in data:
                 assignment.title = data['title']
@@ -242,13 +300,28 @@ class AssignmentResource(Resource):
                 assignment.weight = data['weight']
             if 'status' in data:
                 assignment.status = data['status']
+                if old_status != 'published' and data['status'] == 'published':
+                    status_changed_to_published = True
             
             assignment.save_to_db()
             
+            # Auto-create student assignments if newly published
+            students_created = 0
+            if status_changed_to_published:
+                class_obj = ClassModel.find_by_id(assignment.class_id)
+                if class_obj:
+                    students_created = create_student_assignments_for_class(
+                        str(assignment._id),
+                        class_obj.class_name,
+                        str(assignment.subject_id),
+                        str(assignment.term_id)
+                    )
+            
             response = {
                 'success': True,
-                'message': 'Assignment updated successfully',
-                'assignment': assignment.json()
+                'message': f'Assignment updated successfully. {students_created} student records created.' if students_created > 0 else 'Assignment updated successfully',
+                'assignment': assignment.json(),
+                'students_affected': students_created
             }
             return Response(json.dumps(response), 200, mimetype='application/json')
         

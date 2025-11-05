@@ -588,6 +588,17 @@ class ApiService {
     return this.get(queryString ? `/gradebook/class/${classId}?${queryString}` : `/gradebook/class/${classId}`);
   }
 
+  // Student Assignments
+  async getStudentAssignments(filters?: { term_id?: string; subject_id?: string; status?: string; year_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.term_id) params.append('term_id', filters.term_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.year_id) params.append('year_id', filters.year_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/student/assignments?${queryString}` : '/student/assignments');
+  }
+
 }
 
 // Export singleton instance
