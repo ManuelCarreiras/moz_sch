@@ -3,8 +3,8 @@
 ## 📋 Project Overview
 A comprehensive school management system with React frontend and Flask backend, featuring AWS Cognito authentication and PostgreSQL database.
 
-## 🎯 Current Status: **Phase 2 - Academic Foundation**
-**Progress: 100% Complete** ✅
+## 🎯 Current Status: **Phase 3 & 4 - Grading & Attendance Systems**
+**Progress: Phase 3 - 90% Complete | Phase 4 - 80% Complete** ✅
 
 ### ✅ **Completed Features**
 - [x] **Student Portal**: Student creation, management, and API integration
@@ -108,111 +108,91 @@ A comprehensive school management system with React frontend and Flask backend, 
 
 ---
 
-### **Phase 3: Assignments, Evaluations & Grading System**
-**Timeline: Weeks 5-8** | **Priority: HIGH**
+### **Phase 3: Assignments, Evaluations & Grading System** ✅
+**Timeline: Weeks 5-8** | **Priority: HIGH** | **Status: 90% Complete**
 
-#### **Foundation: Assessment Types & Structure**
-- [ ] **Assessment Types** - Define evaluation methods (Homework, Quiz, Test, Project, Lab, Presentation, Midterm, Final)
-- [ ] **Assessment Type Management** - CRUD interface for assessment types
-- [ ] **Database Schema** - Create assessment_type, assignment, student_assignment, student_term_grade tables
+#### **Foundation: Assessment Types & Structure** ✅
+- [x] **Assessment Types** - Define evaluation methods (Homework, Quiz, Test, Project, Lab, Presentation)
+- [x] **Assessment Type Management** - CRUD interface for assessment types
+- [x] **Database Schema** - Created assessment_type, assignment, student_assignment, student_year_grade tables
+- [x] **0-20 Grading Scale** - Implemented numerical grading instead of letter grades
+- [x] **Year Average Calculation** - Caching year averages per subject (not term averages per class)
 
-#### **Tier 1: Assignment Management**
-- [ ] **Assignment Model** - Create assignment entity with all relationships
-  - [ ] Link to subject, class, term, assessment_type
-  - [ ] Fields: title, description, due_date, max_score, weight, status
-- [ ] **Assignment Creation Wizard** - Teacher interface to create assignments
-  - [ ] Select class and subject
-  - [ ] Choose assessment type
-  - [ ] Set due date and max score
-  - [ ] Define weight (% of final grade)
-  - [ ] Status management (draft, published, closed)
-- [ ] **Assignment List View** - Display all assignments per class/subject
-  - [ ] Filter by term, subject, status
-  - [ ] Sort by due date, assessment type
-  - [ ] Bulk operations (publish multiple, close multiple)
-- [ ] **Assignment Details** - View/edit assignment information
-- [ ] **Assignment API Endpoints** - Full CRUD for assignments
+#### **Tier 1: Assignment Management** ✅
+- [x] **Assignment Model** - Created with all relationships
+  - [x] Link to subject, class, term, assessment_type
+  - [x] Fields: title, description, due_date, max_score, weight, status
+- [x] **Assignment Creation Wizard** - Teacher interface with cascading filters
+  - [x] Granular cascading filters: Department → Subject → School Year → Term → Class
+  - [x] Current/upcoming year restriction
+  - [x] Assessment type selection
+  - [x] Due date and max score configuration
+  - [x] Weight definition (% of final grade)
+  - [x] Status management (draft, published, closed)
+  - [x] Clean class display (only class name, no redundant info)
+- [x] **Assignment List View** - Display all assignments with hierarchical filters
+  - [x] Filter by school year, subject, class, status
+  - [x] Sort by due date, assessment type
+  - [x] Edit and delete operations
+  - [x] De-duplicated class names
+- [x] **Assignment Details** - View/edit assignment information
+- [x] **Assignment API Endpoints** - Full CRUD for assignments
+- [x] **Auto-create student_assignment** - Records auto-created when assignment published
 
-#### **Tier 2: Grade Entry & Management**
-- [ ] **Student Assignment Model** - Link students to assignments with scores
-  - [ ] Fields: score, submission_date, graded_date, feedback, status
-  - [ ] Status tracking (not_submitted, submitted, graded, late)
-- [ ] **Gradebook Interface** - Spreadsheet-like grade entry
-  - [ ] Grid view: students as rows, assignments as columns
-  - [ ] Quick entry: click cell, type score, auto-save
-  - [ ] Visual indicators: late submissions, missing grades, grade distribution
-  - [ ] Bulk operations: copy grades, apply curve, drop lowest scores
-- [ ] **Individual Grade Entry** - Detailed grading for single student
-  - [ ] Score entry with feedback
-  - [ ] Submission date tracking
-  - [ ] File attachment support (future)
-- [ ] **Grade Calculation Engine** - Automated grade computation
-  - [ ] Weighted average calculation
-  - [ ] Category-based grading (optional)
-  - [ ] Letter grade conversion using score_range
-  - [ ] Term grade caching (student_term_grade table)
-- [ ] **Grade Analytics** - Teacher insights
-  - [ ] Class average per assignment
-  - [ ] Grade distribution charts
-  - [ ] Student performance trends
-  - [ ] Identify struggling students
+#### **Tier 2: Grade Entry & Management** ✅
+- [x] **Student Assignment Model** - Link students to assignments with scores
+  - [x] Fields: score, submission_date, graded_date, feedback, status
+  - [x] Status tracking (not_submitted, submitted, graded, late)
+- [x] **Gradebook Interface** - Assignment-focused grade entry
+  - [x] Cascading filters: Year → Term → Subject → Class → Assignment
+  - [x] Assignment selector dropdown
+  - [x] Vertical student list (not horizontal grid)
+  - [x] Click score cell to edit
+  - [x] Editable status dropdown (Not Submitted, Submitted, Graded, Late)
+  - [x] Notes field per student
+  - [x] Auto-save on entry
+  - [x] Dark theme throughout
+- [x] **Grade Calculation Engine** - Automated year average computation
+  - [x] Weighted average calculation (0-20 scale)
+  - [x] Year grade caching in student_year_grade table
+  - [x] Auto-update on grade changes
+  - [x] Exclude ungraded assignments from average
+- [x] **Grade Analytics** - Teacher insights
+  - [ ] Class average per assignment (PENDING)
+  - [ ] Grade distribution charts (PENDING)
+  - [ ] Student performance trends (PENDING)
 
-#### **Tier 3: Student & Parent Views**
-- [ ] **Student Assignment View** - See all assignments
-  - [ ] Filter by subject, status (upcoming, past due, graded)
-  - [ ] Sort by due date
-  - [ ] Assignment details and requirements
-- [ ] **Student Grades View** - See scores and feedback
-  - [ ] View grades per subject
-  - [ ] Current term average calculation
-  - [ ] Overall grade display with letter grade
-  - [ ] Grade history and trends
-- [ ] **Student Dashboard Widget** - Quick grade overview
-  - [ ] "Your current grade: 85%" per subject
-  - [ ] Upcoming assignments
-  - [ ] Recent feedback
-- [ ] **What-If Calculator** - Grade projection tool
-  - [ ] "If I get X on the final, my grade will be Y"
-  - [ ] Identify required scores for target grade
-- [ ] **Parent/Guardian Grade Access** - View student progress
+#### **Tier 3: Student Views** ✅
+- [x] **Student Assignment View** - See all assignments
+  - [x] Filter by year, subject, term, status
+  - [x] Sort by due date
+  - [x] Assignment details and requirements
+  - [x] Calendar view for due dates
+  - [x] List view with color-coded due dates
+- [x] **Student Grades View** - See scores and feedback
+  - [x] View grades per subject
+  - [x] Year average display (0-20 scale)
+  - [x] Color-coded performance cards
+  - [x] Individual assignment grades table
+  - [x] Filter by subject and year
+- [ ] **Parent/Guardian Grade Access** - View student progress (PENDING)
   - [ ] All grades and assignments
   - [ ] Performance alerts
   - [ ] Teacher comments
 
-#### **Tier 4: Advanced Features**
+#### **Tier 4: Advanced Features** (PENDING FOR FUTURE)
 - [ ] **Report Card Generation** - Automated term reports
-  - [ ] PDF export with school branding
-  - [ ] All subjects with grades and comments
-  - [ ] Attendance integration (future)
-  - [ ] Signature fields for parent/teacher
 - [ ] **Grade Import/Export** - Bulk operations
-  - [ ] CSV import for bulk grade entry
-  - [ ] Excel export for external processing
-  - [ ] Grade backup and restore
 - [ ] **Grading Policies** - Flexible configuration
-  - [ ] Extra credit allowance
-  - [ ] Drop lowest N scores
-  - [ ] Curve/scale options
-  - [ ] Rounding rules
-  - [ ] Late submission penalties
 - [ ] **Grade History** - Audit trail
-  - [ ] Track grade changes
-  - [ ] Teacher who made changes
-  - [ ] Timestamp of modifications
-  - [ ] Reason for change (optional)
-- [ ] **Alert System** - Notifications
-  - [ ] Email parents when grade drops below threshold
-  - [ ] Notify students of new grades
-  - [ ] Alert teachers to missing assignments
-  - [ ] Upcoming deadline reminders
+- [ ] **Alert System** - Email notifications
 
-#### **Integration Points**
-- [ ] **Score Range Integration** - Use existing score_range for letter grades
-- [ ] **Subject Integration** - Assignments belong to subjects
-- [ ] **Class Integration** - Assignments assigned to specific class instances
-- [ ] **Term Integration** - Grades calculated per term
-- [ ] **Student Integration** - Link grades to student records
-- [ ] **Teacher Integration** - Teachers create/grade assignments for their classes
+#### **Integration Points** ✅
+- [x] **Subject Integration** - Assignments belong to subjects
+- [x] **Class Integration** - Assignments assigned to specific class instances
+- [x] **Term Integration** - Grades calculated per year (across all terms)
+- [x] **Student Integration** - Link grades to student records
+- [x] **Teacher Integration** - Teachers create/grade assignments for their classes
 
 #### **API Endpoints (Phase 3)**
 ```
@@ -246,12 +226,53 @@ GET    /grade/calculate/student/<id> # Calculate current grade for student
 
 ---
 
-### **Phase 4: Timetables & Scheduling**
-**Timeline: Weeks 7-8** | **Priority: LOW**
+### **Phase 4: Attendance System** ✅
+**Timeline: Week 9** | **Priority: HIGH** | **Status: 80% Complete**
 
-#### **Visual Timetables**
-- [ ] **Student Timetables** - Individual student schedules
-- [ ] **Teacher Timetables** - Teacher schedule views
+#### **Database & Backend** ✅
+- [x] **Attendance Table** - Created with constraints and indexes
+- [x] **Attendance Model** - Complete with query methods
+- [x] **Attendance API Endpoints** - Full CRUD operations
+  - [x] GET /attendance - With filters (student, class, date, subject, term, year)
+  - [x] POST /attendance - Bulk save for class roster
+  - [x] DELETE /attendance - Remove records
+  - [x] GET /attendance/roster/<class_id> - Get class roster with attendance
+- [x] **Backend Filtering** - Filter by subject/term/year for student attendance
+
+#### **Teacher Attendance** ✅
+- [x] **Attendance Taking Interface** - Class roster with date picker
+  - [x] Cascading filters: Year → Term → Subject → Class → Date
+  - [x] Student roster table
+  - [x] Status dropdown per student (Present, Absent, Late, Excused)
+  - [x] Notes field per student
+  - [x] Bulk actions (Mark All Present/Absent)
+  - [x] Live statistics (Present/Absent/Late/Excused counts + Attendance Rate%)
+  - [x] Save button - Bulk save all attendance
+- [x] **Status Legend** - Color-coded status indicators
+
+#### **Student Attendance** ✅
+- [x] **Attendance View** - Personal attendance records
+  - [x] Cascading filters: Year → Term → Subject
+  - [x] Statistics cards (Present/Absent/Late/Excused + Attendance Rate%)
+  - [x] Attendance history table
+  - [x] Filter by date range (future enhancement)
+- [x] **Color-Coded Badges** - Visual status indicators
+
+#### **Pending Enhancements**
+- [ ] **Attendance Reports** - Admin view of school-wide attendance
+- [ ] **Truancy Alerts** - Automatic notifications for excessive absences
+- [ ] **Attendance Analytics** - Charts and trends
+- [ ] **Calendar View** - Monthly attendance calendar
+- [ ] **Export Attendance** - PDF/Excel export
+
+---
+
+### **Phase 5: Timetables & Advanced Scheduling** (PLANNED)
+**Timeline: Weeks 10-11** | **Priority: MEDIUM**
+
+#### **Visual Timetables** (Already Implemented)
+- [x] **Student Timetables** - Individual student schedules ✅
+- [x] **Teacher Timetables** - Teacher schedule views ✅
 - [ ] **Classroom Timetables** - Room utilization views
 - [ ] **Department Timetables** - Subject scheduling views
 
@@ -330,20 +351,29 @@ frontend/src/components/
 - [x] Optimized workflow for score range creation
 - [x] Academic setup wizard functional
 
-### **Phase 3 Goals**
-- [ ] Assessment types defined and manageable
-- [ ] Teachers can create and manage assignments
-- [ ] Teachers can enter grades efficiently via gradebook
-- [ ] Grade calculations working (weighted averages)
-- [ ] Students can view assignments and grades
-- [ ] Letter grades automatically calculated from score ranges
-- [ ] Report cards can be generated
-- [ ] Grade analytics available for teachers
-- [ ] Parent/guardian grade access working
-- [ ] Bulk import/export functional
+### **Phase 3 Goals** ✅
+- [x] Assessment types defined and manageable
+- [x] Teachers can create and manage assignments
+- [x] Teachers can enter grades efficiently via gradebook
+- [x] Grade calculations working (weighted averages on 0-20 scale)
+- [x] Students can view assignments and grades
+- [x] Year averages automatically calculated and cached
+- [ ] Report cards can be generated (PENDING)
+- [ ] Grade analytics available for teachers (PENDING)
+- [ ] Parent/guardian grade access working (PENDING)
+- [ ] Bulk import/export functional (PENDING)
 
-### **Phase 4 Goals**
-- [ ] Visual timetables displayed
+### **Phase 4 Goals** ✅
+- [x] Attendance tracking system implemented
+- [x] Teacher can take attendance with class rosters
+- [x] Student can view attendance records
+- [x] Attendance statistics and summaries
+- [ ] Attendance reports and analytics (PENDING)
+- [ ] Truancy alerts (PENDING)
+- [ ] Export functionality (PENDING)
+
+### **Phase 5 Goals** (PLANNED)
+- [x] Visual timetables displayed (Already done!)
 - [ ] Schedule optimization working
 - [ ] Conflict resolution automated
 - [ ] Reporting system functional
@@ -404,22 +434,28 @@ frontend/src/components/
 
 ## 🎯 **Current Sprint Focus**
 
-**Sprint Goal**: Plan Phase 3 - Assignments, Evaluations & Grading System
-**Duration**: Planning phase (November 1-2, 2025)
+**Sprint Goal**: Complete Phase 3 & 4 - Grading and Attendance Systems
+**Duration**: November 5-6, 2025
 **Key Deliverables**:
-1. ✅ Database schema design for grading system
-2. ✅ API endpoint specification
-3. ✅ UI/UX wireframes for gradebook
-4. ✅ Grade calculation algorithm design
-5. ✅ Integration strategy with existing system
+1. ✅ Complete grading system with 0-20 scale
+2. ✅ Teacher gradebook with assignment filtering
+3. ✅ Student grades and assignment views
+4. ✅ Attendance system (teacher & student)
+5. ✅ Cascading filters across all features
 
 **Previous Sprint**: ✅ Phase 2 - Academic Foundation (100% Complete)
 
-**Next Sprint**: Phase 3 Implementation - Weeks 5-8
-- Week 5: Foundation & Assignment Management
-- Week 6: Grade Entry & Gradebook
-- Week 7: Student Views & Analytics
-- Week 8: Advanced Features & Reports
+**Next Sprint**: Phase 5 - Admin Enhancements & Reports (November 7+)
+- **Admin Grade Analytics**: School-wide grading reports and statistics
+- **Admin Attendance Reports**: Truancy tracking and analytics
+- **Admin Assignment Management**: View all assignments across school
+- **Assessment Type Management**: Admin interface for assessment types
+- **Report Card Generation**: PDF export with school branding
+- **Grade Import/Export**: Bulk operations (CSV/Excel)
+- **Parent/Guardian Portal**: Grade and attendance access
+- **Notification System**: Email alerts for grades and attendance
+- **Performance Analytics**: Charts, trends, grade distributions
+- **Attendance Calendar**: Visual monthly attendance view
 
 ---
 
@@ -535,9 +571,79 @@ frontend/src/components/
 
 ---
 
-**Last Updated**: November 1, 2025
-**Next Review**: Week 5 check-in (Phase 3 implementation start)
-**Project Status**: 🎉 Phase 2 - 100% Complete | Phase 3 Planned | Ready for Grading System Implementation
+**Last Updated**: November 6, 2025
+**Next Review**: Week 10 check-in (Phase 5 admin enhancements)
+**Project Status**: 🎉 Phase 3 & 4 - 90% Complete | Core Features Operational | Ready for Admin Analytics
+
+---
+
+## 🎉 **What We Built (November 5-6, 2025)**
+
+### **Grading System (Phase 3)** ✅
+- **Backend**: 
+  - `assessment_type`, `assignment`, `student_assignment`, `student_year_grade` tables
+  - Complete CRUD APIs with role-based permissions
+  - Weighted average calculation (0-20 scale)
+  - Auto-caching year grades
+  - Auto-create student_assignment on assignment publish
+- **Teacher Portal**:
+  - Assignment creation wizard with Department → Subject → Year → Term → Class filters
+  - Assignment list with Year → Subject → Class → Status filters
+  - Gradebook with Year → Term → Subject → Class → Assignment filters
+  - Vertical student list (not horizontal grid)
+  - Editable scores and status
+  - Dark theme throughout
+- **Student Portal**:
+  - Assignment list + calendar views
+  - Year averages (0-20 scale) with color-coded cards
+  - Individual assignment grades table
+  - Filters by subject and year
+
+### **Attendance System (Phase 4)** ✅
+- **Backend**:
+  - `attendance` table with constraints
+  - Complete CRUD APIs
+  - Filtering by subject/term/year
+  - Bulk save for class rosters
+- **Teacher Portal**:
+  - Attendance taking with Year → Term → Subject → Class → Date filters
+  - Student roster with status dropdowns
+  - Bulk actions (Mark All Present/Absent)
+  - Live statistics
+- **Student Portal**:
+  - Attendance records with Year → Term → Subject filters
+  - Statistics cards
+  - History table
+
+### **Key Achievements** 🏆
+- ✅ **Consistent UX**: Cascading filters everywhere
+- ✅ **0-20 Grading Scale**: Per user feedback
+- ✅ **Year Averages**: Not term averages
+- ✅ **Dark Theme**: Removed all white backgrounds
+- ✅ **Clean Filtering**: No redundant info in dropdowns
+- ✅ **Auto-Actions**: Auto-create records, auto-calculate grades
+- ✅ **Permission Fixes**: Student ID mismatch resolved
+- ✅ **API Enhancements**: Added `term_id` to teacher schedule, `find_by_class_id` to StudentClassModel
+
+---
+
+## 🚀 **Tomorrow's Priorities (November 7, 2025)**
+
+### **Must-Have (Priority 1)**
+1. **Admin Assessment Type Management** - CRUD interface in admin dashboard
+2. **Admin Assignment Overview** - View all assignments school-wide
+3. **Admin Grade Reports** - Basic grade analytics and statistics
+4. **Admin Attendance Reports** - Attendance overview and truancy tracking
+
+### **Should-Have (Priority 2)**
+5. **Parent/Guardian Grade Access** - Parents view student grades/attendance
+6. **Report Card Generation** - PDF export for term reports
+7. **Grade Analytics Charts** - Visual grade distributions
+
+### **Nice-to-Have (Priority 3)**
+8. **Notification System** - Email alerts
+9. **Bulk Import/Export** - CSV/Excel operations
+10. **Attendance Calendar View** - Visual monthly calendar
 
 ---
 

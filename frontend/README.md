@@ -6,16 +6,17 @@ A modern React + TypeScript frontend for the Santa Isabel Escola school manageme
 
 This is the frontend application for the Santa Isabel Escola school management portal, providing a clean and responsive interface for managing students, teachers, classes, and academic schedules with secure authentication.
 
-### 🎉 **Phase 2 Complete - Academic Foundation (100%)**
+### 🎉 **Phase 3 & 4 Complete - Grading & Attendance (90%+)**
 
-**✅ All Personnel Management**: Students, Teachers, Guardians with wizard-based creation  
-**✅ All Academic Setup**: Departments, Subjects, Classrooms, Year Levels, School Years  
-**✅ Academic Foundation**: Terms, Periods, Score Ranges with tabbed interface  
-**✅ Academic Setup Wizard**: Complete guided setup with auto-generation  
-**✅ All Assignment Interfaces**: Teacher-Department, Student-Guardian, Student-Year Level  
-**✅ UI/UX Excellence**: Consistent modals, responsive design, comprehensive validation  
+**✅ Assignment System**: Complete assignment creation, management, and tracking  
+**✅ Grading System**: Full gradebook with 0-20 scale and weighted year averages  
+**✅ Attendance System**: Teacher attendance taking and student attendance viewing  
+**✅ Student Portal**: Assignments (list + calendar), Grades, Attendance, Schedule  
+**✅ Teacher Portal**: Assignments, Gradebook, Attendance, My Classes  
+**✅ Cascading Filters**: Year → Term → Subject → Class across all features  
+**✅ UI/UX Excellence**: Dark theme, responsive design, intuitive workflows  
 
-**🚀 Ready for Phase 3**: Class Management, Enrollment, Grades, Schedules
+**🚀 Next Phase**: Admin Analytics & Reports (Grade reports, Attendance analytics, Parent portal)
 
 ## ✨ Features
 
@@ -37,7 +38,24 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Guardian Portal**: `localhost:3000/guardian` - Guardian management and student assignments
 - **Bidirectional Navigation**: Easy navigation between all portals
 
-### Student Portal Features
+### Student Portal Features ✨
+- **Student Assignments**: View all assignments with list and calendar views
+  - List view with color-coded due dates (overdue, due soon, plenty of time)
+  - Calendar view showing assignments on their due dates
+  - Filter by year, subject, term, status
+  - See score if graded, submission status
+  - Navigate between months in calendar
+- **Student Grades**: View academic performance
+  - Year averages per subject (0-20 scale) with color-coded cards
+  - Individual assignment grades table
+  - Filter by subject and school year
+  - See score, percentage, weight for each assignment
+  - Performance indicators (Excellent, Good, Satisfactory, Needs Improvement)
+- **Student Attendance**: Personal attendance tracking
+  - Cascading filters: Year → Term → Subject
+  - Statistics cards: Present, Absent, Late, Excused counts + Attendance Rate%
+  - Attendance history table with dates and notes
+  - Color-coded status badges
 - **Student Schedule View**: Read-only timetable displaying enrolled classes
   - Grid-based timetable with days of week (Monday-Friday) as columns
   - Period rows with time intervals
@@ -58,7 +76,30 @@ This is the frontend application for the Santa Isabel Escola school management p
 - **Real-time Feedback**: Success/error messages and loading states
 - **Modal Interface**: Clean, accessible form design
 
-### Teacher Portal Features
+### Teacher Portal Features ✨
+- **Assignment Management**: Create and manage assignments
+  - Assignment creation wizard with cascading filters (Department → Subject → Year → Term → Class)
+  - Current/upcoming year restriction
+  - Assessment type selection (Homework, Quiz, Test, etc.)
+  - Assignment list with hierarchical filters (Year, Subject, Class, Status)
+  - Edit and delete operations
+  - Auto-create student_assignment records on publish
+- **Gradebook**: Enter and manage student grades
+  - Cascading filters: Year → Term → Subject → Class → Assignment
+  - Assignment selector dropdown
+  - Vertical student list with grades
+  - Click score cell to edit, Enter to save
+  - Editable status dropdown (Not Submitted, Submitted, Graded, Late)
+  - Auto-calculates year average (0-20 scale)
+  - Weighted average based on assignment weights
+- **Attendance**: Take and manage class attendance
+  - Cascading filters: Year → Term → Subject → Class + Date picker
+  - Student roster with all enrolled students
+  - Status dropdown per student (Present, Absent, Late, Excused)
+  - Notes field for each student
+  - Bulk actions: Mark All Present / Mark All Absent
+  - Live statistics: Attendance counts and rate percentage
+  - Save button for bulk attendance submission
 - **Teacher Schedule View**: Read-only timetable displaying assigned classes
   - Grid-based timetable showing all classes taught by the teacher
   - Filter by school year and term (with smart cascading)
@@ -429,6 +470,43 @@ For technical support or questions about the Santa Isabel Escola portal:
 - Review the authentication setup guide
 - Test across different screen sizes
 - Verify Doppler secrets configuration
+
+---
+
+---
+
+## 📊 **Tomorrow's Plan - Phase 5: Admin Enhancements**
+
+### **Priority 1: Admin Grade Management**
+1. **Assessment Type Management Tab** - Admin interface to manage assessment types
+2. **School-Wide Assignment View** - See all assignments across all classes
+3. **Grade Analytics Dashboard** - School-wide statistics and reports
+4. **Grade Distribution Charts** - Visual analytics per class/subject
+
+### **Priority 2: Admin Attendance Management**
+1. **Attendance Reports** - School-wide attendance statistics
+2. **Truancy Tracking** - Identify students with excessive absences
+3. **Attendance Analytics** - Charts and trends by class/period/day
+4. **Export Functionality** - PDF/Excel export for reports
+
+### **Priority 3: Parent/Guardian Portal**
+1. **Grade Access** - Parents view their children's grades
+2. **Attendance Access** - Parents view attendance records
+3. **Assignment Access** - Parents see upcoming assignments
+4. **Multi-Child Support** - Toggle between multiple children
+
+### **Priority 4: Additional Enhancements**
+1. **Notification System** - Email alerts for new grades/absences
+2. **Report Card Generation** - PDF export with school branding
+3. **Bulk Import/Export** - CSV/Excel for grades and attendance
+4. **Performance Optimizations** - Caching, pagination, lazy loading
+
+### **Nice-to-Have Features**
+- Assignment submission (file upload)
+- Grade comments/feedback UI
+- Attendance calendar view
+- Grade history/audit trail
+- What-If grade calculator for students
 
 ---
 

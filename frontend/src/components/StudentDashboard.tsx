@@ -5,6 +5,7 @@ import logoSrc from '../assets/Santa_Isabel.png';
 import { StudentSchedule } from './StudentSchedule';
 import StudentAssignments from './student/StudentAssignments';
 import StudentGrades from './student/StudentGrades';
+import StudentAttendance from './student/StudentAttendance';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
@@ -144,15 +145,7 @@ export function StudentDashboard() {
           </div>
         );
       case 'attendance':
-        return (
-          <div className="student-content">
-            <h2>Attendance</h2>
-            <p>View your attendance records and absences.</p>
-            <div className="placeholder-content">
-              <p>Attendance tracking coming soon...</p>
-            </div>
-          </div>
-        );
+        return <StudentAttendance />;
       case 'assignments':
         return (
           <div className="student-content">

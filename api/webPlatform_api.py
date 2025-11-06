@@ -190,6 +190,11 @@ api.add_resource(StudentAssignmentResource, "/student/assignments", "/student/as
 api.add_resource(GradeResource, "/grade", "/grade/<grade_id>")
 api.add_resource(GradebookResource, "/gradebook/class/<class_id>")
 
+# ========== Phase 4: Attendance System ==========
+from resources.attendance import AttendanceResource, AttendanceRosterResource
+api.add_resource(AttendanceResource, "/attendance", "/attendance/<attendance_id>")
+api.add_resource(AttendanceRosterResource, "/attendance/roster/<class_id>")
+
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers

@@ -6,6 +6,7 @@ import { TeacherWizard } from './admin/TeacherWizard';
 import { TeacherSchedule } from './TeacherSchedule';
 import AssignmentList from './teacher/AssignmentList';
 import Gradebook from './teacher/Gradebook';
+import TeacherAttendance from './teacher/TeacherAttendance';
 import apiService from '../services/apiService';
 
 type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
@@ -443,15 +444,7 @@ export function TeacherDashboard() {
           </div>
         );
       case 'attendance':
-        return (
-          <div className="teacher-content">
-            <h2>Attendance</h2>
-            <p>Track student attendance and manage records.</p>
-            <div className="placeholder-content">
-              <p>Attendance tracking functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <TeacherAttendance />;
       case 'assignments':
         return <AssignmentList />;
       default:

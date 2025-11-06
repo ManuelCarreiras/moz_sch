@@ -20,17 +20,19 @@ A comprehensive full-stack school management system with React frontend, Flask A
 
 Santa Isabel Escola is a modern full-stack school management system designed for comprehensive educational administration. It features a React frontend with AWS Cognito authentication, a Flask REST API backend, and PostgreSQL database for managing students, teachers, classes, subjects, academic years, and various educational administrative tasks.
 
-### 🚀 **Current Status: Phase 2 Complete (100%)**
+### 🚀 **Current Status: Phase 3 & 4 Complete (90%+)**
 
 ✅ **Personnel Management** - Students, Teachers, Guardians fully operational  
 ✅ **Academic Foundation** - Complete academic structure setup with guided wizard  
-✅ **Assignment Interfaces** - All relationship management interfaces complete  
-✅ **UI/UX Excellence** - Consistent, responsive design across all components  
-✅ **Student Portal** - Authentication, schedule view, and Cognito integration fully working  
-✅ **Teacher Portal** - Authentication, schedule view, username integration fully working  
-✅ **Filtering System** - Comprehensive year/term filtering with smart cascading across all interfaces  
+✅ **Assignment System** - Complete assignment creation, management, and student views  
+✅ **Grading System** - Full gradebook with 0-20 scale, weighted averages, year grade caching  
+✅ **Attendance System** - Teacher attendance taking and student attendance tracking  
+✅ **Student Portal** - Assignments, Grades, Attendance, and Schedule views fully working  
+✅ **Teacher Portal** - Assignments, Gradebook, Attendance, and Schedule management complete  
+✅ **Cascading Filters** - Year → Term → Subject → Class filters across all features  
+✅ **UI/UX Excellence** - Consistent dark theme, responsive design, intuitive workflows  
 
-**Next Phase**: Academic Operations (Class Management, Enrollment, Grades, Advanced Scheduling)
+**Next Phase**: Admin Analytics & Reports (Grade analytics, Attendance reports, Parent portal)
 
 ## ✨ Features
 
@@ -40,10 +42,14 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 - **Guardian Management**: Guardian creation and student-guardian relationship management
 - **Academic Structure**: Comprehensive academic foundation with year levels, terms, periods, and school years
 - **Subject Management**: Academic subjects organized by departments with integrated grading scales
-- **Score Ranges**: Flexible grading scales (A, B, C, etc.) linked to subjects
 - **Classroom Management**: Physical classroom and facility administration with type classifications
 - **Academic Setup Wizard**: Guided step-by-step setup for complete academic infrastructure
-- **Assignment Interfaces**: Streamlined bulk assignment for teacher-department and student-year level relationships
+- **Assignment System**: Complete assignment creation, management, publishing, and tracking
+- **Grading System**: Full gradebook with 0-20 scale grading, weighted averages, and year grade calculation
+- **Attendance System**: Class roster attendance taking with status tracking and statistics
+- **Student Portal**: View assignments (list + calendar), grades (year averages + individual), attendance records, and class schedules
+- **Teacher Portal**: Create assignments, enter grades via gradebook, take attendance, manage classes
+- **Cascading Filters**: Intelligent Year → Term → Subject → Class filtering across all features
 
 ### Authentication & Security
 - **AWS Cognito Integration**: Secure user authentication with JWT tokens
@@ -528,7 +534,16 @@ The system runs the following services:
 - **API Integration**: Student and teacher creation forms directly connected to Flask backend with Cognito integration
 - **Backend Validation**: Teacher conflict detection prevents double-booking (same teacher, term, period, day)
 
-**Latest Update**: November 1, 2025 - Student and Teacher portals fully operational with comprehensive filtering system
+**Latest Update**: November 6, 2025 - Grading and Attendance systems fully operational
+
+**What's New:**
+- ✅ **Assignments**: Teachers can create/publish assignments with cascading filters
+- ✅ **Gradebook**: Assignment-focused grade entry with vertical student lists
+- ✅ **Grading**: 0-20 scale with weighted averages and automatic year grade calculation
+- ✅ **Student Grades**: View year averages, individual assignment grades, and performance metrics
+- ✅ **Attendance**: Teacher attendance taking with class rosters and bulk actions
+- ✅ **Student Attendance**: Personal attendance records with statistics and filtering
+- ✅ **Cascading Filters**: Consistent Year → Term → Subject → Class filtering everywhere
 
 ## 🤝 Contributing
 

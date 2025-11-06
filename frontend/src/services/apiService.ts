@@ -604,6 +604,39 @@ class ApiService {
     return this.get('/teacher/schedule');
   }
 
+  // ========== Phase 4: Attendance System ==========
+  
+  // Attendance
+  async getAttendance(filters?: { student_id?: string; class_id?: string; date?: string; start_date?: string; end_date?: string; subject_id?: string; term_id?: string; year_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.student_id) params.append('student_id', filters.student_id);
+    if (filters?.class_id) params.append('class_id', filters.class_id);
+    if (filters?.date) params.append('date', filters.date);
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.term_id) params.append('term_id', filters.term_id);
+    if (filters?.year_id) params.append('year_id', filters.year_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/attendance?${queryString}` : '/attendance');
+  }
+
+  async getAttendanceRecord(id: string) {
+    return this.get(`/attendance/${id}`);
+  }
+
+  async saveAttendance(attendanceData: any) {
+    return this.post('/attendance', attendanceData);
+  }
+
+  async deleteAttendance(id: string) {
+    return this.delete(`/attendance/${id}`);
+  }
+
+  async getAttendanceRoster(classId: string, date: string) {
+    return this.get(`/attendance/roster/${classId}?date=${date}`);
+  }
+
 }
 
 // Export singleton instance
