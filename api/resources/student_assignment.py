@@ -22,8 +22,91 @@ class StudentAssignmentResource(Resource):
     def get(self, student_id=None):
         """
         GET /student/assignments - Get all assignments for authenticated student
-        Optional filters: term_id, subject_id, status
+        GET /student_assignment (admin) - Get all student assignments
+        Optional filters: term_id, subject_id, status, year_id, class_name
         """
+        # Check if admin is requesting all student assignments
+        role = g.role if hasattr(g, 'role') else None
+        
+        if role == 'admin' and not student_id:
+            # Admin viewing all student assignments
+            class_name_filter = request.args.get('class_name')
+            term_id = request.args.get('term_id')
+            subject_id = request.args.get('subject_id')
+            status_filter = request.args.get('status')
+            year_id = request.args.get('year_id')
+            
+            # Get all student assignments
+            all_student_assignments = StudentAssignmentModel.query.all()
+            
+            # Enhance with details
+            enhanced_assignments = []
+            for sa in all_student_assignments:
+                assignment = AssignmentModel.find_by_id(sa.assignment_id)
+                if not assignment:
+                    continue
+                
+                # Apply filters
+                if term_id and str(assignment.term_id) != term_id:
+                    continue
+                if subject_id and str(assignment.subject_id) != subject_id:
+                    continue
+                if status_filter and sa.status != status_filter:
+                    continue
+                
+                # Get class for class_name filter
+                class_obj = ClassModel.find_by_id(assignment.class_id)
+                if class_name_filter and (not class_obj or class_obj.class_name != class_name_filter):
+                    continue
+                
+                # Get term and year info for year filtering
+                term = TermModel.find_by_id(assignment.term_id)
+                if year_id and term:
+                    if str(term.year_id) != year_id:
+                        continue
+                
+                # Build enhanced data
+                assignment_data = sa.json()
+                assignment_data['assignment'] = assignment.json()
+                
+                # Add student name
+                student = StudentModel.find_by_id(sa.student_id)
+                if student:
+                    assignment_data['student_name'] = f"{student.given_name} {student.surname}"
+                
+                # Add assessment type
+                assessment_type = AssessmentTypeModel.find_by_id(assignment.assessment_type_id)
+                if assessment_type:
+                    assignment_data['assessment_type_name'] = assessment_type.type_name
+                
+                # Add subject
+                subject = SubjectModel.find_by_id(assignment.subject_id)
+                if subject:
+                    assignment_data['subject_name'] = subject.subject_name
+                
+                # Add class
+                if class_obj:
+                    assignment_data['class_name'] = class_obj.class_name
+                
+                # Add term and year info
+                if term:
+                    assignment_data['term_number'] = term.term_number
+                    year = SchoolYearModel.find_by_id(term.year_id)
+                    if year:
+                        assignment_data['year_name'] = year.year_name
+                        assignment_data['year_id'] = str(year._id)
+                
+                enhanced_assignments.append(assignment_data)
+            
+            # Sort by due date
+            enhanced_assignments.sort(key=lambda x: x['assignment'].get('due_date') or '9999-12-31')
+            
+            return {
+                'success': True,
+                'assignments': enhanced_assignments,
+                'count': len(enhanced_assignments)
+            }, 200
+        
         # Get authenticated student
         if not student_id:
             username = g.username if hasattr(g, 'username') else None

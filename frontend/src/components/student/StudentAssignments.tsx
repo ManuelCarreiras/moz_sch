@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/apiService';
 import StudentAssignmentCalendar from './StudentAssignmentCalendar';
+import { useUser } from '../../contexts/AuthContext';
 
 interface StudentAssignment {
   _id: string;
   student_id: string;
+  student_name?: string;
   assignment_id: string;
   score: number | null;
   submission_date: string | null;
@@ -39,43 +41,130 @@ interface SchoolYear {
   year_name: string;
 }
 
+interface Term {
+  _id: string;
+  term_number: number;
+  year_id: string;
+}
+
+interface ClassItem {
+  class_id: string;
+  class_name: string;
+}
+
 type ViewMode = 'list' | 'calendar';
 
 const StudentAssignments: React.FC = () => {
+  const user = useUser();
+  const isAdmin = user?.role === 'admin';
+  
   const [assignments, setAssignments] = useState<StudentAssignment[]>([]);
   const [filteredAssignments, setFilteredAssignments] = useState<StudentAssignment[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   
   // Filters
   const [filterYear, setFilterYear] = useState<string>('');
+  const [filterTerm, setFilterTerm] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('');
+  const [filterClass, setFilterClass] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
 
   useEffect(() => {
-    loadAssignments();
     loadSubjects();
     loadSchoolYears();
+    loadTerms();
+    if (isAdmin) {
+      loadClasses();
+    }
   }, []);
 
   useEffect(() => {
-    applyFilters();
-  }, [assignments, filterYear, filterSubject, filterStatus]);
+    // Reload assignments when filters change (for admin)
+    if (isAdmin) {
+      loadAssignments();
+    }
+  }, [filterYear, filterTerm, filterSubject, filterClass, filterStatus]);
+
+  useEffect(() => {
+    // Load assignments on mount for students
+    if (!isAdmin) {
+      loadAssignments();
+    }
+  }, []);
+
+  useEffect(() => {
+    // Reload assignments when filters change (for students too - server-side filtering)
+    if (!isAdmin && (filterYear || filterTerm || filterSubject || filterStatus)) {
+      loadAssignments();
+    }
+  }, [filterYear, filterTerm, filterSubject, filterStatus]);
 
   const loadAssignments = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getStudentAssignments();
-      if (response.success && response.data) {
-        const assignmentsData = (response.data as any)?.assignments || [];
-        setAssignments(assignmentsData);
+      let response;
+      
+      if (isAdmin) {
+        // Admin: Load ALL student assignments with server-side filters
+        const params = new URLSearchParams();
+        if (filterYear) params.append('year_id', filterYear);
+        if (filterTerm) params.append('term_id', filterTerm);
+        if (filterSubject) params.append('subject_id', filterSubject);
+        if (filterClass) params.append('class_name', filterClass);
+        if (filterStatus) params.append('status', filterStatus);
+        
+        const queryString = params.toString();
+        const endpoint = queryString ? `/student/assignments?${queryString}` : '/student/assignments';
+        
+        console.log('[StudentAssignments] Admin loading from:', endpoint);
+        response = await apiService.get(endpoint);
+        
+        if (response.success && response.data) {
+          const assignmentsData = (response.data as any)?.assignments || [];
+          console.log('[StudentAssignments] Admin loaded:', assignmentsData.length, 'assignments');
+          setAssignments(assignmentsData);
+          setFilteredAssignments(assignmentsData); // For admin, no client-side filtering
+        }
+      } else {
+        // Student: Load only my assignments with filters
+        const filters: any = {};
+        if (filterYear) filters.year_id = filterYear;
+        if (filterTerm) filters.term_id = filterTerm;
+        if (filterSubject) filters.subject_id = filterSubject;
+        if (filterStatus) filters.status = filterStatus;
+        
+        response = await apiService.getStudentAssignments(filters);
+        if (response.success && response.data) {
+          const assignmentsData = (response.data as any)?.assignments || [];
+          setAssignments(assignmentsData);
+          setFilteredAssignments(assignmentsData); // Set filtered directly for students too
+        }
       }
     } catch (error) {
       console.error('Error loading assignments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadClasses = async () => {
+    try {
+      const response = await apiService.getClasses();
+      if (response.success && response.data) {
+        const allClasses = (response.data as any)?.message || [];
+        // Extract unique class names
+        const uniqueClasses = Array.from(
+          new Map(allClasses.map((c: any) => [c.class_name, { class_id: c._id, class_name: c.class_name }])).values()
+        );
+        setClasses(uniqueClasses as ClassItem[]);
+      }
+    } catch (error) {
+      console.error('Error loading classes:', error);
     }
   };
 
@@ -113,22 +202,21 @@ const StudentAssignments: React.FC = () => {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...assignments];
-
-    if (filterYear) {
-      filtered = filtered.filter(a => a.year_id === filterYear);
+  const loadTerms = async () => {
+    try {
+      const response = await apiService.getTerms();
+      if (response.success && response.data) {
+        const allTerms = (response.data as any)?.message || [];
+        setTerms(allTerms);
+      }
+    } catch (error) {
+      console.error('Error loading terms:', error);
     }
+  };
 
-    if (filterSubject) {
-      filtered = filtered.filter(a => a.assignment.subject_id === filterSubject);
-    }
-
-    if (filterStatus) {
-      filtered = filtered.filter(a => a.status === filterStatus);
-    }
-
-    setFilteredAssignments(filtered);
+  const getFilteredTerms = () => {
+    if (!filterYear) return terms;
+    return terms.filter(t => t.year_id === filterYear);
   };
 
   const formatDate = (dateString?: string) => {
@@ -218,12 +306,35 @@ const StudentAssignments: React.FC = () => {
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>School Year</label>
           <select
             value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
+            onChange={(e) => {
+              setFilterYear(e.target.value);
+              setFilterTerm('');
+            }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
             <option value="">All Years</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Term</label>
+          <select
+            value={filterTerm}
+            onChange={(e) => setFilterTerm(e.target.value)}
+            disabled={!filterYear}
+            style={{ 
+              width: '100%', 
+              padding: '0.5rem', 
+              borderRadius: '4px',
+              opacity: !filterYear ? 0.5 : 1
+            }}
+          >
+            <option value="">All Terms</option>
+            {getFilteredTerms().map((term) => (
+              <option key={term._id} value={term._id}>Term {term.term_number}</option>
             ))}
           </select>
         </div>
@@ -242,6 +353,22 @@ const StudentAssignments: React.FC = () => {
           </select>
         </div>
 
+        {isAdmin && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Class</label>
+            <select
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            >
+              <option value="">All Classes</option>
+              {classes.map((cls) => (
+                <option key={cls.class_id} value={cls.class_name}>{cls.class_name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Status</label>
           <select
@@ -257,13 +384,15 @@ const StudentAssignments: React.FC = () => {
           </select>
         </div>
 
-        {(filterYear || filterSubject || filterStatus) && (
+        {(filterYear || filterTerm || filterSubject || filterClass || filterStatus) && (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               className="btn btn-secondary"
               onClick={() => {
                 setFilterYear('');
+                setFilterTerm('');
                 setFilterSubject('');
+                setFilterClass('');
                 setFilterStatus('');
               }}
               style={{ width: '100%' }}
@@ -297,6 +426,7 @@ const StudentAssignments: React.FC = () => {
               <thead>
                 <tr>
                   <th>Assignment</th>
+                  {isAdmin && <th>Student</th>}
                   <th>Subject</th>
                   <th>Class</th>
                   <th>Type</th>
@@ -324,6 +454,7 @@ const StudentAssignments: React.FC = () => {
                           </div>
                         )}
                       </td>
+                      {isAdmin && <td>{sa.student_name || 'Unknown'}</td>}
                       <td>{sa.subject_name || '-'}</td>
                       <td>{sa.class_name || '-'}</td>
                       <td>{sa.assessment_type_name || '-'}</td>
