@@ -152,12 +152,84 @@ class AttendanceResource(Resource):
                 'count': len(enhanced_records)
             }, 200
         
-        # Class attendance
+        # Class attendance (for admin/teacher viewing all students in a class)
         if class_id:
-            records = AttendanceModel.find_by_class_id(class_id)
+            # Get filters
+            subject_id = request.args.get('subject_id')
+            term_id = request.args.get('term_id')
+            year_id = request.args.get('year_id')
+            
+            # Find ALL classes that match the filters (subject, term, year)
+            # This handles cases where there are multiple class instances with the same name
+            from models.term import TermModel
+            
+            matching_classes = []
+            if subject_id and term_id:
+                # Find all classes with this subject and term
+                all_classes = ClassModel.query.filter_by(subject_id=subject_id, term_id=term_id).all()
+                
+                # Also get the class name from the provided class_id to match
+                target_class = ClassModel.find_by_id(class_id)
+                if target_class:
+                    target_class_name = target_class.class_name
+                    
+                    # Filter to classes with the same name
+                    matching_classes = [c for c in all_classes if c.class_name == target_class_name]
+            
+            if not matching_classes:
+                return {'attendance_records': [], 'count': 0}, 200
+            
+            # Get all students enrolled in ANY of these matching classes
+            from models.student_class import StudentClassModel
+            student_ids = set()
+            for cls in matching_classes:
+                student_classes = StudentClassModel.query.filter_by(class_id=cls._id).all()
+                for sc in student_classes:
+                    student_ids.add(sc.student_id)
+            
+            student_ids = list(student_ids)
+            
+            # Get attendance records for all these students
+            enhanced_records = []
+            for student_id in student_ids:
+                # Get all attendance for this student
+                student_records = AttendanceModel.find_by_student_id(student_id)
+                
+                for record in student_records:
+                    # Get the class for this attendance record
+                    record_class = ClassModel.find_by_id(record.class_id)
+                    if not record_class:
+                        continue
+                    
+                    # Apply filters - must match subject, term, year
+                    if subject_id and str(record_class.subject_id) != subject_id:
+                        continue
+                    
+                    if term_id and str(record_class.term_id) != term_id:
+                        continue
+                    
+                    if year_id:
+                        from models.term import TermModel
+                        term = TermModel.find_by_id(record_class.term_id)
+                        if not term or str(term.year_id) != year_id:
+                            continue
+                    
+                    # Build record data
+                    record_data = record.json()
+                    
+                    # Add student name
+                    student = StudentModel.find_by_id(record.student_id)
+                    if student:
+                        record_data['student_name'] = f"{student.given_name} {student.surname}"
+                    
+                    # Add class name
+                    record_data['class_name'] = record_class.class_name
+                    
+                    enhanced_records.append(record_data)
+            
             return {
-                'attendance_records': [r.json() for r in records],
-                'count': len(records)
+                'attendance_records': enhanced_records,
+                'count': len(enhanced_records)
             }, 200
         
         return {'message': 'Please provide student_id, class_id, or date filters'}, 400
