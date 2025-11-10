@@ -201,6 +201,38 @@ class GradeComponentResource(Resource):
             return {'message': f'Error deleting grade component: {str(e)}'}, 500
 
 
+class GradeComponentAutoCreateResource(Resource):
+    """Auto-create grade components from assignments"""
+    
+    def post(self):
+        """Auto-create grade components from graded assignments"""
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['student_id', 'subject_id', 'term_id']
+        for field in required_fields:
+            if field not in data:
+                return {'message': f'Missing required field: {field}'}, 400
+        
+        try:
+            components = GradeComponentModel.auto_create_from_assignments(
+                student_id=data['student_id'],
+                subject_id=data['subject_id'],
+                term_id=data['term_id'],
+                class_id=data.get('class_id'),
+                created_by=data.get('created_by')
+            )
+            
+            return {
+                'message': f'Auto-created {len(components)} grade components',
+                'components': [c.json() for c in components]
+            }, 201
+            
+        except Exception as e:
+            logging.error(f"Error auto-creating grade components: {str(e)}")
+            return {'message': f'Error auto-creating grade components: {str(e)}'}, 500
+
+
 class GradeComponentBulkResource(Resource):
     """Bulk operations for grade components"""
     

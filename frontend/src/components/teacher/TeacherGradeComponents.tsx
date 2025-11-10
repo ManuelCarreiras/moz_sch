@@ -247,6 +247,35 @@ const TeacherGradeComponents: React.FC = () => {
     }
   };
 
+  const handleAutoCreate = async () => {
+    if (!filterStudent) return;
+    
+    if (!confirm('This will auto-create grade components from graded assignments. Continue?')) return;
+    
+    try {
+      const selectedClass = getFilteredClasses().find(c => c.class_name === filterClass);
+      
+      const response = await apiService.autoCreateGradeComponents({
+        student_id: filterStudent,
+        subject_id: filterSubject,
+        term_id: filterTerm,
+        class_id: selectedClass?._id,
+        created_by: user?.id
+      });
+      
+      if (response.success) {
+        const componentsData = (response as any)?.components || [];
+        alert(`Auto-created ${componentsData.length} grade components! Please set their weights.`);
+        loadComponents();
+      } else {
+        alert('Error auto-creating components: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error auto-creating components:', error);
+      alert('Error auto-creating components');
+    }
+  };
+
   const handleDelete = async (componentId: string) => {
     if (!confirm('Are you sure you want to delete this grade component?')) return;
     
@@ -480,9 +509,9 @@ const TeacherGradeComponents: React.FC = () => {
         </div>
       </div>
 
-      {/* Add Component Button */}
+      {/* Action Buttons */}
       {filterYear && filterTerm && filterSubject && filterClass && (
-        <div style={{ marginBottom: '2rem' }}>
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
           <button
             onClick={() => {
               if (!showAddForm) {
@@ -508,8 +537,26 @@ const TeacherGradeComponents: React.FC = () => {
               fontWeight: 600
             }}
           >
-            {showAddForm ? 'Cancel' : '+ Add Grade Component'}
+            {showAddForm ? 'Cancel' : '+ Add Manual Component'}
           </button>
+          
+          {filterStudent && (
+            <button
+              onClick={handleAutoCreate}
+              style={{
+                padding: '0.75rem 1.5rem',
+                borderRadius: '4px',
+                border: '1px solid var(--primary)',
+                background: 'transparent',
+                color: 'var(--primary)',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: 600
+              }}
+            >
+              🤖 Auto-Create from Assignments
+            </button>
+          )}
         </div>
       )}
 

@@ -671,6 +671,10 @@ class ApiService {
     return this.post('/grade_component/bulk', { components });
   }
 
+  async autoCreateGradeComponents(data: { student_id: string; subject_id: string; term_id: string; class_id?: string; created_by?: string }) {
+    return this.post('/grade_component/auto_create', data);
+  }
+
   // ========== Term Grades ==========
   
   async getTermGrades(filters?: { student_id?: string; subject_id?: string; term_id?: string; class_id?: string; year_id?: string; class_name?: string; is_finalized?: boolean }) {

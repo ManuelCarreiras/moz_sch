@@ -36,7 +36,7 @@ from resources.assessment_type import AssessmentTypeResource
 from resources.assignment import AssignmentResource, TeacherAssignmentResource
 from resources.grade import GradeResource, GradebookResource
 from resources.student_assignment import StudentAssignmentResource
-from resources.grade_component import GradeComponentResource, GradeComponentBulkResource
+from resources.grade_component import GradeComponentResource, GradeComponentBulkResource, GradeComponentAutoCreateResource
 from resources.term_grade import TermGradeResource, TermGradeCalculateResource
 
 # Get environment variables from Doppler
@@ -199,6 +199,7 @@ api.add_resource(AttendanceRosterResource, "/attendance/roster/<class_id>")
 
 # Grade Components
 api.add_resource(GradeComponentResource, "/grade_component", "/grade_component/<component_id>")
+api.add_resource(GradeComponentAutoCreateResource, "/grade_component/auto_create")
 api.add_resource(GradeComponentBulkResource, "/grade_component/bulk")
 
 # Term Grades
