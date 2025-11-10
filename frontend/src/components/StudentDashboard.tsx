@@ -108,15 +108,21 @@ export function StudentDashboard() {
     );
   }
 
-  const tabs = [
-    { id: 'overview' as StudentTab, label: 'Overview', icon: '🏠' },
-    { id: 'grades' as StudentTab, label: 'My Grades', icon: '📊' },
-    { id: 'schedule' as StudentTab, label: 'Schedule', icon: '📅' },
-    { id: 'profile' as StudentTab, label: 'Profile', icon: '👤' },
-    { id: 'resources' as StudentTab, label: 'Resources', icon: '📚' },
-    { id: 'attendance' as StudentTab, label: 'Attendance', icon: '✅' },
-    { id: 'assignments' as StudentTab, label: 'Assignments', icon: '📝' },
+  // Filter tabs based on user role
+  const allTabs = [
+    { id: 'overview' as StudentTab, label: 'Overview', icon: '🏠', showForAdmin: true },
+    { id: 'grades' as StudentTab, label: 'Grades', icon: '📊', showForAdmin: true },
+    { id: 'schedule' as StudentTab, label: 'Schedule', icon: '📅', showForAdmin: false },
+    { id: 'profile' as StudentTab, label: 'Profile', icon: '👤', showForAdmin: false },
+    { id: 'resources' as StudentTab, label: 'Resources', icon: '📚', showForAdmin: true },
+    { id: 'attendance' as StudentTab, label: 'Attendance', icon: '✅', showForAdmin: true },
+    { id: 'assignments' as StudentTab, label: 'Assignments', icon: '📝', showForAdmin: true },
   ];
+
+  // Filter tabs based on admin role
+  const tabs = isAdmin 
+    ? allTabs.filter(tab => tab.showForAdmin)
+    : allTabs;
 
   const renderTabContent = () => {
     switch (activeTab) {

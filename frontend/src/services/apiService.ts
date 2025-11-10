@@ -589,12 +589,13 @@ class ApiService {
   }
 
   // Student Assignments
-  async getStudentAssignments(filters?: { term_id?: string; subject_id?: string; status?: string; year_id?: string }) {
+  async getStudentAssignments(filters?: { term_id?: string; subject_id?: string; status?: string; year_id?: string; class_name?: string }) {
     const params = new URLSearchParams();
     if (filters?.term_id) params.append('term_id', filters.term_id);
     if (filters?.subject_id) params.append('subject_id', filters.subject_id);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.year_id) params.append('year_id', filters.year_id);
+    if (filters?.class_name) params.append('class_name', filters.class_name);
     const queryString = params.toString();
     return this.get(queryString ? `/student/assignments?${queryString}` : '/student/assignments');
   }
@@ -635,6 +636,70 @@ class ApiService {
 
   async getAttendanceRoster(classId: string, date: string) {
     return this.get(`/attendance/roster/${classId}?date=${date}`);
+  }
+
+  // ========== Grade Components ==========
+  
+  async getGradeComponents(filters?: { student_id?: string; subject_id?: string; term_id?: string; class_id?: string; component_type?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.student_id) params.append('student_id', filters.student_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.term_id) params.append('term_id', filters.term_id);
+    if (filters?.class_id) params.append('class_id', filters.class_id);
+    if (filters?.component_type) params.append('component_type', filters.component_type);
+    const queryString = params.toString();
+    return this.get(queryString ? `/grade_component?${queryString}` : '/grade_component');
+  }
+
+  async getGradeComponent(id: string) {
+    return this.get(`/grade_component/${id}`);
+  }
+
+  async createGradeComponent(componentData: any) {
+    return this.post('/grade_component', componentData);
+  }
+
+  async updateGradeComponent(id: string, componentData: any) {
+    return this.put(`/grade_component/${id}`, componentData);
+  }
+
+  async deleteGradeComponent(id: string) {
+    return this.delete(`/grade_component/${id}`);
+  }
+
+  async createGradeComponentsBulk(components: any[]) {
+    return this.post('/grade_component/bulk', { components });
+  }
+
+  // ========== Term Grades ==========
+  
+  async getTermGrades(filters?: { student_id?: string; subject_id?: string; term_id?: string; class_id?: string; year_id?: string; class_name?: string; is_finalized?: boolean }) {
+    const params = new URLSearchParams();
+    if (filters?.student_id) params.append('student_id', filters.student_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.term_id) params.append('term_id', filters.term_id);
+    if (filters?.class_id) params.append('class_id', filters.class_id);
+    if (filters?.year_id) params.append('year_id', filters.year_id);
+    if (filters?.class_name) params.append('class_name', filters.class_name);
+    if (filters?.is_finalized !== undefined) params.append('is_finalized', filters.is_finalized.toString());
+    const queryString = params.toString();
+    return this.get(queryString ? `/term_grade?${queryString}` : '/term_grade');
+  }
+
+  async getTermGrade(id: string) {
+    return this.get(`/term_grade/${id}`);
+  }
+
+  async updateTermGrade(id: string, gradeData: any) {
+    return this.put(`/term_grade/${id}`, gradeData);
+  }
+
+  async deleteTermGrade(id: string) {
+    return this.delete(`/term_grade/${id}`);
+  }
+
+  async calculateTermGrades(data: any) {
+    return this.post('/term_grade/calculate', data);
   }
 
 }
