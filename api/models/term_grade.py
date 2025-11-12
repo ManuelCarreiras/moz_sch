@@ -114,33 +114,29 @@ class TermGradeModel(db.Model):
         return cls.query.all()
 
     @classmethod
-    def calculate_and_save(cls, student_id, subject_id, term_id, class_id=None, created_by=None):
-        """Calculate term grade from grade_components and save/update"""
-        from models.grade_component import GradeComponentModel
+    def calculate_and_save(cls, student_id, subject_id, term_id, class_id=None, year_level_id=None, created_by=None):
+        """Calculate term grade from grading_criteria (pulls from student_assignment and attendance)"""
+        from models.grading_criteria import GradingCriteriaModel
+        from models.student import StudentModel
         
-        # Get all grade components for this student/subject/term
-        components = GradeComponentModel.find_by_student_subject_term(student_id, subject_id, term_id)
+        # Get student's year level if not provided
+        if not year_level_id:
+            student = StudentModel.find_by_id(student_id)
+            if not student or not student.year_level_id:
+                return None
+            year_level_id = student.year_level_id
         
-        if not components:
+        # Calculate grade using grading criteria
+        calculated_grade = GradingCriteriaModel.calculate_term_grade(
+            student_id, subject_id, term_id, year_level_id
+        )
+        
+        if calculated_grade is None:
             return None
         
-        # Calculate weighted average
-        total_weighted_score = 0
-        total_weight = 0
-        
-        for component in components:
-            percentage = (float(component.score) / float(component.max_score)) * 100
-            weighted_score = percentage * float(component.weight)
-            total_weighted_score += weighted_score
-            total_weight += float(component.weight)
-        
-        if total_weight == 0:
-            return None
-        
-        # Calculate grade on 0-20 scale
-        average_percentage = total_weighted_score / total_weight
-        calculated_grade = (average_percentage / 100) * 20
-        calculated_grade = round(calculated_grade, 2)
+        # Get criteria details
+        criteria_list = GradingCriteriaModel.find_by_subject_year_level(subject_id, year_level_id)
+        total_weight = sum(float(c.weight) for c in criteria_list)
         
         # Check if grade already exists
         existing_grade = cls.find_by_student_subject_term(student_id, subject_id, term_id)
@@ -148,8 +144,8 @@ class TermGradeModel(db.Model):
         if existing_grade:
             # Update existing grade
             existing_grade.calculated_grade = calculated_grade
+            existing_grade.component_count = len(criteria_list)
             existing_grade.total_weight_entered = total_weight
-            existing_grade.component_count = len(components)
             existing_grade.is_complete = (total_weight >= 100)
             
             # Use manual override if exists, otherwise use calculated
@@ -170,8 +166,8 @@ class TermGradeModel(db.Model):
                 class_id=class_id,
                 calculated_grade=calculated_grade,
                 final_grade=calculated_grade,
+                component_count=len(criteria_list),
                 total_weight_entered=total_weight,
-                component_count=len(components),
                 is_complete=(total_weight >= 100),
                 created_by=created_by
             )

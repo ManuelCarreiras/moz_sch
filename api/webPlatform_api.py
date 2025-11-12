@@ -36,8 +36,8 @@ from resources.assessment_type import AssessmentTypeResource
 from resources.assignment import AssignmentResource, TeacherAssignmentResource
 from resources.grade import GradeResource, GradebookResource
 from resources.student_assignment import StudentAssignmentResource
-from resources.grade_component import GradeComponentResource, GradeComponentBulkResource, GradeComponentAutoCreateResource
 from resources.term_grade import TermGradeResource, TermGradeCalculateResource
+from resources.grading_criteria import GradingCriteriaResource
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -197,10 +197,8 @@ from resources.attendance import AttendanceResource, AttendanceRosterResource
 api.add_resource(AttendanceResource, "/attendance", "/attendance/<attendance_id>")
 api.add_resource(AttendanceRosterResource, "/attendance/roster/<class_id>")
 
-# Grade Components
-api.add_resource(GradeComponentResource, "/grade_component", "/grade_component/<component_id>")
-api.add_resource(GradeComponentAutoCreateResource, "/grade_component/auto_create")
-api.add_resource(GradeComponentBulkResource, "/grade_component/bulk")
+# Grading Criteria (Admin-only)
+api.add_resource(GradingCriteriaResource, "/grading_criteria", "/grading_criteria/<criteria_id>")
 
 # Term Grades
 api.add_resource(TermGradeResource, "/term_grade", "/term_grade/<grade_id>")

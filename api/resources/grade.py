@@ -144,6 +144,9 @@ class GradeResource(Resource):
                 # Recalculate year grade
                 self._recalculate_year_grade(data['student_id'], assignment.subject_id)
                 
+                # Recalculate term grade
+                self._recalculate_term_grade(data['student_id'], assignment.subject_id, assignment.term_id, assignment.class_id)
+                
                 response = {
                     'success': True,
                     'message': 'Grade updated successfully',
@@ -177,6 +180,9 @@ class GradeResource(Resource):
                 
                 # Recalculate year grade
                 self._recalculate_year_grade(data['student_id'], assignment.subject_id)
+                
+                # Recalculate term grade
+                self._recalculate_term_grade(data['student_id'], assignment.subject_id, assignment.term_id, assignment.class_id)
                 
                 response = {
                     'success': True,
@@ -223,6 +229,9 @@ class GradeResource(Resource):
             
             # Recalculate year grade
             self._recalculate_year_grade(student_id, subject_id)
+            
+            # Recalculate term grade
+            self._recalculate_term_grade(student_id, subject_id, assignment.term_id, assignment.class_id)
             
             response = {
                 'success': True,
@@ -310,6 +319,25 @@ class GradeResource(Resource):
         
         except Exception as e:
             print(f"Error recalculating year grade: {e}")
+
+    def _recalculate_term_grade(self, student_id, subject_id, term_id, class_id=None):
+        """
+        Recalculate and save the student's term grade automatically
+        Uses grading_criteria to pull from student_assignment and attendance
+        """
+        try:
+            from models.term_grade import TermGradeModel
+            
+            # Calculate and save term grade from grading criteria
+            TermGradeModel.calculate_and_save(
+                student_id=student_id,
+                subject_id=subject_id,
+                term_id=term_id,
+                class_id=class_id
+            )
+        
+        except Exception as e:
+            print(f"Error recalculating term grade: {e}")
 
 
 class GradebookResource(Resource):

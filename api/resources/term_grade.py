@@ -223,20 +223,34 @@ class TermGradeCalculateResource(Resource):
             if not term_id:
                 return {'message': 'term_id is required'}, 400
             
-            # Get all grade components for this term
-            from models.grade_component import GradeComponentModel
-            query = GradeComponentModel.query.filter_by(term_id=term_id)
+            # Get all student assignments for this term to find students
+            from models.student_assignment import StudentAssignmentModel
+            from models.assignment import AssignmentModel
+            
+            # Get all assignments for this term/subject
+            assignment_query = AssignmentModel.query.filter_by(term_id=term_id)
             if subject_id:
-                query = query.filter_by(subject_id=subject_id)
-            if class_id:
-                query = query.filter_by(class_id=class_id)
+                assignment_query = assignment_query.filter_by(subject_id=subject_id)
             
-            components = query.all()
+            assignments = assignment_query.all()
+            assignment_ids = [str(a._id) for a in assignments]
             
-            # Get unique student/subject combinations
+            # Get unique student/subject combinations from student assignments
             student_subjects = set()
-            for comp in components:
-                student_subjects.add((comp.student_id, comp.subject_id, comp.term_id, comp.class_id))
+            if assignment_ids:
+                student_assignments = StudentAssignmentModel.query.filter(
+                    StudentAssignmentModel.assignment_id.in_(assignment_ids)
+                ).all()
+                
+                for sa in student_assignments:
+                    assignment = next((a for a in assignments if str(a._id) == str(sa.assignment_id)), None)
+                    if assignment:
+                        student_subjects.add((
+                            str(sa.student_id),
+                            str(assignment.subject_id),
+                            str(assignment.term_id),
+                            str(class_id) if class_id else None
+                        ))
             
             # Calculate grades
             calculated = []

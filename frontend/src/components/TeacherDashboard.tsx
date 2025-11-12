@@ -7,10 +7,9 @@ import { TeacherSchedule } from './TeacherSchedule';
 import AssignmentList from './teacher/AssignmentList';
 import Gradebook from './teacher/Gradebook';
 import TeacherAttendance from './teacher/TeacherAttendance';
-import TeacherGradeComponents from './teacher/TeacherGradeComponents';
 import apiService from '../services/apiService';
 
-type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments' | 'grade_components';
+type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
 
 interface TeacherClass {
   _id: string;
@@ -171,7 +170,6 @@ export function TeacherDashboard() {
     { id: 'classes' as TeacherTab, label: 'My Classes', icon: '📚' },
     { id: 'students' as TeacherTab, label: 'Students', icon: '👥' },
     { id: 'grades' as TeacherTab, label: 'Grades', icon: '📊' },
-    { id: 'grade_components' as TeacherTab, label: 'Grade Components', icon: '🎯' },
     { id: 'resources' as TeacherTab, label: 'Resources', icon: '📖' },
     { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
     { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' },
@@ -447,8 +445,6 @@ export function TeacherDashboard() {
         );
       case 'attendance':
         return <TeacherAttendance />;
-      case 'grade_components':
-        return <TeacherGradeComponents />;
       case 'assignments':
         return <AssignmentList />;
       default:

@@ -8,6 +8,7 @@ class AttendanceModel(db.Model):
     _id = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     student_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('student._id'), nullable=False)
     class_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('class._id'), nullable=False)
+    subject_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('subject._id'))
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), nullable=False, default='present')
     notes = db.Column(db.Text)
@@ -15,9 +16,10 @@ class AttendanceModel(db.Model):
     created_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
     updated_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
-    def __init__(self, student_id, class_id, date, status='present', notes=None, created_by=None):
+    def __init__(self, student_id, class_id, date, status='present', subject_id=None, notes=None, created_by=None):
         self.student_id = student_id
         self.class_id = class_id
+        self.subject_id = subject_id
         self.date = date
         self.status = status
         self.notes = notes
@@ -28,6 +30,7 @@ class AttendanceModel(db.Model):
             '_id': str(self._id),
             'student_id': str(self.student_id),
             'class_id': str(self.class_id),
+            'subject_id': str(self.subject_id) if self.subject_id else None,
             'date': self.date.isoformat() if self.date else None,
             'status': self.status,
             'notes': self.notes,

@@ -638,43 +638,6 @@ class ApiService {
     return this.get(`/attendance/roster/${classId}?date=${date}`);
   }
 
-  // ========== Grade Components ==========
-  
-  async getGradeComponents(filters?: { student_id?: string; subject_id?: string; term_id?: string; class_id?: string; component_type?: string }) {
-    const params = new URLSearchParams();
-    if (filters?.student_id) params.append('student_id', filters.student_id);
-    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
-    if (filters?.term_id) params.append('term_id', filters.term_id);
-    if (filters?.class_id) params.append('class_id', filters.class_id);
-    if (filters?.component_type) params.append('component_type', filters.component_type);
-    const queryString = params.toString();
-    return this.get(queryString ? `/grade_component?${queryString}` : '/grade_component');
-  }
-
-  async getGradeComponent(id: string) {
-    return this.get(`/grade_component/${id}`);
-  }
-
-  async createGradeComponent(componentData: any) {
-    return this.post('/grade_component', componentData);
-  }
-
-  async updateGradeComponent(id: string, componentData: any) {
-    return this.put(`/grade_component/${id}`, componentData);
-  }
-
-  async deleteGradeComponent(id: string) {
-    return this.delete(`/grade_component/${id}`);
-  }
-
-  async createGradeComponentsBulk(components: any[]) {
-    return this.post('/grade_component/bulk', { components });
-  }
-
-  async autoCreateGradeComponents(data: { student_id: string; subject_id: string; term_id: string; class_id?: string; created_by?: string }) {
-    return this.post('/grade_component/auto_create', data);
-  }
-
   // ========== Term Grades ==========
   
   async getTermGrades(filters?: { student_id?: string; subject_id?: string; term_id?: string; class_id?: string; year_id?: string; class_name?: string; is_finalized?: boolean }) {
@@ -704,6 +667,32 @@ class ApiService {
 
   async calculateTermGrades(data: any) {
     return this.post('/term_grade/calculate', data);
+  }
+
+  // ========== Grading Criteria ==========
+  
+  async getGradingCriteria(filters?: { subject_id?: string; year_level_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.year_level_id) params.append('year_level_id', filters.year_level_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/grading_criteria?${queryString}` : '/grading_criteria');
+  }
+
+  async getGradingCriterion(id: string) {
+    return this.get(`/grading_criteria/${id}`);
+  }
+
+  async createGradingCriteria(criteriaData: any) {
+    return this.post('/grading_criteria', criteriaData);
+  }
+
+  async updateGradingCriteria(id: string, criteriaData: any) {
+    return this.put(`/grading_criteria/${id}`, criteriaData);
+  }
+
+  async deleteGradingCriteria(id: string) {
+    return this.delete(`/grading_criteria/${id}`);
   }
 
 }

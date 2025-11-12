@@ -14,10 +14,11 @@ import AcademicFoundationManagement from './AcademicFoundationManagement';
 import AcademicSetupWizard from './AcademicSetupWizard';
 import { StudentClassEnrollment } from './StudentClassEnrollment';
 import { YearLevelTimetable } from './YearLevelTimetable';
+import GradingCriteriaTable from './GradingCriteriaTable';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
 type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings';
-type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management';
+type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
 
@@ -282,6 +283,10 @@ export function AdminDashboard() {
           return <ClassroomManagement onBack={() => setActiveAcademicTab('overview')} />;
         }
         
+        if (activeAcademicTab === 'grading-criteria') {
+          return <GradingCriteriaTable onBack={() => setActiveAcademicTab('overview')} />;
+        }
+        
         return (
           <div className="admin-content">
             <h2>Academic Setup</h2>
@@ -329,6 +334,17 @@ export function AdminDashboard() {
                   onClick={() => setActiveAcademicTab('teacher-departments')}
                 >
                   Assign Teachers to Departments
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>⚖️ Grading Criteria</h3>
+                <p>Define how grades are calculated for each subject and year level (Tests, Homework, Attendance)</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('grading-criteria')}
+                >
+                  Manage Grading Criteria
                 </button>
               </div>
 
