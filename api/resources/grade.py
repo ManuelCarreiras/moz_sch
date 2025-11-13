@@ -82,7 +82,6 @@ class GradeResource(Resource):
                 if assignment:
                     grade_data['assignment_title'] = assignment.title
                     grade_data['max_score'] = float(assignment.max_score) if assignment.max_score else 100.00
-                    grade_data['weight'] = float(assignment.weight) if assignment.weight else 10.00
                 enhanced_grades.append(grade_data)
             
             return {'grades': enhanced_grades, 'count': len(enhanced_grades)}, 200
@@ -276,23 +275,21 @@ class GradeResource(Resource):
             if not subject_assignments or not year_id:
                 return
             
-            # Calculate weighted average on 0-100 scale first
-            total_weighted_score = Decimal('0.00')
-            total_weight = Decimal('0.00')
+            # Calculate simple average on 0-100 scale first
+            total_percentage = Decimal('0.00')
+            count = 0
             
             for assignment, grade_record in subject_assignments:
                 if grade_record.score is not None and grade_record.status == 'graded':
                     # Calculate percentage (0-100)
                     percentage = (Decimal(str(grade_record.score)) / Decimal(str(assignment.max_score))) * Decimal('100')
-                    weighted_score = percentage * Decimal(str(assignment.weight))
-                    
-                    total_weighted_score += weighted_score
-                    total_weight += Decimal(str(assignment.weight))
+                    total_percentage += percentage
+                    count += 1
             
             # Calculate final average
-            if total_weight > 0:
-                # Average on 0-100 scale
-                average_100 = total_weighted_score / total_weight
+            if count > 0:
+                # Simple average on 0-100 scale
+                average_100 = total_percentage / count
                 
                 # Convert to 0-20 scale
                 average_20 = (average_100 / Decimal('100')) * Decimal('20')
@@ -305,15 +302,13 @@ class GradeResource(Resource):
                 
                 if cached_grade:
                     cached_grade.calculated_average = average_20
-                    cached_grade.total_weight_graded = total_weight
                     cached_grade.save_to_db()
                 else:
                     new_cached_grade = StudentYearGradeModel(
                         student_id=student_id,
                         subject_id=subject_id,
                         year_id=year_id,
-                        calculated_average=average_20,
-                        total_weight_graded=total_weight
+                        calculated_average=average_20
                     )
                     new_cached_grade.save_to_db()
         
@@ -434,7 +429,6 @@ class GradebookResource(Resource):
                 '_id': str(assignment._id),
                 'title': assignment.title,
                 'max_score': float(assignment.max_score) if assignment.max_score else 100.00,
-                'weight': float(assignment.weight) if assignment.weight else 10.00,
                 'due_date': assignment.due_date.isoformat() if assignment.due_date else None
             })
         

@@ -5,7 +5,6 @@ interface Assignment {
   _id: string;
   title: string;
   max_score: number;
-  weight: number;
   due_date: string | null;
 }
 
@@ -200,7 +199,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
             <option value="">-- Select Assignment --</option>
             {gradebook.assignments.map((assignment) => (
               <option key={assignment._id} value={assignment._id}>
-                {assignment.title} (Max: {assignment.max_score}, Weight: {assignment.weight}%)
+                {assignment.title} (Max: {assignment.max_score})
               </option>
             ))}
           </select>
@@ -213,7 +212,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
           <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>
             {selectedAssignment.title}
             <span style={{ fontSize: '0.9rem', color: 'var(--muted)', marginLeft: '1rem' }}>
-              Max: {selectedAssignment.max_score} | Weight: {selectedAssignment.weight}%
+              Max: {selectedAssignment.max_score}
             </span>
           </h3>
           

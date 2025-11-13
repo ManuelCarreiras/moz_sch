@@ -6,12 +6,13 @@ interface GradingCriteria {
   subject_id: string;
   subject_name?: string;
   year_level_id: string;
-  year_level_name?: string;
-  component_name: string;
-  weight: number;
-  source_type: string;
-  assessment_type_id?: string;
-  assessment_type_name?: string;
+  year_level_order?: number;
+  school_year_id: string;
+  school_year_name?: string;
+  tests_weight: number;
+  homework_weight: number;
+  attendance_weight: number;
+  total_weight: number;
   description?: string;
 }
 
@@ -25,9 +26,9 @@ interface YearLevel {
   level_order: number;
 }
 
-interface AssessmentType {
+interface SchoolYear {
   _id: string;
-  type_name: string;
+  year_name: string;
 }
 
 interface Props {
@@ -38,15 +39,11 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
   const [criteria, setCriteria] = useState<GradingCriteria[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
-  const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
+  const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
-  // Filters
-  const [filterSubjectId, setFilterSubjectId] = useState('');
-  const [filterYearLevelId, setFilterYearLevelId] = useState('');
   
   // Form
   const [showForm, setShowForm] = useState(false);
@@ -54,30 +51,27 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
   const [formData, setFormData] = useState({
     subject_id: '',
     year_level_id: '',
-    component_name: '',
-    weight: '',
-    source_type: 'assignment',
-    assessment_type_id: '',
+    school_year_id: '',
+    tests_weight: '',
+    homework_weight: '',
+    attendance_weight: '',
     description: ''
   });
 
   useEffect(() => {
     loadData();
-  }, [filterSubjectId, filterYearLevelId]);
+  }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [criteriaRes, subjectsRes, yearLevelsRes, assessmentTypesRes] = await Promise.all([
-        apiService.getGradingCriteria({
-          subject_id: filterSubjectId || undefined,
-          year_level_id: filterYearLevelId || undefined
-        }),
+      const [criteriaRes, subjectsRes, yearLevelsRes, schoolYearsRes] = await Promise.all([
+        apiService.getGradingCriteria(),
         apiService.getSubjects(),
         apiService.getYearLevels(),
-        apiService.getAssessmentTypes()
+        apiService.getSchoolYears()
       ]);
 
       if (criteriaRes.success) {
@@ -105,9 +99,9 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         setYearLevels(uniqueYearLevels);
       }
 
-      if (assessmentTypesRes.success) {
-        const data = (assessmentTypesRes.data as any)?.message || assessmentTypesRes.data || [];
-        setAssessmentTypes(Array.isArray(data) ? data : []);
+      if (schoolYearsRes.success) {
+        const data = (schoolYearsRes.data as any)?.message || schoolYearsRes.data || [];
+        setSchoolYears(Array.isArray(data) ? data : []);
       }
 
     } catch (err: any) {
@@ -117,21 +111,24 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
     }
   };
 
+  const calculateTotal = () => {
+    const tests = parseFloat(formData.tests_weight) || 0;
+    const homework = parseFloat(formData.homework_weight) || 0;
+    const attendance = parseFloat(formData.attendance_weight) || 0;
+    return tests + homework + attendance;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.subject_id || !formData.year_level_id || !formData.component_name || !formData.weight) {
-      setError('Please fill in all required fields');
+    if (!formData.subject_id || !formData.year_level_id || !formData.school_year_id) {
+      setError('Please select subject, year level, and school year');
       return;
     }
 
-    if (parseFloat(formData.weight) < 0 || parseFloat(formData.weight) > 100) {
-      setError('Weight must be between 0 and 100');
-      return;
-    }
-
-    if (formData.source_type === 'assignment' && !formData.assessment_type_id) {
-      setError('Assessment Type is required for assignment source');
+    const total = calculateTotal();
+    if (Math.abs(total - 100) > 0.01) {
+      setError(`Weights must add up to 100%. Current total: ${total}%`);
       return;
     }
 
@@ -140,9 +137,13 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
       setError(null);
 
       const payload = {
-        ...formData,
-        weight: parseFloat(formData.weight),
-        assessment_type_id: formData.source_type === 'assignment' ? formData.assessment_type_id : undefined
+        subject_id: formData.subject_id,
+        year_level_id: formData.year_level_id,
+        school_year_id: formData.school_year_id,
+        tests_weight: parseFloat(formData.tests_weight),
+        homework_weight: parseFloat(formData.homework_weight),
+        attendance_weight: parseFloat(formData.attendance_weight),
+        description: formData.description
       };
 
       let response;
@@ -157,7 +158,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         resetForm();
         loadData();
       } else {
-        setError(response.error || 'Operation failed');
+        setError(response.error || response.message || 'Operation failed');
       }
     } catch (err: any) {
       setError(err.message || 'Operation failed');
@@ -170,10 +171,10 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
     setFormData({
       subject_id: criterion.subject_id,
       year_level_id: criterion.year_level_id,
-      component_name: criterion.component_name,
-      weight: criterion.weight.toString(),
-      source_type: criterion.source_type,
-      assessment_type_id: criterion.assessment_type_id || '',
+      school_year_id: criterion.school_year_id,
+      tests_weight: criterion.tests_weight.toString(),
+      homework_weight: criterion.homework_weight.toString(),
+      attendance_weight: criterion.attendance_weight.toString(),
       description: criterion.description || ''
     });
     setEditingId(criterion._id);
@@ -181,20 +182,20 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this criterion?')) return;
+    if (!confirm('Are you sure you want to delete this grading criteria?')) return;
 
     try {
       setLoading(true);
       const response = await apiService.deleteGradingCriteria(id);
       
       if (response.success) {
-        setSuccess('Criterion deleted successfully!');
+        setSuccess('Criteria deleted successfully!');
         loadData();
       } else {
-        setError(response.error || 'Failed to delete criterion');
+        setError(response.error || 'Failed to delete');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to delete criterion');
+      setError(err.message || 'Failed to delete');
     } finally {
       setLoading(false);
     }
@@ -204,18 +205,18 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
     setFormData({
       subject_id: '',
       year_level_id: '',
-      component_name: '',
-      weight: '',
-      source_type: 'assignment',
-      assessment_type_id: '',
+      school_year_id: '',
+      tests_weight: '',
+      homework_weight: '',
+      attendance_weight: '',
       description: ''
     });
     setEditingId(null);
     setShowForm(false);
   };
 
-  // Calculate total weight for filtered criteria
-  const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
+  const total = calculateTotal();
+  const isValid = Math.abs(total - 100) < 0.01;
 
   return (
     <div className="admin-content">
@@ -225,7 +226,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         </button>
         
         <h2>⚖️ Grading Criteria</h2>
-        <p>Define how grades are calculated for each subject and year level. All students in the same year level will use the same criteria.</p>
+        <p>Define the weight of Tests, Homework, and Attendance for each subject and year level. Weights must total 100%.</p>
       </div>
 
       {error && (
@@ -254,72 +255,15 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         </div>
       )}
 
-      {/* Filters */}
-      <div style={{ 
-        marginBottom: '2rem', 
-        padding: '1.5rem', 
-        background: 'var(--card)', 
-        borderRadius: '8px',
-        display: 'flex',
-        gap: '1rem',
-        alignItems: 'end'
-      }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            Subject:
-          </label>
-          <select
-            value={filterSubjectId}
-            onChange={(e) => setFilterSubjectId(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem' }}
-          >
-            <option value="">All Subjects</option>
-            {subjects.map(s => (
-              <option key={s._id} value={s._id}>{s.subject_name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            Year Level:
-          </label>
-          <select
-            value={filterYearLevelId}
-            onChange={(e) => setFilterYearLevelId(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem' }}
-          >
-            <option value="">All Year Levels</option>
-            {yearLevels.map(y => (
-              <option key={y._id} value={y._id}>{y.level_order}</option>
-            ))}
-          </select>
-        </div>
-
+      {/* Add Button */}
+      <div style={{ marginBottom: '2rem' }}>
         <button
           onClick={() => setShowForm(!showForm)}
           className="btn btn--primary"
         >
-          {showForm ? 'Cancel' : '+ Add Criterion'}
+          {showForm ? 'Cancel' : '+ Add Grading Criteria'}
         </button>
       </div>
-
-      {/* Total Weight Display */}
-      {filterSubjectId && filterYearLevelId && criteria.length > 0 && (
-        <div style={{
-          marginBottom: '1.5rem',
-          padding: '1rem',
-          background: totalWeight === 100 ? '#efe' : '#ffe',
-          border: `1px solid ${totalWeight === 100 ? '#cfc' : '#ffc'}`,
-          borderRadius: '4px',
-          textAlign: 'center'
-        }}>
-          <strong>Total Weight: {totalWeight}%</strong>
-          {totalWeight === 100 && ' ✅ Complete'}
-          {totalWeight < 100 && ` ⚠️ Incomplete (${100 - totalWeight}% remaining)`}
-          {totalWeight > 100 && ` ❌ Over by ${totalWeight - 100}%`}
-        </div>
-      )}
 
       {/* Form */}
       {showForm && (
@@ -330,9 +274,27 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
           borderRadius: '8px',
           border: '2px solid var(--primary)'
         }}>
-          <h3>{editingId ? 'Edit Criterion' : 'Add New Criterion'}</h3>
+          <h3>{editingId ? 'Edit Grading Criteria' : 'Add New Grading Criteria'}</h3>
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  School Year *
+                </label>
+                <select
+                  value={formData.school_year_id}
+                  onChange={(e) => setFormData({ ...formData, school_year_id: e.target.value })}
+                  required
+                  disabled={!!editingId}
+                  style={{ width: '100%', padding: '0.5rem' }}
+                >
+                  <option value="">Select School Year</option>
+                  {schoolYears.map(sy => (
+                    <option key={sy._id} value={sy._id}>{sy.year_name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
                   Subject *
@@ -341,6 +303,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
                   value={formData.subject_id}
                   onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
                   required
+                  disabled={!!editingId}
                   style={{ width: '100%', padding: '0.5rem' }}
                 >
                   <option value="">Select Subject</option>
@@ -358,6 +321,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
                   value={formData.year_level_id}
                   onChange={(e) => setFormData({ ...formData, year_level_id: e.target.value })}
                   required
+                  disabled={!!editingId}
                   style={{ width: '100%', padding: '0.5rem' }}
                 >
                   <option value="">Select Year Level</option>
@@ -366,71 +330,83 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
                   ))}
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-                  Component Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.component_name}
-                  onChange={(e) => setFormData({ ...formData, component_name: e.target.value })}
-                  placeholder="e.g., Tests, Homework, Attendance"
-                  required
-                  style={{ width: '100%', padding: '0.5rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-                  Weight (%) *
-                </label>
-                <input
-                  type="number"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  placeholder="0-100"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  required
-                  style={{ width: '100%', padding: '0.5rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-                  Source Type *
-                </label>
-                <select
-                  value={formData.source_type}
-                  onChange={(e) => setFormData({ ...formData, source_type: e.target.value, assessment_type_id: '' })}
-                  required
-                  style={{ width: '100%', padding: '0.5rem' }}
-                >
-                  <option value="assignment">Assignment</option>
-                  <option value="attendance">Attendance</option>
-                </select>
-              </div>
-
-              {formData.source_type === 'assignment' && (
+            <div style={{ 
+              marginBottom: '1rem', 
+              padding: '1rem', 
+              background: 'var(--card)',
+              border: `2px solid ${isValid ? 'var(--success)' : 'var(--warning)'}`,
+              borderRadius: '8px'
+            }}>
+              <h4 style={{ marginBottom: '1rem', color: 'var(--text)' }}>Component Weights (must total 100%)</h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-                    Assessment Type *
+                    📝 Tests Weight (%) *
                   </label>
-                  <select
-                    value={formData.assessment_type_id}
-                    onChange={(e) => setFormData({ ...formData, assessment_type_id: e.target.value })}
+                  <input
+                    type="number"
+                    value={formData.tests_weight}
+                    onChange={(e) => setFormData({ ...formData, tests_weight: e.target.value })}
+                    placeholder="0-100"
+                    min="0"
+                    max="100"
+                    step="0.01"
                     required
                     style={{ width: '100%', padding: '0.5rem' }}
-                  >
-                    <option value="">Select Type</option>
-                    {assessmentTypes.map(a => (
-                      <option key={a._id} value={a._id}>{a.type_name}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
-              )}
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                    📚 Homework Weight (%) *
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.homework_weight}
+                    onChange={(e) => setFormData({ ...formData, homework_weight: e.target.value })}
+                    placeholder="0-100"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                    style={{ width: '100%', padding: '0.5rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                    ✅ Attendance Weight (%) *
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.attendance_weight}
+                    onChange={(e) => setFormData({ ...formData, attendance_weight: e.target.value })}
+                    placeholder="0-100"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                    style={{ width: '100%', padding: '0.5rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '0.75rem', 
+                background: isValid ? 'rgba(72, 187, 120, 0.1)' : 'rgba(237, 137, 54, 0.1)',
+                border: `1px solid ${isValid ? 'var(--success)' : 'var(--warning)'}`,
+                borderRadius: '4px',
+                textAlign: 'center',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                color: isValid ? 'var(--success)' : 'var(--warning)'
+              }}>
+                Total: {total.toFixed(2)}% {isValid ? '✅' : '❌'}
+              </div>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
@@ -447,7 +423,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="submit" className="btn btn--primary" disabled={loading}>
+              <button type="submit" className="btn btn--primary" disabled={loading || !isValid}>
                 {loading ? 'Saving...' : (editingId ? 'Update' : 'Create')}
               </button>
               <button type="button" onClick={resetForm} className="btn btn--secondary">
@@ -463,12 +439,13 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         <table className="data-table">
           <thead>
             <tr>
+              <th>School Year</th>
               <th>Subject</th>
               <th>Year Level</th>
-              <th>Component</th>
-              <th>Weight (%)</th>
-              <th>Source</th>
-              <th>Assessment Type</th>
+              <th style={{ textAlign: 'right' }}>📝 Tests (%)</th>
+              <th style={{ textAlign: 'right' }}>📚 Homework (%)</th>
+              <th style={{ textAlign: 'right' }}>✅ Attendance (%)</th>
+              <th style={{ textAlign: 'right' }}>Total</th>
               <th>Description</th>
               <th>Actions</th>
             </tr>
@@ -476,26 +453,33 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', padding: '2rem' }}>
+                <td colSpan={9} style={{ textAlign: 'center', padding: '2rem' }}>
                   Loading...
                 </td>
               </tr>
             )}
             {!loading && criteria.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                  No grading criteria found. {filterSubjectId || filterYearLevelId ? 'Try adjusting filters.' : 'Add your first criterion!'}
+                <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
+                  No grading criteria found. Add your first one!
                 </td>
               </tr>
             )}
             {!loading && criteria.map((criterion) => (
               <tr key={criterion._id}>
-                <td>{criterion.subject_name || criterion.subject_id}</td>
-                <td>{(criterion as any).year_level_order || criterion.year_level_id}</td>
-                <td><strong>{criterion.component_name}</strong></td>
-                <td style={{ textAlign: 'right' }}>{criterion.weight}%</td>
-                <td>{criterion.source_type}</td>
-                <td>{criterion.assessment_type_name || '-'}</td>
+                <td>{criterion.school_year_name || criterion.school_year_id}</td>
+                <td><strong>{criterion.subject_name || criterion.subject_id}</strong></td>
+                <td>{criterion.year_level_order || criterion.year_level_id}</td>
+                <td style={{ textAlign: 'right' }}>{criterion.tests_weight}%</td>
+                <td style={{ textAlign: 'right' }}>{criterion.homework_weight}%</td>
+                <td style={{ textAlign: 'right' }}>{criterion.attendance_weight}%</td>
+                <td style={{ 
+                  textAlign: 'right', 
+                  fontWeight: 'bold',
+                  color: criterion.total_weight === 100 ? '#3c3' : '#c33'
+                }}>
+                  {criterion.total_weight}% {criterion.total_weight === 100 ? '✅' : '❌'}
+                </td>
                 <td style={{ fontSize: '0.9em', color: 'var(--muted)' }}>
                   {criterion.description || '-'}
                 </td>
@@ -524,4 +508,3 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
 };
 
 export default GradingCriteriaTable;
-

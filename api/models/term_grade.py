@@ -118,25 +118,47 @@ class TermGradeModel(db.Model):
         """Calculate term grade from grading_criteria (pulls from student_assignment and attendance)"""
         from models.grading_criteria import GradingCriteriaModel
         from models.student import StudentModel
+        from models.term import TermModel
         
         # Get student's year level if not provided
+        # Derive from their class enrollment
         if not year_level_id:
-            student = StudentModel.find_by_id(student_id)
-            if not student or not student.year_level_id:
+            from models.student_class import StudentClassModel
+            from models.class_model import ClassModel
+            
+            # Get student's class enrollments
+            enrollments = StudentClassModel.query.filter_by(student_id=student_id).all()
+            
+            if not enrollments:
                 return None
-            year_level_id = student.year_level_id
+            
+            # Get year level from first class (they should all be same year level)
+            first_class = ClassModel.find_by_id(enrollments[0].class_id)
+            if not first_class or not first_class.year_level_id:
+                return None
+            
+            year_level_id = first_class.year_level_id
+        
+        # Get school year from term
+        term = TermModel.find_by_id(term_id)
+        if not term or not term.year_id:
+            return None
+        school_year_id = term.year_id
         
         # Calculate grade using grading criteria
         calculated_grade = GradingCriteriaModel.calculate_term_grade(
-            student_id, subject_id, term_id, year_level_id
+            student_id, subject_id, term_id, year_level_id, school_year_id
         )
         
         if calculated_grade is None:
             return None
         
         # Get criteria details
-        criteria_list = GradingCriteriaModel.find_by_subject_year_level(subject_id, year_level_id)
-        total_weight = sum(float(c.weight) for c in criteria_list)
+        criteria = GradingCriteriaModel.find_by_subject_year_level(subject_id, year_level_id, school_year_id)
+        if not criteria:
+            return None
+        
+        total_weight = float(criteria.tests_weight) + float(criteria.homework_weight) + float(criteria.attendance_weight)
         
         # Check if grade already exists
         existing_grade = cls.find_by_student_subject_term(student_id, subject_id, term_id)
@@ -144,7 +166,7 @@ class TermGradeModel(db.Model):
         if existing_grade:
             # Update existing grade
             existing_grade.calculated_grade = calculated_grade
-            existing_grade.component_count = len(criteria_list)
+            existing_grade.component_count = 3  # Always 3 components (tests, homework, attendance)
             existing_grade.total_weight_entered = total_weight
             existing_grade.is_complete = (total_weight >= 100)
             
@@ -166,7 +188,7 @@ class TermGradeModel(db.Model):
                 class_id=class_id,
                 calculated_grade=calculated_grade,
                 final_grade=calculated_grade,
-                component_count=len(criteria_list),
+                component_count=3,  # Always 3 components (tests, homework, attendance)
                 total_weight_entered=total_weight,
                 is_complete=(total_weight >= 100),
                 created_by=created_by

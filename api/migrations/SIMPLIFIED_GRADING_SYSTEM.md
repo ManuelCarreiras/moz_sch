@@ -1,212 +1,118 @@
-# Simplified 4-Table Grading System
+# Simplified Grading Criteria System
 
-## Overview
-Clean, simple grading system with only 4 tables that auto-calculates grades from existing data.
+## What Changed
 
-## The 4 Tables
+### OLD System (Complex):
+- 3 separate rows per subject+year:
+  - Algebra, 1st, "Tests", 60%
+  - Algebra, 1st, "Homework", 20%
+  - Algebra, 1st, "Attendance", 20%
+- Had to manage multiple rows
+- Could have incomplete configurations
 
-### 1. **`student_assignment`** (Already exists)
-- Individual test and homework scores
-- Already populated when teachers grade assignments
+### NEW System (Simple):
+- **1 row** per subject+year:
+  - Algebra, 1st, tests: 60%, homework: 20%, attendance: 20%
+- All components in one place
+- Database constraint ensures total = 100%
 
-### 2. **`attendance`** (Updated with `subject_id`)
-- Attendance records per subject
-- Now tracks which subject each attendance belongs to
-- Used to calculate attendance percentage
+## Database Structure
 
-### 3. **`grading_criteria`** (NEW - Admin-only)
-- **Rules** for how to calculate grades
-- Defined ONCE per subject + year_level
-- Applies to ALL students in that year
-
-### 4. **`term_grade`** (Exists, updated logic)
-- Final calculated grades
-- Auto-calculated from criteria
-- Can be manually overridden by teachers
-
-## How It Works
-
-### Step 1: Admin Defines Criteria (One Time)
-
-**Example: Algebra for 1st Year Students**
-
-```http
-POST /grading_criteria
+```sql
+grading_criteria:
+├─ subject_id
+├─ year_level_id
+├─ tests_weight (0-100%)
+├─ homework_weight (0-100%)
+├─ attendance_weight (0-100%)
+└─ CONSTRAINT: tests + homework + attendance = 100%
 ```
 
-```json
-{
-  "subject_id": "algebra-uuid",
-  "year_level_id": "1st-year-uuid",
-  "component_name": "Tests",
-  "weight": 60,
-  "source_type": "assignment",
-  "assessment_type_id": "test-uuid"
-}
+## UI Features
+
+### Clean Single Form
+```
+Subject: [Algebra]
+Year Level: [1]
+
+Component Weights (must total 100%):
+┌──────────────────────────────────────────┐
+│ 📝 Tests: [60]%                          │
+│ 📚 Homework: [20]%                       │
+│ ✅ Attendance: [20]%                     │
+│                                          │
+│ Total: 100% ✅                           │
+└──────────────────────────────────────────┘
+
+[Create] [Cancel]
 ```
 
-```json
-{
-  "subject_id": "algebra-uuid",
-  "year_level_id": "1st-year-uuid",
-  "component_name": "Homework",
-  "weight": 20,
-  "source_type": "assignment",
-  "assessment_type_id": "homework-uuid"
-}
+### Real-Time Validation
+- Shows total as you type
+- Green background when total = 100%
+- Red/yellow when incorrect
+- Create button disabled until valid
+
+### Clean Table View
+```
+Subject | Year | Tests | Homework | Attendance | Total  | Actions
+--------|------|-------|----------|------------|--------|--------
+Algebra | 1    | 60%   | 20%      | 20%        | 100% ✅| Edit Delete
+Math    | 2    | 50%   | 30%      | 20%        | 100% ✅| Edit Delete
 ```
 
-```json
-{
-  "subject_id": "algebra-uuid",
-  "year_level_id": "1st-year-uuid",
-  "component_name": "Attendance",
-  "weight": 20,
-  "source_type": "attendance"
-}
-```
+## Example Usage
 
-**Total Weight: 100%** ✅
+### Creating Criteria for 1st Year Algebra:
 
-Now ALL 1st year Algebra students (1st A, 1st B, 1st C) use these same criteria!
+1. Go to: **Admin Dashboard → Academic Setup → ⚖️ Grading Criteria**
+2. Click **"+ Add Grading Criteria"**
+3. Select:
+   - Subject: **Algebra**
+   - Year Level: **1**
+4. Enter weights:
+   - Tests: **60**
+   - Homework: **20**
+   - Attendance: **20**
+5. See: **Total: 100% ✅**
+6. Click **"Create"**
 
-### Step 2: Teachers Grade Assignments (Normal Workflow)
+Done! Now ALL 1st year Algebra students (1st A, 1st B, 1st C) use these weights.
 
-```http
-POST /grade
-```
+## How It Calculates Grades
 
-```json
-{
-  "student_id": "joao-uuid",
-  "assignment_id": "test-1-uuid",
-  "score": 16,
-  "status": "graded"
-}
-```
+### For João in 1st Year Algebra, Term 1:
 
-**What Happens Automatically:**
-1. Score saved to `student_assignment`
-2. Term grade auto-recalculates:
-   - Gets all Tests for João → calculates average
-   - Gets all Homework for João → calculates average  
-   - Gets Attendance for João → calculates percentage
-   - Applies weights (60%, 20%, 20%)
-   - Saves to `term_grade`
-
-### Step 3: Teachers Mark Attendance
-
-```http
-POST /attendance
-```
-
-```json
-{
-  "student_id": "joao-uuid",
-  "class_id": "1st-a-uuid",
-  "subject_id": "algebra-uuid",
-  "date": "2025-11-11",
-  "status": "present"
-}
-```
-
-**What Happens Automatically:**
-- Attendance percentage recalculates
-- Term grade updates automatically
-
-## Example Calculation
-
-### João - Algebra - Term 1
-
-**Grading Criteria (Admin-defined):**
-- Tests: 60% weight
-- Homework: 20% weight
-- Attendance: 20% weight
-
-**João's Scores:**
-
-**Tests (from `student_assignment`):**
+**Tests (60% weight):**
 - Test 1: 16/20 (80%)
 - Test 2: 14/20 (70%)
 - Average: 75% → 15/20
+- Weighted: 15 × 0.60 = **9 points**
 
-**Homework (from `student_assignment`):**
-- HW 1: 18/20 (90%)
-- HW 2: 20/20 (100%)
-- HW 3: 19/20 (95%)
+**Homework (20% weight):**
+- HW1: 18/20, HW2: 20/20, HW3: 19/20
 - Average: 95% → 19/20
+- Weighted: 19 × 0.20 = **3.8 points**
 
-**Attendance (from `attendance`):**
-- 28 present out of 30 classes
-- Percentage: 93.3% → 18.66/20
+**Attendance (20% weight):**
+- Present: 28/30 days = 93.3% → 18.66/20
+- Weighted: 18.66 × 0.20 = **3.73 points**
 
-**Final Calculation:**
-```
-Term Grade = (15 × 0.60) + (19 × 0.20) + (18.66 × 0.20)
-          = 9.0 + 3.8 + 3.73
-          = 16.53
-          ≈ 16.5/20
-```
+**Final Grade = 9 + 3.8 + 3.73 = 16.53/20** ✅
 
-## Comparing Students
+## Benefits
 
-**João (1st A):** 16.5/20  
-**Maria (1st B):** 17.2/20  
-**Pedro (1st C):** 15.8/20
+1. ✅ **Simpler** - One row instead of three
+2. ✅ **Guaranteed valid** - Database enforces 100% total
+3. ✅ **Cleaner UI** - All components visible at once
+4. ✅ **No duplicates** - Unique per subject+year
+5. ✅ **Real-time validation** - See total as you type
+6. ✅ **Easy to compare** - All students in same year use same rules
 
-All calculated with same criteria → **Fair comparison**! ✅
+## Migration
 
-## API Endpoints
-
-### Admin: Manage Criteria
-```http
-GET    /grading_criteria?subject_id=X&year_level_id=Y
-POST   /grading_criteria
-PUT    /grading_criteria/<id>
-DELETE /grading_criteria/<id>
-```
-
-### Teachers: Grade Assignments (Existing)
-```http
-POST /grade
-```
-→ Automatically triggers term grade calculation
-
-### Teachers: Mark Attendance (Existing)
-```http
-POST /attendance
-```
-→ Make sure to include `subject_id`!
-
-### View Term Grades
-```http
-GET /term_grade?student_id=X&subject_id=Y&term_id=Z
-```
-
-## Key Features
-
-✅ **No Behavior Component** - Simplified for now  
-✅ **Auto-Calculated** - Everything updates automatically  
-✅ **Fair Comparison** - Same criteria for all students in year level  
-✅ **Admin-Controlled** - Only admins can change criteria  
-✅ **Simple** - Only 4 tables, no complex relationships  
-
-## Migration Steps
-
-1. ✅ Create `grading_criteria` table
-2. ✅ Add `subject_id` to `attendance` table  
-3. ✅ Update `term_grade` calculation logic
-4. ✅ Admin creates criteria for each subject+year_level
-5. ✅ Grade assignments as normal - everything auto-updates!
-
-## Future Enhancements
-
-- **Behavior Component** - Add manual entry if needed
-- **Term Weights** - Weight Term 1 vs Term 2 vs Term 3 for year grade
-- **Custom Formulas** - More complex calculation methods
-- **Component Templates** - Quick setup for common subjects
+Old data has been cleared. Start fresh with new simplified structure!
 
 ---
 
-**System Status:** ✅ **READY TO USE**
-
+**System ready!** Much simpler than before. 🎯

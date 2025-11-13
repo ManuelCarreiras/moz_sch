@@ -17,7 +17,6 @@ interface Assignment {
   term_number?: number;
   due_date?: string;
   max_score: number;
-  weight: number;
   status: string;
   created_date?: string;
 }
@@ -443,7 +442,6 @@ const AssignmentList: React.FC = () => {
                 <td>{assignment.assessment_type_name || '-'}</td>
                 <td>{formatDate(assignment.due_date)}</td>
                 <td>{assignment.max_score}</td>
-                <td>{assignment.weight}%</td>
                 <td>{getStatusBadge(assignment.status)}</td>
                 <td>
                   <div className="action-buttons">

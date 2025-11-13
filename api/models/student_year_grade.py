@@ -15,15 +15,13 @@ class StudentYearGradeModel(db.Model):
     subject_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('subject._id'), nullable=False)
     year_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('school_year._id'), nullable=False)
     calculated_average = db.Column(db.Numeric(4, 2))  # 0.00 to 20.00
-    total_weight_graded = db.Column(db.Numeric(5, 2), default=0.00)
     last_updated = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
-    def __init__(self, student_id, subject_id, year_id, calculated_average=None, total_weight_graded=0.00):
+    def __init__(self, student_id, subject_id, year_id, calculated_average=None):
         self.student_id = student_id
         self.subject_id = subject_id
         self.year_id = year_id
         self.calculated_average = calculated_average
-        self.total_weight_graded = total_weight_graded
 
     def json(self):
         return {
@@ -32,7 +30,6 @@ class StudentYearGradeModel(db.Model):
             'subject_id': str(self.subject_id),
             'year_id': str(self.year_id),
             'calculated_average': float(self.calculated_average) if self.calculated_average is not None else None,
-            'total_weight_graded': float(self.total_weight_graded) if self.total_weight_graded else 0.00,
             'last_updated': self.last_updated.isoformat() if self.last_updated else None
         }
 

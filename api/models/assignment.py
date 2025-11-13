@@ -18,14 +18,13 @@ class AssignmentModel(db.Model):
     term_id = db.Column(db.UUID(as_uuid=True), db.ForeignKey('term._id'), nullable=False)
     due_date = db.Column(db.TIMESTAMP)
     max_score = db.Column(db.Numeric(5, 2), nullable=False, default=100.00)
-    weight = db.Column(db.Numeric(5, 2), nullable=False, default=10.00)  # percentage
     status = db.Column(db.String(20), default='draft')  # draft, published, closed
     created_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
     created_by = db.Column(db.UUID(as_uuid=True), db.ForeignKey('professor._id'))
     updated_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
     def __init__(self, title, subject_id, class_id, assessment_type_id, term_id, 
-                 description=None, due_date=None, max_score=100.00, weight=10.00, 
+                 description=None, due_date=None, max_score=100.00, 
                  status='draft', created_by=None):
         self.title = title
         self.description = description
@@ -35,7 +34,6 @@ class AssignmentModel(db.Model):
         self.term_id = term_id
         self.due_date = due_date
         self.max_score = max_score
-        self.weight = weight
         self.status = status
         self.created_by = created_by
 
@@ -50,7 +48,6 @@ class AssignmentModel(db.Model):
             'term_id': str(self.term_id),
             'due_date': self.due_date.isoformat() if self.due_date else None,
             'max_score': float(self.max_score) if self.max_score else 100.00,
-            'weight': float(self.weight) if self.weight else 10.00,
             'status': self.status,
             'created_date': self.created_date.isoformat() if self.created_date else None,
             'created_by': str(self.created_by) if self.created_by else None,

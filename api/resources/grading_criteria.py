@@ -3,12 +3,12 @@ from flask_restful import Resource
 from models.grading_criteria import GradingCriteriaModel
 from models.subject import SubjectModel
 from models.year_level import YearLevelModel
-from models.assessment_type import AssessmentTypeModel
+from models.school_year import SchoolYearModel
 from utils.auth_middleware import require_role
 import logging
 
 class GradingCriteriaResource(Resource):
-    """Admin-only: Manage grading criteria for subjects"""
+    """Admin-only: Manage grading criteria for subjects (simplified: one row per subject+year)"""
     
     @require_role('admin')
     def get(self, criteria_id=None):
@@ -17,78 +17,108 @@ class GradingCriteriaResource(Resource):
             criteria = GradingCriteriaModel.find_by_id(criteria_id)
             if not criteria:
                 return {'message': 'Grading criteria not found'}, 404
-            return criteria.json(), 200
-        
-        # Get criteria with filters
-        subject_id = request.args.get('subject_id')
-        year_level_id = request.args.get('year_level_id')
-        
-        if subject_id and year_level_id:
-            criteria_list = GradingCriteriaModel.find_by_subject_year_level(subject_id, year_level_id)
-        else:
-            criteria_list = GradingCriteriaModel.find_all()
-        
-        # Enhance with related data
-        enhanced_criteria = []
-        for criteria in criteria_list:
-            crit_data = criteria.json()
             
-            # Add subject name
+            # Enhance with related data
+            crit_data = criteria.json()
             subject = SubjectModel.find_by_id(criteria.subject_id)
             if subject:
                 crit_data['subject_name'] = subject.subject_name
             
-            # Add year level order
             year_level = YearLevelModel.find_by_id(criteria.year_level_id)
             if year_level:
                 crit_data['year_level_order'] = year_level.level_order
             
-            # Add assessment type name if applicable
-            if criteria.assessment_type_id:
-                assessment_type = AssessmentTypeModel.find_by_id(criteria.assessment_type_id)
-                if assessment_type:
-                    crit_data['assessment_type_name'] = assessment_type.type_name
+            school_year = SchoolYearModel.find_by_id(criteria.school_year_id)
+            if school_year:
+                crit_data['school_year_name'] = school_year.year_name
             
-            enhanced_criteria.append(crit_data)
+            return crit_data, 200
         
-        # Calculate total weight if filtering
-        total_weight = 0
-        if subject_id and year_level_id:
-            total_weight = sum(float(c.weight) for c in criteria_list)
+        # Get criteria with filters
+        subject_id = request.args.get('subject_id')
+        year_level_id = request.args.get('year_level_id')
+        school_year_id = request.args.get('school_year_id')
         
-        return {
-            'grading_criteria': enhanced_criteria,
-            'count': len(enhanced_criteria),
-            'total_weight': total_weight if subject_id and year_level_id else None,
-            'is_complete': total_weight >= 100 if subject_id and year_level_id else None
-        }, 200
+        if subject_id and year_level_id and school_year_id:
+            # Get specific criteria
+            criteria = GradingCriteriaModel.find_by_subject_year_level(subject_id, year_level_id, school_year_id)
+            if criteria:
+                crit_data = criteria.json()
+                subject = SubjectModel.find_by_id(criteria.subject_id)
+                if subject:
+                    crit_data['subject_name'] = subject.subject_name
+                
+                year_level = YearLevelModel.find_by_id(criteria.year_level_id)
+                if year_level:
+                    crit_data['year_level_order'] = year_level.level_order
+                
+                school_year = SchoolYearModel.find_by_id(criteria.school_year_id)
+                if school_year:
+                    crit_data['school_year_name'] = school_year.year_name
+                
+                return {'grading_criteria': [crit_data]}, 200
+            else:
+                return {'grading_criteria': []}, 200
+        else:
+            # Get all criteria
+            criteria_list = GradingCriteriaModel.find_all()
+            
+            enhanced_criteria = []
+            for criteria in criteria_list:
+                crit_data = criteria.json()
+                
+                subject = SubjectModel.find_by_id(criteria.subject_id)
+                if subject:
+                    crit_data['subject_name'] = subject.subject_name
+                
+                year_level = YearLevelModel.find_by_id(criteria.year_level_id)
+                if year_level:
+                    crit_data['year_level_order'] = year_level.level_order
+                
+                school_year = SchoolYearModel.find_by_id(criteria.school_year_id)
+                if school_year:
+                    crit_data['school_year_name'] = school_year.year_name
+                
+                enhanced_criteria.append(crit_data)
+            
+            return {
+                'grading_criteria': enhanced_criteria,
+                'count': len(enhanced_criteria)
+            }, 200
     
     @require_role('admin')
     def post(self):
         """Create grading criteria"""
         data = request.get_json()
         
-        required_fields = ['subject_id', 'year_level_id', 'component_name', 'weight', 'source_type']
+        required_fields = ['subject_id', 'year_level_id', 'school_year_id', 'tests_weight', 'homework_weight', 'attendance_weight']
         for field in required_fields:
             if field not in data:
                 return {'message': f'Missing required field: {field}'}, 400
         
-        # Validate source_type
-        if data['source_type'] not in ['assignment', 'attendance']:
-            return {'message': 'source_type must be "assignment" or "attendance"'}, 400
+        # Validate weights
+        total_weight = float(data['tests_weight']) + float(data['homework_weight']) + float(data['attendance_weight'])
+        if abs(total_weight - 100) > 0.01:  # Allow small floating point errors
+            return {'message': f'Weights must add up to 100%. Current total: {total_weight}%'}, 400
         
-        # If source_type is assignment, assessment_type_id is required
-        if data['source_type'] == 'assignment' and not data.get('assessment_type_id'):
-            return {'message': 'assessment_type_id is required for assignment source_type'}, 400
+        # Check if criteria already exists
+        existing = GradingCriteriaModel.find_by_subject_year_level(
+            data['subject_id'],
+            data['year_level_id'],
+            data['school_year_id']
+        )
+        
+        if existing:
+            return {'message': 'Grading criteria already exists for this subject, year level, and school year. Use PUT to update.'}, 409
         
         try:
             criteria = GradingCriteriaModel(
                 subject_id=data['subject_id'],
                 year_level_id=data['year_level_id'],
-                component_name=data['component_name'],
-                weight=data['weight'],
-                source_type=data['source_type'],
-                assessment_type_id=data.get('assessment_type_id'),
+                school_year_id=data['school_year_id'],
+                tests_weight=data['tests_weight'],
+                homework_weight=data['homework_weight'],
+                attendance_weight=data['attendance_weight'],
                 description=data.get('description'),
                 created_by=data.get('created_by')
             )
@@ -113,15 +143,25 @@ class GradingCriteriaResource(Resource):
         
         data = request.get_json()
         
+        # If updating weights, validate total
+        if 'tests_weight' in data or 'homework_weight' in data or 'attendance_weight' in data:
+            tests = float(data.get('tests_weight', criteria.tests_weight))
+            homework = float(data.get('homework_weight', criteria.homework_weight))
+            attendance = float(data.get('attendance_weight', criteria.attendance_weight))
+            total_weight = tests + homework + attendance
+            
+            if abs(total_weight - 100) > 0.01:
+                return {'message': f'Weights must add up to 100%. Current total: {total_weight}%'}, 400
+        
         try:
-            if 'component_name' in data:
-                criteria.component_name = data['component_name']
-            if 'weight' in data:
-                criteria.weight = data['weight']
+            if 'tests_weight' in data:
+                criteria.tests_weight = data['tests_weight']
+            if 'homework_weight' in data:
+                criteria.homework_weight = data['homework_weight']
+            if 'attendance_weight' in data:
+                criteria.attendance_weight = data['attendance_weight']
             if 'description' in data:
                 criteria.description = data['description']
-            if 'assessment_type_id' in data:
-                criteria.assessment_type_id = data['assessment_type_id']
             
             criteria.save_to_db()
             
@@ -148,4 +188,3 @@ class GradingCriteriaResource(Resource):
         except Exception as e:
             logging.error(f"Error deleting grading criteria: {str(e)}")
             return {'message': f'Error: {str(e)}'}, 500
-

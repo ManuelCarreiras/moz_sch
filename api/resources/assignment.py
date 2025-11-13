@@ -219,7 +219,6 @@ class AssignmentResource(Resource):
                 term_id=data['term_id'],
                 due_date=due_date,
                 max_score=data.get('max_score', 100.00),
-                weight=data.get('weight', 10.00),
                 status=data.get('status', 'draft'),
                 created_by=teacher._id if teacher else None
             )
@@ -296,8 +295,6 @@ class AssignmentResource(Resource):
                     assignment.due_date = None
             if 'max_score' in data:
                 assignment.max_score = data['max_score']
-            if 'weight' in data:
-                assignment.weight = data['weight']
             if 'status' in data:
                 assignment.status = data['status']
                 if old_status != 'published' and data['status'] == 'published':

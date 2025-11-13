@@ -17,7 +17,6 @@ interface Assignment {
   term_id: string;
   due_date?: string;
   max_score: number;
-  weight: number;
   status: string;
 }
 
@@ -71,7 +70,6 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
     term_id: '',
     due_date: '',
     max_score: 100,
-    weight: 10,
     status: 'draft'
   });
 
@@ -107,7 +105,6 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
         term_id: editingAssignment.term_id,
         due_date: editingAssignment.due_date ? editingAssignment.due_date.split('T')[0] : '',
         max_score: editingAssignment.max_score,
-        weight: editingAssignment.weight,
         status: editingAssignment.status
       });
     }
@@ -313,7 +310,6 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
       const payload = {
         ...formData,
         max_score: Number(formData.max_score),
-        weight: Number(formData.weight),
         due_date: formData.due_date || null
       };
 
@@ -520,21 +516,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="form-group">
-              <label>Weight (%) *</label>
-              <input
-                type="number"
-                value={formData.weight}
-                onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
-                min="0"
-                max="100"
-                step="0.01"
-                required
-              />
-              <small>% of final grade</small>
-            </div>
-
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
             <div className="form-group">
               <label>Status *</label>
               <select

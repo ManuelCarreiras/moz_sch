@@ -32,7 +32,6 @@ class StudentClassResource(Resource):
             return {'message': 'Student Class not found'}, 400
 
         new_student_class = StudentClassModel(student_id, class_id, score)
-
         new_student_class.save_to_db()
 
         response = {
