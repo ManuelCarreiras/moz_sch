@@ -617,6 +617,41 @@ const StudentGrades: React.FC = () => {
           </select>
         </div>
 
+        {/* Student filter (for admin) */}
+        {isAdmin && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+              Student:
+            </label>
+            <select
+              value={selectedStudent?._id || ''}
+              onChange={(e) => {
+                const studentId = e.target.value;
+                const student = students.find(s => s._id === studentId);
+                setSelectedStudent(student || null);
+              }}
+              disabled={!filterClass || students.length === 0}
+              style={{
+                padding: '0.5rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--text)',
+                minWidth: '200px',
+                opacity: !filterClass || students.length === 0 ? 0.5 : 1,
+                cursor: !filterClass || students.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <option value="">Select a Student</option>
+              {students.map(student => (
+                <option key={student._id} value={student._id}>
+                  {student.given_name} {student.surname}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {(filterYear || filterTerm || filterClass || filterSubject || filterAssessmentType) && (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
@@ -627,6 +662,7 @@ const StudentGrades: React.FC = () => {
                 setFilterClass('');
                 setFilterAssessmentType('');
                 setSelectedStudent(null);
+                setStudents([]);
               }}
               style={{
                 padding: '0.5rem 1rem',
@@ -644,103 +680,6 @@ const StudentGrades: React.FC = () => {
         )}
       </div>
 
-      {/* Student Selection Section (for admin) */}
-      {isAdmin && students.length > 0 && !selectedStudent && (
-        <div style={{ marginBottom: '3rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>👥 Select a Student</h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '1rem'
-          }}>
-            {students.map(student => (
-              <div
-                key={student._id}
-                onClick={() => setSelectedStudent(student)}
-                style={{
-                  padding: '1.5rem',
-                  background: 'var(--card)',
-                  borderRadius: '8px',
-                  border: '2px solid var(--border)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--primary)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <div style={{ 
-                  fontSize: '1.1rem', 
-                  fontWeight: 600,
-                  marginBottom: '0.5rem',
-                  color: 'var(--text)'
-                }}>
-                  {student.given_name} {student.surname}
-                </div>
-                <div style={{ 
-                  fontSize: '0.9rem', 
-                  color: 'var(--muted)',
-                  marginBottom: '0.75rem'
-                }}>
-                  Class: {student.class_name}
-                </div>
-                {student.overall_score !== undefined && student.overall_score > 0 && (
-                  <div style={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    paddingTop: '0.75rem',
-                    borderTop: '1px solid var(--border)'
-                  }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                      Year Average (All Subjects):
-                    </span>
-                    <span style={{ 
-                      fontSize: '1.25rem', 
-                      fontWeight: 700,
-                      color: getGradeColor(student.overall_score)
-                    }}>
-                      {student.overall_score.toFixed(2)} / 20
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Back to Student List Button (for admin when student is selected) */}
-      {isAdmin && selectedStudent && (
-        <div style={{ marginBottom: '2rem' }}>
-          <button
-            onClick={() => setSelectedStudent(null)}
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: '4px',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text)',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            ← Back to Student List
-          </button>
-          <div style={{ marginTop: '1rem', fontSize: '1.1rem', fontWeight: 600 }}>
-            Viewing grades for: {selectedStudent.given_name} {selectedStudent.surname}
-          </div>
-        </div>
-      )}
 
       {/* Individual Assignment Grades Section */}
       {(!isAdmin || selectedStudent) && (

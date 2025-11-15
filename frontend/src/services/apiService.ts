@@ -116,6 +116,46 @@ class ApiService {
     return this.delete(`/student/${id}`);
   }
 
+  async importStudentsFromExcel(file: File) {
+    try {
+      const url = `${this.baseURL}/student/import`;
+      const token = await authService.getAccessToken();
+      
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || null,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
   // Teachers
   async getTeachers() {
     return this.get('/teacher');
@@ -135,6 +175,46 @@ class ApiService {
 
   async deleteTeacher(id: string) {
     return this.delete(`/teacher/${id}`);
+  }
+
+  async importTeachersFromExcel(file: File) {
+    try {
+      const url = `${this.baseURL}/teacher/import`;
+      const token = await authService.getAccessToken();
+      
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || null,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
   }
 
   // Classes

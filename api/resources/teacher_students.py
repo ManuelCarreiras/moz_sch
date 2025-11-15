@@ -45,20 +45,25 @@ class TeacherStudentsResource(Resource):
             subject_id = request.args.get('subject_id')
             class_id = request.args.get('class_id')
             class_name = request.args.get('class_name')
+            teacher_id_param = request.args.get('teacher_id')  # Allow teacher_id as query parameter for admin
             
             # Get teacher's classes
             if user_role == 'admin':
-                # Admin sees all classes
-                query = ClassModel.query
-                
-                if subject_id and term_id:
-                    query = query.filter_by(subject_id=subject_id, term_id=term_id)
-                elif subject_id:
-                    query = query.filter_by(subject_id=subject_id)
-                elif term_id:
-                    query = query.filter_by(term_id=term_id)
-                
-                teacher_classes = query.all()
+                # Admin can filter by teacher_id if provided
+                if teacher_id_param:
+                    teacher_classes = ClassModel.list_by_teacher_id(teacher_id_param)
+                else:
+                    # Admin sees all classes
+                    query = ClassModel.query
+                    
+                    if subject_id and term_id:
+                        query = query.filter_by(subject_id=subject_id, term_id=term_id)
+                    elif subject_id:
+                        query = query.filter_by(subject_id=subject_id)
+                    elif term_id:
+                        query = query.filter_by(term_id=term_id)
+                    
+                    teacher_classes = query.all()
             else:
                 # Teacher sees only their classes
                 teacher = TeacherModel.find_by_username(username)

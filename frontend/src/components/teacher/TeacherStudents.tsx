@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/apiService';
+import { useUser } from '../../contexts/AuthContext';
 
 interface StudentPerformance {
   student_id: string;
@@ -43,23 +44,37 @@ interface TeacherClass {
   term_id?: string;
 }
 
+interface Teacher {
+  _id: string;
+  given_name: string;
+  surname: string;
+  email_address?: string;
+}
+
 const TeacherStudents: React.FC = () => {
+  const user = useUser();
+  const isAdmin = user?.role === 'admin';
   const [students, setStudents] = useState<StudentPerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<TeacherClass[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   
   // Filters
   const [filterYear, setFilterYear] = useState<string>('');
   const [filterTerm, setFilterTerm] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
+  const [filterTeacher, setFilterTeacher] = useState<string>('');
 
   useEffect(() => {
     loadFilterOptions();
-  }, []);
+    if (isAdmin) {
+      loadTeachers();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (filterYear) {
@@ -83,7 +98,21 @@ const TeacherStudents: React.FC = () => {
 
   useEffect(() => {
     loadStudents();
-  }, [filterYear, filterTerm, filterSubject, filterClass]);
+  }, [filterYear, filterTerm, filterSubject, filterClass, filterTeacher]);
+
+  const loadTeachers = async () => {
+    if (!isAdmin) return;
+    
+    try {
+      const response = await apiService.getTeachers();
+      if (response.success && response.data) {
+        const teachersData = (response.data as any)?.message || response.data || [];
+        setTeachers(Array.isArray(teachersData) ? teachersData : []);
+      }
+    } catch (error) {
+      console.error('Error loading teachers:', error);
+    }
+  };
 
   const loadFilterOptions = async () => {
     try {
@@ -185,6 +214,9 @@ const TeacherStudents: React.FC = () => {
           params.append('class_name', selectedClass.class_name);
         }
       }
+      if (isAdmin && filterTeacher) {
+        params.append('teacher_id', filterTeacher);
+      }
       
       const queryString = params.toString();
       const endpoint = queryString ? `/teacher/students?${queryString}` : '/teacher/students';
@@ -239,6 +271,32 @@ const TeacherStudents: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '4px'
       }}>
+        {isAdmin && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+              Teacher
+            </label>
+            <select
+              value={filterTeacher}
+              onChange={(e) => {
+                setFilterTeacher(e.target.value);
+                setFilterYear('');
+                setFilterTerm('');
+                setFilterSubject('');
+                setFilterClass('');
+              }}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            >
+              <option value="">All Teachers</option>
+              {teachers.map((teacher) => (
+                <option key={teacher._id} value={teacher._id}>
+                  {teacher.given_name} {teacher.surname}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
             School Year

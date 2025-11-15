@@ -21,7 +21,12 @@ class TeacherScheduleResource(Resource):
         # Get query parameters for filtering
         term_id = request.args.get('term_id')
         year_id = request.args.get('year_id')
+        teacher_id_param = request.args.get('teacher_id')  # Allow teacher_id as query parameter for admin
         user_role = getattr(g, 'role', None)
+        
+        # Use teacher_id from query parameter if provided (for admin filtering)
+        if teacher_id_param:
+            teacher_id = teacher_id_param
         
         # If no teacher_id provided, try to get from authenticated user
         if not teacher_id:

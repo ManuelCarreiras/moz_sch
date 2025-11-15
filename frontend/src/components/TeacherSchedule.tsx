@@ -50,22 +50,46 @@ function getOrdinalSuffix(num: number): string {
   return 'th';
 }
 
+interface Teacher {
+  _id: string;
+  given_name: string;
+  surname: string;
+  email_address?: string;
+}
+
 export function TeacherSchedule() {
   const user = useUser();
+  const isAdmin = user?.role === 'admin';
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allAvailableTerms, setAllAvailableTerms] = useState<Term[]>([]);
   const [allAvailableYears, setAllAvailableYears] = useState<Year[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [selectedTermId, setSelectedTermId] = useState<string>('');
   const [selectedYearId, setSelectedYearId] = useState<string>('');
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
 
-  const loadTeacherTimetable = useCallback(async (termId?: string, yearId?: string) => {
+  const loadTeachers = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    try {
+      const response = await apiService.getTeachers();
+      if (response.success && response.data) {
+        const teachersData = (response.data as any)?.message || response.data || [];
+        setTeachers(Array.isArray(teachersData) ? teachersData : []);
+      }
+    } catch (err) {
+      console.error('Error loading teachers:', err);
+    }
+  }, [isAdmin]);
+
+  const loadTeacherTimetable = useCallback(async (termId?: string, yearId?: string, teacherId?: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      if (!user?.id) {
+      if (!isAdmin && !user?.id) {
         setError('Unable to identify teacher. Please contact your administrator.');
         setLoading(false);
         return;
@@ -75,6 +99,7 @@ export function TeacherSchedule() {
       const params = new URLSearchParams();
       if (termId) params.append('term_id', termId);
       if (yearId) params.append('year_id', yearId);
+      if (isAdmin && teacherId) params.append('teacher_id', teacherId);
       if (params.toString()) url += `?${params.toString()}`;
 
       const response = await apiService.get<any>(url);
@@ -102,16 +127,34 @@ export function TeacherSchedule() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
+
+  // Load teachers for admin
+  useEffect(() => {
+    if (isAdmin) {
+      loadTeachers();
+    }
+  }, [isAdmin, loadTeachers]);
 
   // Reset term selection when year changes
   useEffect(() => {
     setSelectedTermId('');
   }, [selectedYearId]);
 
+  // Reset teacher selection when filters change
   useEffect(() => {
-    loadTeacherTimetable(selectedTermId || undefined, selectedYearId || undefined);
-  }, [selectedTermId, selectedYearId, loadTeacherTimetable]);
+    if (!isAdmin) {
+      setSelectedTeacherId('');
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    loadTeacherTimetable(
+      selectedTermId || undefined, 
+      selectedYearId || undefined,
+      selectedTeacherId || undefined
+    );
+  }, [selectedTermId, selectedYearId, selectedTeacherId, loadTeacherTimetable]);
 
   const organizeTimetableGrid = (): { periods: string[]; periodMap: Map<string, { start: string; end: string }>; classes: Map<string, Class> } | null => {
     if (!timetable) return null;
@@ -212,6 +255,36 @@ export function TeacherSchedule() {
             alignItems: 'center',
             flexWrap: 'wrap'
           }}>
+            {isAdmin && (
+              <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                <label htmlFor="teacher-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                  Teacher:
+                </label>
+                <select
+                  id="teacher-filter"
+                  value={selectedTeacherId}
+                  onChange={(e) => setSelectedTeacherId(e.target.value)}
+                  style={{
+                    padding: 'var(--space-sm) var(--space-md)',
+                    borderRadius: '0.25rem',
+                    border: '1px solid var(--border)',
+                    background: 'var(--card)',
+                    color: 'var(--text)',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    minWidth: '200px'
+                  }}
+                >
+                  <option value="">All Teachers</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher._id} value={teacher._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
+                      {teacher.given_name} {teacher.surname}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
               <label htmlFor="year-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
                 Year:
@@ -268,11 +341,12 @@ export function TeacherSchedule() {
               </select>
             </div>
 
-            {(selectedTermId || selectedYearId) && (
+            {(selectedTermId || selectedYearId || selectedTeacherId) && (
               <button
                 onClick={() => {
                   setSelectedTermId('');
                   setSelectedYearId('');
+                  setSelectedTeacherId('');
                 }}
                 style={{
                   padding: 'var(--space-sm) var(--space-md)',

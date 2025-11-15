@@ -12,7 +12,9 @@ from flask_restful import Api, Resource
 
 from resources.school_year import SchoolYearResource
 from resources.student import StudentResource
+from resources.student_import import StudentBulkImportResource
 from resources.teacher import TeacherResource
+from resources.teacher_import import TeacherBulkImportResource
 from resources.student_year_level import StudentYearLevelResourceStudent, StudentYearLevelResourceLevel, StudentYearLevelResourceYear, StudentYearLevelAssignmentResource  # noqa
 from resources.year_level import YearLevelResource
 from resources.student_class import StudentClassResource
@@ -125,9 +127,11 @@ api.add_resource(Home, "/")
 
 api.add_resource(StudentResource, "/student",
                                   "/student/<id>")
+api.add_resource(StudentBulkImportResource, "/student/import")
 
 api.add_resource(TeacherResource, "/teacher",
                                   "/teacher/<id>")
+api.add_resource(TeacherBulkImportResource, "/teacher/import")
 
 api.add_resource(SchoolYearResource, "/school_year",
                                      "/school_year/<id>")

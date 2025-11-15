@@ -135,8 +135,20 @@ const StudentAssignments: React.FC = () => {
         if (response.success && response.data) {
           const assignmentsData = (response.data as any)?.assignments || [];
           console.log('[StudentAssignments] Admin loaded:', assignmentsData.length, 'assignments');
-          setAssignments(assignmentsData);
-          setFilteredAssignments(assignmentsData); // For admin, no client-side filtering
+          
+          // For admin, deduplicate by assignment_id to show each assignment only once
+          const uniqueAssignmentsMap = new Map<string, StudentAssignment>();
+          assignmentsData.forEach((sa: StudentAssignment) => {
+            const assignmentId = sa.assignment_id;
+            if (!uniqueAssignmentsMap.has(assignmentId)) {
+              uniqueAssignmentsMap.set(assignmentId, sa);
+            }
+          });
+          const uniqueAssignments = Array.from(uniqueAssignmentsMap.values());
+          
+          console.log('[StudentAssignments] Unique assignments:', uniqueAssignments.length);
+          setAssignments(uniqueAssignments);
+          setFilteredAssignments(uniqueAssignments); // For admin, no client-side filtering
         }
       } else {
         // Student: Load only my assignments with filters
@@ -461,12 +473,10 @@ const StudentAssignments: React.FC = () => {
               <thead>
                 <tr>
                   <th>Assignment</th>
-                  {isAdmin && <th>Student</th>}
                   <th>Subject</th>
                   <th>Class</th>
                   <th>Type</th>
                   <th>Due Date</th>
-                  <th>Score</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -477,7 +487,7 @@ const StudentAssignments: React.FC = () => {
                   const isDueSoon = daysUntil !== null && daysUntil >= 0 && daysUntil <= 3;
                   
                   return (
-                    <tr key={sa._id} style={{ 
+                    <tr key={sa.assignment_id} style={{ 
                       background: isOverdue ? 'rgba(220, 53, 69, 0.1)' : isDueSoon ? 'rgba(255, 193, 7, 0.1)' : undefined 
                     }}>
                       <td>
@@ -489,7 +499,6 @@ const StudentAssignments: React.FC = () => {
                           </div>
                         )}
                       </td>
-                      {isAdmin && <td>{sa.student_name || 'Unknown'}</td>}
                       <td>{sa.subject_name || '-'}</td>
                       <td>{sa.class_name || '-'}</td>
                       <td>{sa.assessment_type_name || '-'}</td>
@@ -508,11 +517,6 @@ const StudentAssignments: React.FC = () => {
                                 : `${daysUntil} days left`}
                           </div>
                         )}
-                      </td>
-                      <td>
-                        {sa.score !== null 
-                          ? `${sa.score} / ${sa.assignment.max_score}` 
-                          : '-'}
                       </td>
                       <td>{getStatusBadge(sa.status)}</td>
                     </tr>

@@ -37,7 +37,11 @@ interface TeacherClass {
   term_id?: string;
 }
 
-const TeacherOverview: React.FC = () => {
+interface TeacherOverviewProps {
+  isAdmin?: boolean;
+}
+
+const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) => {
   const [students, setStudents] = useState<StudentPerformance[]>([]);
   const [testScores, setTestScores] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,16 +49,21 @@ const TeacherOverview: React.FC = () => {
   const [terms, setTerms] = useState<Term[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<TeacherClass[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
   
   // Filters
   const [filterYear, setFilterYear] = useState<string>('');
   const [filterTerm, setFilterTerm] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
+  const [filterTeacher, setFilterTeacher] = useState<string>('');
 
   useEffect(() => {
     loadFilterOptions();
-  }, []);
+    if (isAdmin) {
+      loadTeachers();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (filterYear) {
@@ -78,7 +87,21 @@ const TeacherOverview: React.FC = () => {
 
   useEffect(() => {
     loadStudents();
-  }, [filterYear, filterTerm, filterSubject, filterClass]);
+  }, [filterYear, filterTerm, filterSubject, filterClass, filterTeacher]);
+
+  const loadTeachers = async () => {
+    if (!isAdmin) return;
+    
+    try {
+      const response = await apiService.getTeachers();
+      if (response.success && response.data) {
+        const teachersData = (response.data as any)?.message || response.data || [];
+        setTeachers(Array.isArray(teachersData) ? teachersData : []);
+      }
+    } catch (error) {
+      console.error('Error loading teachers:', error);
+    }
+  };
 
   const loadFilterOptions = async () => {
     try {
@@ -173,6 +196,9 @@ const TeacherOverview: React.FC = () => {
         if (selectedClass) {
           params.append('class_name', selectedClass.class_name);
         }
+      }
+      if (isAdmin && filterTeacher) {
+        params.append('teacher_id', filterTeacher);
       }
       
       const queryString = params.toString();
@@ -349,8 +375,12 @@ const TeacherOverview: React.FC = () => {
   return (
     <div className="teacher-overview" style={{ paddingBottom: '2rem', overflow: 'visible' }}>
       <div style={{ marginBottom: '1.5rem' }}>
-        <h2>Overview</h2>
-        <p>View summarized performance metrics for your students</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+          <div>
+            <h2>Overview</h2>
+            <p>View summarized performance metrics for your students</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -364,6 +394,32 @@ const TeacherOverview: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '4px'
       }}>
+        {isAdmin && (
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+              Teacher
+            </label>
+            <select
+              value={filterTeacher}
+              onChange={(e) => {
+                setFilterTeacher(e.target.value);
+                setFilterYear('');
+                setFilterTerm('');
+                setFilterSubject('');
+                setFilterClass('');
+              }}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            >
+              <option value="">All Teachers</option>
+              {teachers.map((teacher: any) => (
+                <option key={teacher._id} value={teacher._id}>
+                  {teacher.given_name} {teacher.surname}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
             School Year

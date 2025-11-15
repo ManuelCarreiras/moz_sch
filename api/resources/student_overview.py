@@ -38,12 +38,23 @@ class StudentOverviewResource(Resource):
             if not username:
                 return {'message': 'Authentication required'}, 401
             
-            # Get authenticated student
-            student = StudentModel.find_by_username(username)
-            if not student:
-                return {'message': 'Student not found'}, 404
+            # Get student_id - either from request param (for admin) or from authenticated user (for student)
+            requested_student_id = request.args.get('student_id')
             
-            student_id = str(student._id)
+            if user_role == 'admin' and requested_student_id:
+                # Admin viewing a specific student
+                student = StudentModel.find_by_id(requested_student_id)
+                if not student:
+                    return {'message': 'Student not found'}, 404
+                student_id = str(student._id)
+            elif user_role == 'student':
+                # Student viewing their own data
+                student = StudentModel.find_by_username(username)
+                if not student:
+                    return {'message': 'Student not found'}, 404
+                student_id = str(student._id)
+            else:
+                return {'message': 'Invalid access. Student role required or student_id parameter needed for admin.'}, 403
             
             # Get filters
             year_id = request.args.get('year_id')
@@ -126,13 +137,7 @@ class StudentOverviewResource(Resource):
             subject_attendance = defaultdict(lambda: {'present': 0, 'total': 0})
             
             # Process each class
-            processed_combos = set()
             for class_obj in filtered_classes:
-                combo_key = (str(class_obj.subject_id), str(class_obj.term_id))
-                if combo_key in processed_combos:
-                    continue
-                processed_combos.add(combo_key)
-                
                 # Get assignments for this class
                 assignments = AssignmentModel.find_by_class(class_obj._id)
                 
@@ -158,7 +163,7 @@ class StudentOverviewResource(Resource):
                             
                             # Get student's test score
                             sa = StudentAssignmentModel.find_by_student_and_assignment(student_id, assignment._id)
-                            if sa and sa.score is not None:
+                            if sa and sa.score is not None and sa.status == 'graded':
                                 percentage = float((Decimal(str(sa.score)) / Decimal(str(assignment.max_score))) * 100)
                                 test_scores_sum += Decimal(str(percentage))
                                 test_scores_count += 1
@@ -220,7 +225,7 @@ class StudentOverviewResource(Resource):
                             sa = StudentAssignmentModel.find_by_student_and_assignment(
                                 str(other_student_id), assignment._id
                             )
-                            if sa and sa.score is not None:
+                            if sa and sa.score is not None and sa.status == 'graded':
                                 percentage = float((Decimal(str(sa.score)) / Decimal(str(assignment.max_score))) * 100)
                                 class_test_scores.append(percentage)
             

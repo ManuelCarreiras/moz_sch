@@ -7,25 +7,15 @@ import StudentAssignments from './student/StudentAssignments';
 import StudentGrades from './student/StudentGrades';
 import StudentAttendance from './student/StudentAttendance';
 import StudentOverview from './student/StudentOverview';
+import { StudentsTable } from './admin/StudentsTable';
 
-type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
+type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments' | 'students';
 
 export function StudentDashboard() {
-  const { signOut, getAccessToken } = useAuth();
+  const { signOut } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StudentTab>('overview');
-  const [showCreateStudent, setShowCreateStudent] = useState(false);
-  const [studentForm, setStudentForm] = useState({
-    given_name: '',
-    middle_name: '',
-    surname: '',
-    date_of_birth: '',
-    gender: '',
-    enrollment_date: '',
-    email: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const isAdmin = user?.role === 'admin';
 
   const handleSignOut = async () => {
@@ -37,62 +27,6 @@ export function StudentDashboard() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setStudentForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleCreateStudent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Get the API base URL from environment or use default
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-      
-      const token = await getAccessToken();
-      const response = await fetch(`${apiBaseUrl}/student`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(studentForm)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Student created successfully:', result);
-        
-        // Reset form and close modal
-        setStudentForm({
-          given_name: '',
-          middle_name: '',
-          surname: '',
-          date_of_birth: '',
-          gender: '',
-          enrollment_date: '',
-          email: ''
-        });
-        setShowCreateStudent(false);
-        
-        // You could add a success message here
-        alert('Student created successfully!');
-      } else {
-        const error = await response.json();
-        console.error('Failed to create student:', error);
-        alert('Failed to create student: ' + (error.message || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error creating student:', error);
-      alert('Error creating student: ' + error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (!user) {
     return (
@@ -118,6 +52,7 @@ export function StudentDashboard() {
     { id: 'resources' as StudentTab, label: 'Resources', icon: '📚', showForAdmin: true },
     { id: 'attendance' as StudentTab, label: 'Attendance', icon: '✅', showForAdmin: true },
     { id: 'assignments' as StudentTab, label: 'Assignments', icon: '📝', showForAdmin: true },
+    { id: 'students' as StudentTab, label: 'Students', icon: '👥', showForAdmin: true, adminOnly: true },
   ];
 
   // Filter tabs based on admin role
@@ -159,6 +94,11 @@ export function StudentDashboard() {
             <StudentAssignments />
           </div>
         );
+      case 'students':
+        if (isAdmin) {
+          return <StudentsTable />;
+        }
+        return null;
       default:
         return (
           <div className="student-content">
@@ -222,17 +162,6 @@ export function StudentDashboard() {
         <main className="student-main">
           {activeTab === 'overview' && (
             <div className="student-content">
-              {isAdmin && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-md)' }}>
-                  <button 
-                    className="btn btn--primary"
-                    onClick={() => setShowCreateStudent(true)}
-                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
-                  >
-                    Create New Student
-                  </button>
-                </div>
-              )}
               <StudentOverview />
             </div>
           )}
@@ -240,139 +169,6 @@ export function StudentDashboard() {
         </main>
       </div>
 
-      {/* Create Student Modal */}
-      {isAdmin && showCreateStudent && (
-        <div className="modal" role="dialog" aria-modal="true" onClick={() => setShowCreateStudent(false)}>
-          <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal__header">
-              <h2>Add New Student</h2>
-              <button className="icon-btn" aria-label="Close" onClick={() => setShowCreateStudent(false)}>✕</button>
-            </div>
-            <div className="modal__content">
-              <form onSubmit={handleCreateStudent} className="student-form">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="given_name">Given Name *</label>
-                    <input
-                      type="text"
-                      id="given_name"
-                      name="given_name"
-                      value={studentForm.given_name}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="middle_name">Middle Name</label>
-                    <input
-                      type="text"
-                      id="middle_name"
-                      name="middle_name"
-                      value={studentForm.middle_name}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="surname">Surname *</label>
-                    <input
-                      type="text"
-                      id="surname"
-                      name="surname"
-                      value={studentForm.surname}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="date_of_birth">Date of Birth *</label>
-                    <input
-                      type="date"
-                      id="date_of_birth"
-                      name="date_of_birth"
-                      value={studentForm.date_of_birth}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="email">Email (for Cognito invite)</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={studentForm.email}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                      placeholder="student@example.com"
-                    />
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="gender">Gender *</label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={studentForm.gender}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="enrollment_date">Enrollment Date *</label>
-                    <input
-                      type="date"
-                      id="enrollment_date"
-                      name="enrollment_date"
-                      value={studentForm.enrollment_date}
-                      onChange={handleInputChange}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                </div>
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    onClick={() => setShowCreateStudent(false)} 
-                    className="btn btn--secondary" 
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting || !studentForm.given_name || !studentForm.surname || !studentForm.date_of_birth || !studentForm.gender || !studentForm.enrollment_date} 
-                    className="btn btn--primary"
-                  >
-                    {isSubmitting ? 'Creating...' : 'Create Student'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/apiService';
+import { useUser } from '../../contexts/AuthContext';
 
 interface StudentMetrics {
   homework_completion_ratio: number;
@@ -47,7 +48,16 @@ interface TeacherClass {
   term_id?: string;
 }
 
+interface StudentInfo {
+  _id: string;
+  given_name: string;
+  surname: string;
+  class_name: string;
+}
+
 const StudentOverview: React.FC = () => {
+  const user = useUser();
+  const isAdmin = user?.role === 'admin';
   const [studentMetrics, setStudentMetrics] = useState<StudentMetrics | null>(null);
   const [classTestScores, setClassTestScores] = useState<number[]>([]);
   const [studentTestScores, setStudentTestScores] = useState<number[]>([]);
@@ -60,6 +70,8 @@ const StudentOverview: React.FC = () => {
   const [terms, setTerms] = useState<Term[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<TeacherClass[]>([]);
+  const [students, setStudents] = useState<StudentInfo[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
   
   // Filters
   const [filterYear, setFilterYear] = useState<string>('');
@@ -175,6 +187,77 @@ const StudentOverview: React.FC = () => {
     }
   };
 
+  // Load students when class is selected (for admin)
+  useEffect(() => {
+    if (isAdmin && filterClass) {
+      loadStudentsInClass();
+    } else {
+      setStudents([]);
+      setSelectedStudent(null);
+    }
+  }, [filterClass, isAdmin]);
+
+  // Reset selected student when filters change
+  useEffect(() => {
+    setSelectedStudent(null);
+  }, [filterYear, filterTerm, filterClass]);
+
+  // Reload overview when filters change or student is selected
+  useEffect(() => {
+    if (isAdmin) {
+      // For admin, only load if a student is selected
+      if (selectedStudent) {
+        loadStudentOverview();
+      }
+    } else {
+      // For students, load their own data
+      loadStudentOverview();
+    }
+  }, [filterYear, filterTerm, filterSubject, filterClass, selectedStudent]);
+
+  const loadStudentsInClass = async () => {
+    try {
+      if (!filterClass) {
+        setStudents([]);
+        return;
+      }
+
+      const params = new URLSearchParams();
+      if (filterYear) params.append('year_id', filterYear);
+      if (filterTerm) params.append('term_id', filterTerm);
+      if (filterClass) params.append('class_name', filterClass);
+
+      const queryString = params.toString();
+      const endpoint = queryString ? `/student/assignments?${queryString}` : '/student/assignments';
+
+      const response = await apiService.get(endpoint);
+      
+      if (response.success && response.data) {
+        const assignmentsData = (response.data as any)?.assignments || [];
+        
+        // Extract unique students from assignments
+        const studentsMap = new Map<string, StudentInfo>();
+        assignmentsData.forEach((assignment: any) => {
+          if (assignment.student_id && assignment.student_name) {
+            if (!studentsMap.has(assignment.student_id)) {
+              studentsMap.set(assignment.student_id, {
+                _id: assignment.student_id,
+                given_name: assignment.student_name.split(' ')[0] || '',
+                surname: assignment.student_name.split(' ').slice(1).join(' ') || '',
+                class_name: filterClass
+              });
+            }
+          }
+        });
+        
+        setStudents(Array.from(studentsMap.values()));
+      }
+    } catch (error) {
+      console.error('Error loading students in class:', error);
+      setStudents([]);
+    }
+  };
+
   const loadStudentOverview = async () => {
     try {
       setLoading(true);
@@ -183,6 +266,11 @@ const StudentOverview: React.FC = () => {
       if (filterTerm) params.append('term_id', filterTerm);
       if (filterSubject) params.append('subject_id', filterSubject);
       if (filterClass) params.append('class_name', filterClass);
+      
+      // For admin, add student_id parameter
+      if (isAdmin && selectedStudent) {
+        params.append('student_id', selectedStudent._id);
+      }
       
       const queryString = params.toString();
       const endpoint = queryString ? `/student/overview?${queryString}` : '/student/overview';
@@ -243,7 +331,10 @@ const StudentOverview: React.FC = () => {
   const bins = [0, 20, 40, 60, 80, 100];
   const histogram = bins.slice(0, -1).map((min, i) => {
     const max = bins[i + 1];
-    const count = allTestScores.filter(score => score >= min && score < max).length;
+    const isLastBin = i === bins.length - 2; // Last bin should include the max value
+    const count = allTestScores.filter(score => 
+      score >= min && (isLastBin ? score <= max : score < max)
+    ).length;
     return { min, max, count, percentage: allTestScores.length > 0 ? (count / allTestScores.length) * 100 : 0 };
   });
 
@@ -267,7 +358,7 @@ const StudentOverview: React.FC = () => {
   const normalCurvePoints = generateNormalCurve();
 
   // Get student's average test score for positioning
-  const studentAvgTestScore = studentMetrics?.test_average || 0;
+  const studentAvgTestScore = studentMetrics?.test_average ?? null;
 
   // Term Grade Distribution Statistics (include student's own grades for full distribution)
   const allTermGrades = [...classTermGrades, ...studentTermGrades];
@@ -300,7 +391,10 @@ const StudentOverview: React.FC = () => {
   const termGradeBins = [0, 4, 8, 12, 16, 20];
   const termGradeHistogram = termGradeBins.slice(0, -1).map((min, i) => {
     const max = termGradeBins[i + 1];
-    const count = allTermGrades.filter(grade => grade >= min && grade < max).length;
+    const isLastBin = i === termGradeBins.length - 2; // Last bin should include the max value
+    const count = allTermGrades.filter(grade => 
+      grade >= min && (isLastBin ? grade <= max : grade < max)
+    ).length;
     return { min, max, count, percentage: allTermGrades.length > 0 ? (count / allTermGrades.length) * 100 : 0 };
   });
 
@@ -499,7 +593,10 @@ const StudentOverview: React.FC = () => {
           </label>
           <select
             value={filterClass}
-            onChange={(e) => setFilterClass(e.target.value)}
+            onChange={(e) => {
+              setFilterClass(e.target.value);
+              setSelectedStudent(null);
+            }}
             disabled={!filterYear || (!filterTerm && !filterSubject)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
@@ -509,10 +606,36 @@ const StudentOverview: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {/* Student Selection (for admin) */}
+        {isAdmin && (
+          <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+            Student
+          </label>
+          <select
+            value={selectedStudent?._id || ''}
+            onChange={(e) => {
+              const studentId = e.target.value;
+              const student = students.find(s => s._id === studentId);
+              setSelectedStudent(student || null);
+            }}
+            disabled={!filterClass || students.length === 0}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+          >
+            <option value="">Select a Student</option>
+            {students.map((student) => (
+              <option key={student._id} value={student._id}>
+                {student.given_name} {student.surname}
+              </option>
+            ))}
+          </select>
+        </div>
+        )}
       </div>
 
       {/* Student Performance Metrics */}
-      {studentMetrics ? (
+      {(!isAdmin || selectedStudent) && studentMetrics ? (
         <>
           <div style={{ 
             display: 'grid', 
@@ -582,9 +705,15 @@ const StudentOverview: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Count</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#27ae60' }}>
+                    {testScoreStats.count}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Average</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#2ecc71' }}>
-                    {studentAvgTestScore.toFixed(1)}%
+                    {studentAvgTestScore !== null && studentAvgTestScore !== undefined ? `${studentAvgTestScore.toFixed(1)}%` : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -671,26 +800,38 @@ const StudentOverview: React.FC = () => {
                             {bin.count}
                           </div>
                         )}
-                        <div 
-                          style={{ 
-                            width: '100%', 
-                            height: `${barHeight}px`, 
-                            background: barColor,
-                            borderRadius: '4px 4px 0 0',
-                            transition: 'all 0.2s',
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.opacity = '0.8';
-                            const tooltip = e.currentTarget.parentElement?.querySelector('.histogram-tooltip');
-                            if (tooltip) (tooltip as HTMLElement).style.opacity = '1';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.opacity = '1';
-                            const tooltip = e.currentTarget.parentElement?.querySelector('.histogram-tooltip');
-                            if (tooltip) (tooltip as HTMLElement).style.opacity = '0';
-                          }}
-                        />
+                        {bin.count > 0 ? (
+                          <div 
+                            style={{ 
+                              width: '100%', 
+                              height: `${Math.max(barHeight, 4)}px`, 
+                              background: barColor,
+                              borderRadius: '4px 4px 0 0',
+                              transition: 'all 0.2s',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              minHeight: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.opacity = '0.8';
+                              const tooltip = e.currentTarget.parentElement?.querySelector('.histogram-tooltip');
+                              if (tooltip) (tooltip as HTMLElement).style.opacity = '1';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.opacity = '1';
+                              const tooltip = e.currentTarget.parentElement?.querySelector('.histogram-tooltip');
+                              if (tooltip) (tooltip as HTMLElement).style.opacity = '0';
+                            }}
+                          />
+                        ) : (
+                          <div 
+                            style={{ 
+                              width: '100%', 
+                              height: '2px', 
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              borderRadius: '4px 4px 0 0'
+                            }}
+                          />
+                        )}
                         <div style={{ 
                           fontSize: '0.7rem', 
                           color: '#888', 
@@ -730,23 +871,44 @@ const StudentOverview: React.FC = () => {
                   )}
 
                   {/* Student Position Marker */}
-                  {studentAvgTestScore > 0 && (() => {
-                    // Calculate position, clamping to 0-100% if score is outside the range
-                    const range = testScoreStats.max - testScoreStats.min || 1;
-                    let position = ((studentAvgTestScore - testScoreStats.min) / range) * 100;
-                    // Clamp position to 0-100%
-                    position = Math.max(0, Math.min(100, position));
-                    const isOutOfRange = studentAvgTestScore > testScoreStats.max || studentAvgTestScore < testScoreStats.min;
+                  {studentAvgTestScore !== null && studentAvgTestScore !== undefined && allTestScores.length > 0 && (() => {
+                    // Calculate position based on histogram bins (0-20, 20-40, 40-60, 60-80, 80-100)
+                    const bins = [0, 20, 40, 60, 80, 100];
+                    const numBins = bins.length - 1;
+                    let binIndex = 0;
+                    
+                    // Find which bin the score falls into
+                    for (let i = 0; i < numBins; i++) {
+                      if (studentAvgTestScore >= bins[i] && studentAvgTestScore < bins[i + 1]) {
+                        binIndex = i;
+                        break;
+                      }
+                    }
+                    if (studentAvgTestScore >= 100) binIndex = numBins - 1;
+                    
+                    // Calculate position within the bin (0-100% of bin width)
+                    const binMin = bins[binIndex];
+                    const binMax = bins[binIndex + 1];
+                    const binWidth = binMax - binMin;
+                    const positionInBin = binWidth > 0 ? ((studentAvgTestScore - binMin) / binWidth) : 0.5;
+                    
+                    // Calculate overall position: bin start + position within bin
+                    // Each bin is 1/numBins of the total width
+                    const binStartPercent = (binIndex / numBins) * 100;
+                    const binWidthPercent = (1 / numBins) * 100;
+                    const position = binStartPercent + (positionInBin * binWidthPercent);
+                    
+                    const isOutOfRange = testScoreStats.max > testScoreStats.min && (studentAvgTestScore > testScoreStats.max || studentAvgTestScore < testScoreStats.min);
                     
                     return (
                       <div
                         style={{
                           position: 'absolute',
                           bottom: '1rem',
-                          left: `${position}%`,
+                          left: `${Math.max(0, Math.min(100, position))}%`,
                           transform: 'translateX(-50%)',
-                          width: '4px',
-                          height: '200px',
+                          width: '3px',
+                          height: '180px',
                           background: isOutOfRange ? '#ff6b6b' : '#2ecc71',
                           zIndex: 5,
                           boxShadow: isOutOfRange ? '0 0 10px rgba(255, 107, 107, 0.8)' : '0 0 10px rgba(46, 204, 113, 0.8)'
@@ -754,7 +916,7 @@ const StudentOverview: React.FC = () => {
                       >
                         <div style={{
                           position: 'absolute',
-                          top: '-25px',
+                          top: '-30px',
                           left: '50%',
                           transform: 'translateX(-50%)',
                           background: isOutOfRange ? '#ff6b6b' : '#2ecc71',
@@ -764,7 +926,8 @@ const StudentOverview: React.FC = () => {
                           fontSize: '0.75rem',
                           fontWeight: 'bold',
                           whiteSpace: 'nowrap',
-                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                          zIndex: 10
                         }}>
                           You: {studentAvgTestScore.toFixed(1)}%
                           {isOutOfRange && studentAvgTestScore > testScoreStats.max && ' ⬆'}
@@ -987,22 +1150,44 @@ const StudentOverview: React.FC = () => {
                   )}
 
                   {/* Student Term Grade Position Marker */}
-                  {studentAvgTermGrade > 0 && (() => {
-                    const range = termGradeStats.max - termGradeStats.min || 1;
-                    let position = ((studentAvgTermGrade - termGradeStats.min) / range) * 100;
-                    // Clamp position to 0-100%
-                    position = Math.max(0, Math.min(100, position));
-                    const isOutOfRange = studentAvgTermGrade > termGradeStats.max || studentAvgTermGrade < termGradeStats.min;
+                  {studentAvgTermGrade > 0 && studentTermGrades.length > 0 && allTermGrades.length > 0 && (() => {
+                    // Calculate position based on term grade histogram bins (0-4, 4-8, 8-12, 12-16, 16-20)
+                    const bins = [0, 4, 8, 12, 16, 20];
+                    const numBins = bins.length - 1;
+                    let binIndex = 0;
+                    
+                    // Find which bin the grade falls into
+                    for (let i = 0; i < numBins; i++) {
+                      if (studentAvgTermGrade >= bins[i] && studentAvgTermGrade < bins[i + 1]) {
+                        binIndex = i;
+                        break;
+                      }
+                    }
+                    if (studentAvgTermGrade >= 20) binIndex = numBins - 1;
+                    
+                    // Calculate position within the bin (0-100% of bin width)
+                    const binMin = bins[binIndex];
+                    const binMax = bins[binIndex + 1];
+                    const binWidth = binMax - binMin;
+                    const positionInBin = binWidth > 0 ? ((studentAvgTermGrade - binMin) / binWidth) : 0.5;
+                    
+                    // Calculate overall position: bin start + position within bin
+                    // Each bin is 1/numBins of the total width
+                    const binStartPercent = (binIndex / numBins) * 100;
+                    const binWidthPercent = (1 / numBins) * 100;
+                    const position = binStartPercent + (positionInBin * binWidthPercent);
+                    
+                    const isOutOfRange = termGradeStats.max > termGradeStats.min && (studentAvgTermGrade > termGradeStats.max || studentAvgTermGrade < termGradeStats.min);
                     
                     return (
                       <div
                         style={{
                           position: 'absolute',
                           bottom: '1rem',
-                          left: `${position}%`,
+                          left: `${Math.max(0, Math.min(100, position))}%`,
                           transform: 'translateX(-50%)',
-                          width: '4px',
-                          height: '200px',
+                          width: '3px',
+                          height: '180px',
                           background: isOutOfRange ? '#ff6b6b' : '#2ecc71',
                           zIndex: 5,
                           boxShadow: isOutOfRange ? '0 0 10px rgba(255, 107, 107, 0.8)' : '0 0 10px rgba(46, 204, 113, 0.8)'
@@ -1010,7 +1195,7 @@ const StudentOverview: React.FC = () => {
                       >
                         <div style={{
                           position: 'absolute',
-                          top: '-25px',
+                          top: '-30px',
                           left: '50%',
                           transform: 'translateX(-50%)',
                           background: isOutOfRange ? '#ff6b6b' : '#2ecc71',
@@ -1020,7 +1205,8 @@ const StudentOverview: React.FC = () => {
                           fontSize: '0.75rem',
                           fontWeight: 'bold',
                           whiteSpace: 'nowrap',
-                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                          zIndex: 10
                         }}>
                           You: {studentAvgTermGrade.toFixed(1)}
                           {isOutOfRange && studentAvgTermGrade > termGradeStats.max && ' ⬆'}
@@ -1047,7 +1233,7 @@ const StudentOverview: React.FC = () => {
             </div>
           ) : null}
         </>
-      ) : (
+      ) : (!isAdmin || selectedStudent) ? (
         <div style={{
           padding: '2rem',
           textAlign: 'center',
@@ -1057,7 +1243,27 @@ const StudentOverview: React.FC = () => {
         }}>
           No performance data available yet
         </div>
-      )}
+      ) : isAdmin && !selectedStudent && students.length === 0 && filterClass ? (
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '8px',
+          color: '#aaa'
+        }}>
+          No students found in this class. Please select a different class.
+        </div>
+      ) : isAdmin && !filterClass ? (
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '8px',
+          color: '#aaa'
+        }}>
+          Please select a class to view student overview.
+        </div>
+      ) : null}
     </div>
   );
 };

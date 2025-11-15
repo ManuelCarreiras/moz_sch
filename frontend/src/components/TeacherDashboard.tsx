@@ -9,9 +9,10 @@ import Gradebook from './teacher/Gradebook';
 import TeacherAttendance from './teacher/TeacherAttendance';
 import TeacherStudents from './teacher/TeacherStudents';
 import TeacherOverview from './teacher/TeacherOverview';
+import { TeachersTable } from './admin/TeachersTable';
 import apiService from '../services/apiService';
 
-type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
+type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments' | 'teachers';
 
 interface TeacherClass {
   _id: string;
@@ -45,7 +46,8 @@ export function TeacherDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TeacherTab>('overview');
+  const isAdmin = user?.role === 'admin';
+  const [activeTab, setActiveTab] = useState<TeacherTab>(isAdmin ? 'classes' : 'overview');
   const [showCreateTeacher, setShowCreateTeacher] = useState(false);
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
@@ -72,6 +74,14 @@ export function TeacherDashboard() {
       console.log('[TeacherDashboard] No user found, skipping class load');
     }
   }, [user]);
+
+
+  // Redirect admin away from assignments and attendance tabs
+  useEffect(() => {
+    if (isAdmin && (activeTab === 'assignments' || activeTab === 'attendance')) {
+      setActiveTab('classes');
+    }
+  }, [isAdmin, activeTab]);
 
   // Reload data when Grades tab becomes active
   useEffect(() => {
@@ -171,14 +181,18 @@ export function TeacherDashboard() {
     { id: 'students' as TeacherTab, label: 'Students', icon: '👥' },
     { id: 'grades' as TeacherTab, label: 'Grades', icon: '📊' },
     { id: 'resources' as TeacherTab, label: 'Resources', icon: '📖' },
-    { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
-    { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' },
+    ...(isAdmin ? [
+      { id: 'teachers' as TeacherTab, label: 'Teachers', icon: '👨‍🏫' }
+    ] : [
+      { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
+      { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' }
+    ]),
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <TeacherOverview />;
+        return <TeacherOverview isAdmin={isAdmin} />;
       case 'classes':
         return <TeacherSchedule />;
       case 'students':
@@ -437,6 +451,11 @@ export function TeacherDashboard() {
             </div>
           </div>
         );
+      case 'teachers':
+        if (isAdmin) {
+          return <TeachersTable />;
+        }
+        return null;
       case 'attendance':
         return <TeacherAttendance />;
       case 'assignments':
