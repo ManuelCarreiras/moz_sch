@@ -40,6 +40,9 @@ from resources.grade import GradeResource, GradebookResource
 from resources.student_assignment import StudentAssignmentResource
 from resources.term_grade import TermGradeResource, TermGradeCalculateResource
 from resources.grading_criteria import GradingCriteriaResource
+from resources.resource import ResourceResource, ResourceDownloadResource, TeacherResourceResource
+# Import ResourceModel to ensure it's registered with SQLAlchemy
+from models.resource import ResourceModel  # noqa: F401
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -100,6 +103,19 @@ db.init_app(app)
 # Create postgres tables with error handling
 with app.app_context():
     db.create_all()
+    # Add year_level_id column to resource table if it doesn't exist
+    # Also make uploaded_by nullable for admin uploads
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE resource ADD COLUMN IF NOT EXISTS year_level_id UUID REFERENCES year_level(_id) ON DELETE SET NULL"))
+        db.session.execute(text("CREATE INDEX IF NOT EXISTS idx_resource_year_level_id ON resource(year_level_id)"))
+        # Make uploaded_by nullable if it's not already
+        db.session.execute(text("ALTER TABLE resource ALTER COLUMN uploaded_by DROP NOT NULL"))
+        db.session.commit()
+    except Exception as e:
+        # Column might already exist or table might not exist yet - that's ok
+        db.session.rollback()
+        app.logger.info(f"Resource table migration check: {str(e)}")
 
 
 # Add authentication middleware
@@ -215,6 +231,11 @@ api.add_resource(TeacherStudentsResource, "/teacher/students")
 # Student Overview
 from resources.student_overview import StudentOverviewResource
 api.add_resource(StudentOverviewResource, "/student/overview")
+
+# ========== Resources System ==========
+api.add_resource(ResourceResource, "/resource", "/resource/<resource_id>")
+api.add_resource(ResourceDownloadResource, "/resource/<resource_id>/download")
+api.add_resource(TeacherResourceResource, "/resource/teacher")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

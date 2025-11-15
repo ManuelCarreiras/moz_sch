@@ -775,6 +775,113 @@ class ApiService {
     return this.delete(`/grading_criteria/${id}`);
   }
 
+  // ========== Resources ==========
+  
+  async getResources(filters?: { school_year_id?: string; subject_id?: string; year_level_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.school_year_id) params.append('school_year_id', filters.school_year_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.year_level_id) params.append('year_level_id', filters.year_level_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/resource?${queryString}` : '/resource');
+  }
+
+  async getResource(id: string) {
+    return this.get(`/resource/${id}`);
+  }
+
+  async uploadResource(file: File, title: string, description: string, schoolYearId: string, subjectId: string, yearLevelId?: string) {
+    try {
+      const url = `${this.baseURL}/resource`;
+      const token = await authService.getAccessToken();
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('school_year_id', schoolYearId);
+      formData.append('subject_id', subjectId);
+      if (yearLevelId) {
+        formData.append('year_level_id', yearLevelId);
+      }
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.message || `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      return {
+        success: true,
+        data: data || null,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message || 'Network error',
+      };
+    }
+  }
+
+  async updateResource(id: string, resourceData: { title?: string; description?: string }) {
+    const data = { ...resourceData, _id: id };
+    return this.put('/resource', data);
+  }
+
+  async deleteResource(id: string) {
+    return this.delete(`/resource/${id}`);
+  }
+
+  async downloadResource(id: string): Promise<Blob | null> {
+    try {
+      const url = `${this.baseURL}/resource/${id}/download`;
+      const token = await authService.getAccessToken();
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: headers,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Download failed' }));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.blob();
+    } catch (error: any) {
+      console.error('Error downloading resource:', error);
+      return null;
+    }
+  }
+
+  async getTeacherResources(filters?: { school_year_id?: string; subject_id?: string; year_level_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.school_year_id) params.append('school_year_id', filters.school_year_id);
+    if (filters?.subject_id) params.append('subject_id', filters.subject_id);
+    if (filters?.year_level_id) params.append('year_level_id', filters.year_level_id);
+    const queryString = params.toString();
+    return this.get(queryString ? `/resource/teacher?${queryString}` : '/resource/teacher');
+  }
+
 }
 
 // Export singleton instance

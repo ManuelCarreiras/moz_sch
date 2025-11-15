@@ -30,6 +30,14 @@ class YearLevelModel(db.Model):
     def find_by_level_name(cls, level_name):
         return cls.query.filter_by(level_name=level_name).first()
 
+    @classmethod
+    def find_by_level_order(cls, level_order):
+        return cls.query.filter_by(level_order=level_order).all()
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

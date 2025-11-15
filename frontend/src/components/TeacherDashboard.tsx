@@ -9,6 +9,7 @@ import Gradebook from './teacher/Gradebook';
 import TeacherAttendance from './teacher/TeacherAttendance';
 import TeacherStudents from './teacher/TeacherStudents';
 import TeacherOverview from './teacher/TeacherOverview';
+import TeacherResources from './teacher/TeacherResources';
 import { TeachersTable } from './admin/TeachersTable';
 import apiService from '../services/apiService';
 
@@ -442,15 +443,7 @@ export function TeacherDashboard() {
           </div>
         );
       case 'resources':
-        return (
-          <div className="teacher-content">
-            <h2>Resources</h2>
-            <p>Access teaching materials and educational resources.</p>
-            <div className="placeholder-content">
-              <p>Resources functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <TeacherResources />;
       case 'teachers':
         if (isAdmin) {
           return <TeachersTable />;

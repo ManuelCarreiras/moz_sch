@@ -7,6 +7,7 @@ import StudentAssignments from './student/StudentAssignments';
 import StudentGrades from './student/StudentGrades';
 import StudentAttendance from './student/StudentAttendance';
 import StudentOverview from './student/StudentOverview';
+import StudentResources from './student/StudentResources';
 import { StudentsTable } from './admin/StudentsTable';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments' | 'students';
@@ -79,11 +80,7 @@ export function StudentDashboard() {
       case 'resources':
         return (
           <div className="student-content">
-            <h2>Resources</h2>
-            <p>Access learning materials and educational resources.</p>
-            <div className="placeholder-content">
-              <p>Resources functionality coming soon...</p>
-            </div>
+            <StudentResources />
           </div>
         );
       case 'attendance':
