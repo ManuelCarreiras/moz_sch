@@ -882,6 +882,113 @@ class ApiService {
     return this.get(queryString ? `/resource/teacher?${queryString}` : '/resource/teacher');
   }
 
+  // ========== Financial System - Student Mensality ==========
+  async getMensality(filters?: { student_id?: string; month?: number; year?: number; paid?: boolean }) {
+    const params = new URLSearchParams();
+    if (filters?.student_id) params.append('student_id', filters.student_id);
+    if (filters?.month) params.append('month', filters.month.toString());
+    if (filters?.year) params.append('year', filters.year.toString());
+    if (filters?.paid !== undefined) params.append('paid', filters.paid.toString());
+    const queryString = params.toString();
+    return this.get(queryString ? `/mensality?${queryString}` : '/mensality');
+  }
+
+  async getMensalityById(id: string) {
+    return this.get(`/mensality/${id}`);
+  }
+
+  async createMensality(data: {
+    student_id: string;
+    value: number;
+    due_date: string;
+    month: number;
+    year: number;
+    paid?: boolean;
+    payment_date?: string;
+    notes?: string;
+  }) {
+    return this.post('/mensality', data);
+  }
+
+  async updateMensality(data: {
+    _id: string;
+    paid?: boolean;
+    payment_date?: string | null;
+    value?: number;
+    due_date?: string;
+    notes?: string;
+  }) {
+    return this.put('/mensality', data);
+  }
+
+  async deleteMensality(id: string) {
+    return this.delete(`/mensality/${id}`);
+  }
+
+  async generateMensality(data: {
+    month: number;
+    year: number;
+    value: number;
+    due_date: string;
+    notes?: string;
+  }) {
+    return this.post('/mensality/generate', data);
+  }
+
+  // ========== Financial System - Teacher Salary ==========
+  async getTeacherSalary(filters?: { teacher_id?: string; month?: number; year?: number; paid?: boolean }) {
+    const params = new URLSearchParams();
+    if (filters?.teacher_id) params.append('teacher_id', filters.teacher_id);
+    if (filters?.month) params.append('month', filters.month.toString());
+    if (filters?.year) params.append('year', filters.year.toString());
+    if (filters?.paid !== undefined) params.append('paid', filters.paid.toString());
+    const queryString = params.toString();
+    return this.get(queryString ? `/teacher_salary?${queryString}` : '/teacher_salary');
+  }
+
+  async getTeacherSalaryById(id: string) {
+    return this.get(`/teacher_salary/${id}`);
+  }
+
+  async createTeacherSalary(data: {
+    teacher_id: string;
+    value: number;
+    due_date: string;
+    month: number;
+    year: number;
+    paid?: boolean;
+    payment_date?: string;
+    notes?: string;
+  }) {
+    return this.post('/teacher_salary', data);
+  }
+
+  async updateTeacherSalary(data: {
+    _id: string;
+    paid?: boolean;
+    payment_date?: string | null;
+    value?: number;
+    due_date?: string;
+    notes?: string;
+  }) {
+    return this.put('/teacher_salary', data);
+  }
+
+  async deleteTeacherSalary(id: string) {
+    return this.delete(`/teacher_salary/${id}`);
+  }
+
+  async generateTeacherSalary(data: {
+    month: number;
+    year: number;
+    value?: number;
+    due_date: string;
+    salaries?: Array<{ teacher_id: string; value: number }>;
+    notes?: string;
+  }) {
+    return this.post('/teacher_salary/generate', data);
+  }
+
 }
 
 // Export singleton instance

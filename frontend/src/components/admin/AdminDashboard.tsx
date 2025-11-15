@@ -15,9 +15,10 @@ import AcademicSetupWizard from './AcademicSetupWizard';
 import { StudentClassEnrollment } from './StudentClassEnrollment';
 import { YearLevelTimetable } from './YearLevelTimetable';
 import GradingCriteriaTable from './GradingCriteriaTable';
+import { FinancialManagement } from './FinancialManagement';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings' | 'financial';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
@@ -93,6 +94,7 @@ export function AdminDashboard() {
     { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
     { id: 'academic-wizard' as AdminTab, label: 'Academic Setup Wizard', icon: '🧙‍♂️' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
+    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰' },
     { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
     { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
     { id: 'settings' as AdminTab, label: 'Settings', icon: '⚙️' },
@@ -442,6 +444,8 @@ export function AdminDashboard() {
             </div>
           </div>
         );
+      case 'financial':
+        return <FinancialManagement />;
       case 'settings':
         return (
           <div className="admin-content">

@@ -14,8 +14,9 @@ class StudentModel(db.Model):
     enrollment_date = db.Column(db.Date, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=True)
     username = db.Column(db.String(100), unique=True, nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)  # Track if student is still enrolled
 
-    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date, email=None, username=None):     # noqa501
+    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date, email=None, username=None, is_active=True):     # noqa501
         self.given_name = given_name
         self.middle_name = middle_name
         self.surname = surname
@@ -24,6 +25,7 @@ class StudentModel(db.Model):
         self.enrollment_date = enrollment_date
         self.email = email
         self.username = username
+        self.is_active = is_active
 
     def json(self):
         return {
@@ -35,7 +37,8 @@ class StudentModel(db.Model):
             'gender': self.gender,
             'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,  # noqa501
             'email': self.email,
-            'username': self.username
+            'username': self.username,
+            'is_active': self.is_active
         }
 
     def json_with_year_levels(self):
@@ -73,6 +76,11 @@ class StudentModel(db.Model):
         return cls.query.all()
     
     @classmethod
+    def find_active(cls):
+        """Find all active (enrolled) students"""
+        return cls.query.filter_by(is_active=True).all()
+    
+    @classmethod
     def find_by_email(cls, email):
         return cls.query.filter_by(email=email).first()
     
@@ -101,6 +109,8 @@ class StudentModel(db.Model):
             self.email = data['email']
         if data.get('username') is not None:
             self.username = data['username']
+        if data.get('is_active') is not None:
+            self.is_active = data['is_active']
         self.save_to_db()
 
     def delete_by_id(self, record_id):

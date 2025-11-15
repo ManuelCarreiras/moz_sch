@@ -41,8 +41,10 @@ from resources.student_assignment import StudentAssignmentResource
 from resources.term_grade import TermGradeResource, TermGradeCalculateResource
 from resources.grading_criteria import GradingCriteriaResource
 from resources.resource import ResourceResource, ResourceDownloadResource, TeacherResourceResource
-# Import ResourceModel to ensure it's registered with SQLAlchemy
+# Import models to ensure they're registered with SQLAlchemy before db.create_all()
 from models.resource import ResourceModel  # noqa: F401
+from models.student_mensality import StudentMensalityModel  # noqa: F401
+from models.teacher_salary import TeacherSalaryModel  # noqa: F401
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -116,6 +118,15 @@ with app.app_context():
         # Column might already exist or table might not exist yet - that's ok
         db.session.rollback()
         app.logger.info(f"Resource table migration check: {str(e)}")
+    
+    # Add is_active column to student table if it doesn't exist
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE student ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE"))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.info(f"Student is_active column check: {str(e)}")
 
 
 # Add authentication middleware
@@ -236,6 +247,19 @@ api.add_resource(StudentOverviewResource, "/student/overview")
 api.add_resource(ResourceResource, "/resource", "/resource/<resource_id>")
 api.add_resource(ResourceDownloadResource, "/resource/<resource_id>/download")
 api.add_resource(TeacherResourceResource, "/resource/teacher")
+
+# ========== Financial System ==========
+# Student Mensality (Monthly Payments)
+from resources.student_mensality import StudentMensalityResource, GenerateMensalityResource
+# Models already imported above for SQLAlchemy registration
+api.add_resource(StudentMensalityResource, "/mensality", "/mensality/<mensality_id>")
+api.add_resource(GenerateMensalityResource, "/mensality/generate")
+
+# Teacher Salary (Monthly Salaries)
+from resources.teacher_salary import TeacherSalaryResource, GenerateSalaryResource
+# Models already imported above for SQLAlchemy registration
+api.add_resource(TeacherSalaryResource, "/teacher_salary", "/teacher_salary/<salary_id>")
+api.add_resource(GenerateSalaryResource, "/teacher_salary/generate")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
