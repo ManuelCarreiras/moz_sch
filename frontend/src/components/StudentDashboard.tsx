@@ -6,6 +6,7 @@ import { StudentSchedule } from './StudentSchedule';
 import StudentAssignments from './student/StudentAssignments';
 import StudentGrades from './student/StudentGrades';
 import StudentAttendance from './student/StudentAttendance';
+import StudentOverview from './student/StudentOverview';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments';
 
@@ -221,12 +222,8 @@ export function StudentDashboard() {
         <main className="student-main">
           {activeTab === 'overview' && (
             <div className="student-content">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                <div>
-                  <h2>Student Portal</h2>
-                  <p>Access your academic information, grades, and schedule.</p>
-                </div>
-                {isAdmin && (
+              {isAdmin && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--space-md)' }}>
                   <button 
                     className="btn btn--primary"
                     onClick={() => setShowCreateStudent(true)}
@@ -234,11 +231,9 @@ export function StudentDashboard() {
                   >
                     Create New Student
                   </button>
-                )}
-              </div>
-              <div className="welcome-message">
-                <p>Welcome to your student portal! Use the sidebar to navigate to different sections.</p>
-              </div>
+                </div>
+              )}
+              <StudentOverview />
             </div>
           )}
           {activeTab !== 'overview' && renderTabContent()}

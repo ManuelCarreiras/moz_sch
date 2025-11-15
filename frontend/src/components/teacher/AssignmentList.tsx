@@ -42,12 +42,18 @@ interface Subject {
   subject_name: string;
 }
 
+interface AssessmentType {
+  _id: string;
+  type_name: string;
+}
+
 const AssignmentList: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [filteredAssignments, setFilteredAssignments] = useState<Assignment[]>([]);
   const [availableClasses, setAvailableClasses] = useState<TeacherClass[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
@@ -57,17 +63,19 @@ const AssignmentList: React.FC = () => {
   const [filterSubject, setFilterSubject] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
+  const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
 
   useEffect(() => {
     loadAssignments();
     loadAvailableClasses();
     loadSchoolYears();
     loadSubjects();
+    loadAssessmentTypes();
   }, []);
 
   useEffect(() => {
     applyFilters();
-  }, [assignments, filterYear, filterSubject, filterStatus, filterClass]);
+  }, [assignments, filterYear, filterSubject, filterStatus, filterClass, filterAssessmentType]);
 
   const loadAssignments = async () => {
     try {
@@ -154,6 +162,18 @@ const AssignmentList: React.FC = () => {
     }
   };
 
+  const loadAssessmentTypes = async () => {
+    try {
+      const response = await apiService.getAssessmentTypes();
+      if (response.success && response.data) {
+        const typesData = (response.data as any)?.assessment_types || (response.data as any)?.message || response.data || [];
+        setAssessmentTypes(Array.isArray(typesData) ? typesData : []);
+      }
+    } catch (error) {
+      console.error('Error loading assessment types:', error);
+    }
+  };
+
   const applyFilters = () => {
     let filtered = [...assignments];
 
@@ -187,6 +207,11 @@ const AssignmentList: React.FC = () => {
     // Filter by status
     if (filterStatus) {
       filtered = filtered.filter(a => a.status === filterStatus);
+    }
+
+    // Filter by assessment type
+    if (filterAssessmentType) {
+      filtered = filtered.filter(a => a.assessment_type_id === filterAssessmentType);
     }
 
     setFilteredAssignments(filtered);
@@ -356,6 +381,20 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Type</label>
+          <select
+            value={filterAssessmentType}
+            onChange={(e) => setFilterAssessmentType(e.target.value)}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+          >
+            <option value="">All Types</option>
+            {assessmentTypes.map((type) => (
+              <option key={type._id} value={type._id}>{type.type_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Status</label>
           <select
             value={filterStatus}
@@ -369,16 +408,17 @@ const AssignmentList: React.FC = () => {
           </select>
         </div>
 
-        {(filterYear || filterSubject || filterStatus || filterClass) && (
+        {(filterYear || filterSubject || filterStatus || filterClass || filterAssessmentType) && (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               className="btn btn-secondary"
               onClick={() => {
-                setFilterYear('');
-                setFilterSubject('');
-                setFilterStatus('');
-                setFilterClass('');
-              }}
+              setFilterYear('');
+              setFilterSubject('');
+              setFilterStatus('');
+              setFilterClass('');
+              setFilterAssessmentType('');
+            }}
               style={{ width: '100%' }}
             >
               Clear Filters

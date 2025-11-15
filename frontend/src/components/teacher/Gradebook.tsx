@@ -6,6 +6,8 @@ interface Assignment {
   title: string;
   max_score: number;
   due_date: string | null;
+  assessment_type_name?: string;
+  is_scored: boolean;
 }
 
 interface Grade {
@@ -31,6 +33,12 @@ interface GradebookData {
   assignment_count: number;
 }
 
+interface AssessmentType {
+  _id: string;
+  type_name: string;
+  is_scored: boolean;
+}
+
 interface GradebookProps {
   classId: string;
   termId?: string;
@@ -38,21 +46,27 @@ interface GradebookProps {
 
 const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
   const [gradebook, setGradebook] = useState<GradebookData | null>(null);
+  const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingCell, setEditingCell] = useState<{ studentId: string; assignmentId: string } | null>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('');
+  const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
 
   useEffect(() => {
     loadGradebook();
+    loadAssessmentTypes();
   }, [classId, termId]);
   
   useEffect(() => {
     // Auto-select first assignment when gradebook loads
     if (gradebook?.assignments && gradebook.assignments.length > 0 && !selectedAssignmentId) {
-      setSelectedAssignmentId(gradebook.assignments[0]._id);
+      const filteredAssignments = getFilteredAssignments();
+      if (filteredAssignments.length > 0) {
+        setSelectedAssignmentId(filteredAssignments[0]._id);
+      }
     }
-  }, [gradebook]);
+  }, [gradebook, filterAssessmentType]);
 
   const loadGradebook = async () => {
     try {
@@ -68,6 +82,32 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadAssessmentTypes = async () => {
+    try {
+      const response = await apiService.getAssessmentTypes();
+      if (response.success && response.data) {
+        const typesData = (response.data as any)?.assessment_types || (response.data as any)?.message || response.data || [];
+        setAssessmentTypes(Array.isArray(typesData) ? typesData : []);
+      }
+    } catch (error) {
+      console.error('Error loading assessment types:', error);
+    }
+  };
+
+  const getFilteredAssignments = () => {
+    if (!gradebook?.assignments) return [];
+    
+    if (filterAssessmentType) {
+      // Filter by assessment type based on type name
+      const selectedType = assessmentTypes.find(t => t._id === filterAssessmentType);
+      if (selectedType) {
+        return gradebook.assignments.filter(a => a.assessment_type_name === selectedType.type_name);
+      }
+    }
+    
+    return gradebook.assignments;
   };
 
   const handleScoreChange = useCallback(async (
@@ -107,6 +147,39 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
     } finally {
       setSaving(false);
       setEditingCell(null);
+    }
+  }, [classId, termId]);
+
+  const handleCompletionToggle = useCallback(async (
+    studentId: string,
+    assignmentId: string,
+    currentStatus: string,
+    maxScore: number
+  ) => {
+    // Toggle: if graded → mark as not done, if not graded → mark as done
+    const isDone = currentStatus === 'graded';
+    
+    setSaving(true);
+    try {
+      const gradeData = {
+        student_id: studentId,
+        assignment_id: assignmentId,
+        score: isDone ? 0 : maxScore,  // Done = max_score (100%), Not done = 0
+        status: isDone ? 'not_submitted' : 'graded'
+      };
+
+      const response = await apiService.createOrUpdateGrade(gradeData);
+      
+      if (response.success) {
+        await loadGradebook();
+      } else {
+        alert('Error updating completion: ' + (response.message || response.error));
+      }
+    } catch (error) {
+      console.error('Error updating completion:', error);
+      alert('Error updating completion');
+    } finally {
+      setSaving(false);
     }
   }, [classId, termId]);
 
@@ -172,37 +245,78 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
         </p>
       </div>
 
-      {/* Assignment Filter */}
+      {/* Filters */}
       {gradebook.assignment_count > 0 && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '0.5rem',
-            fontWeight: 600,
-            color: 'var(--text)'
-          }}>
-            Select Assignment:
-          </label>
-          <select
-            value={selectedAssignmentId}
-            onChange={(e) => setSelectedAssignmentId(e.target.value)}
-            style={{
-              padding: '0.75rem',
-              borderRadius: '4px',
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
+        <div style={{ 
+          display: 'flex', 
+          gap: '1rem', 
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ flex: '1', minWidth: '200px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem',
+              fontWeight: 600,
               color: 'var(--text)',
-              fontSize: '1rem',
-              minWidth: '400px'
-            }}
-          >
-            <option value="">-- Select Assignment --</option>
-            {gradebook.assignments.map((assignment) => (
-              <option key={assignment._id} value={assignment._id}>
-                {assignment.title} (Max: {assignment.max_score})
-              </option>
-            ))}
-          </select>
+              fontSize: '0.9rem'
+            }}>
+              Filter by Type:
+            </label>
+            <select
+              value={filterAssessmentType}
+              onChange={(e) => {
+                setFilterAssessmentType(e.target.value);
+                setSelectedAssignmentId('');
+              }}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--text)',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">All Types</option>
+              {assessmentTypes.map((type) => (
+                <option key={type._id} value={type._id}>{type.type_name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: '2', minWidth: '300px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem',
+              fontWeight: 600,
+              color: 'var(--text)',
+              fontSize: '0.9rem'
+            }}>
+              Select Assignment:
+            </label>
+            <select
+              value={selectedAssignmentId}
+              onChange={(e) => setSelectedAssignmentId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--text)',
+                fontSize: '1rem'
+              }}
+            >
+              <option value="">-- Select Assignment --</option>
+              {getFilteredAssignments().map((assignment) => (
+                <option key={assignment._id} value={assignment._id}>
+                  {assignment.title} (Max: {assignment.max_score})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
@@ -249,14 +363,36 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                           style={{
                             padding: '1rem',
                             textAlign: 'center',
-                            cursor: 'pointer'
+                            cursor: !selectedAssignment.is_scored ? 'default' : 'pointer'
                           }}
-                          onClick={() => setEditingCell({ 
-                            studentId: student.student_id, 
-                            assignmentId: grade.assignment_id 
-                          })}
+                          onClick={() => {
+                            if (selectedAssignment.is_scored) {
+                              setEditingCell({ 
+                                studentId: student.student_id, 
+                                assignmentId: grade.assignment_id 
+                              });
+                            }
+                          }}
                         >
-                          {isEditing ? (
+                          {!selectedAssignment.is_scored ? (
+                            // Completion checkbox for homework
+                            <input
+                              type="checkbox"
+                              checked={grade.status === 'graded'}
+                              onChange={() => handleCompletionToggle(
+                                student.student_id,
+                                grade.assignment_id,
+                                grade.status,
+                                selectedAssignment.max_score
+                              )}
+                              style={{
+                                width: '24px',
+                                height: '24px',
+                                cursor: 'pointer'
+                              }}
+                            />
+                          ) : isEditing ? (
+                            // Score input for tests
                             <input
                               type="number"
                               step="0.01"
@@ -294,16 +430,28 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                             />
                           ) : (
                             <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text)' }}>
-                              {grade.score !== null ? (
-                                <span>{grade.score} / {selectedAssignment.max_score}</span>
+                              {!selectedAssignment.is_scored ? (
+                                // Show completion status for homework
+                                grade.status === 'graded' ? '✓ Done' : '○ Not Done'
                               ) : (
-                                <span style={{ color: 'var(--muted)' }}>Not graded</span>
+                                // Show score for tests
+                                grade.score !== null ? (
+                                  <span>{grade.score} / {selectedAssignment.max_score}</span>
+                                ) : (
+                                  <span style={{ color: 'var(--muted)' }}>Not graded</span>
+                                )
                               )}
                             </div>
                           )}
                         </td>
                         <td style={{ padding: '1rem', textAlign: 'center', color: 'var(--text)' }}>
-                          {percentage !== null ? `${percentage}%` : '-'}
+                          {!selectedAssignment.is_scored ? (
+                            // Show 100% or 0% for homework completion
+                            grade.status === 'graded' ? '100%' : '0%'
+                          ) : (
+                            // Show actual percentage for tests
+                            percentage !== null ? `${percentage}%` : '-'
+                          )}
                         </td>
                         <td style={{ padding: '1rem', textAlign: 'center' }}>
                           <select

@@ -368,23 +368,29 @@ class AssignmentResource(Resource):
 
 class TeacherAssignmentResource(Resource):
     """
-    Teacher Assignment Resource - Get assignments for authenticated teacher
+    Teacher Assignment Resource - Get assignments for authenticated teacher or admin
     """
 
-    @require_role('teacher')
+    @require_any_role(['admin', 'teacher'])
     def get(self):
         """
-        GET /assignment/teacher - Get all assignments for authenticated teacher
+        GET /assignment/teacher - Get all assignments for authenticated teacher or admin
         """
         username = g.username if hasattr(g, 'username') else None
+        user_role = g.role if hasattr(g, 'role') else None
+        
         if not username:
             return {'message': 'Authentication required'}, 401
         
-        teacher = TeacherModel.find_by_username(username)
-        if not teacher:
-            return {'message': 'Teacher not found'}, 404
-        
-        assignments = AssignmentModel.find_by_teacher(teacher._id)
+        # If admin, return all assignments
+        if user_role == 'admin':
+            assignments = AssignmentModel.find_all()
+        else:
+            # If teacher, return only their assignments
+            teacher = TeacherModel.find_by_username(username)
+            if not teacher:
+                return {'message': 'Teacher not found'}, 404
+            assignments = AssignmentModel.find_by_teacher(teacher._id)
         
         # Enhance each assignment with related info
         enhanced_assignments = []

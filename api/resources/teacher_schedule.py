@@ -1,4 +1,4 @@
-from flask import request, Response
+from flask import request, Response, g
 from flask_restful import Resource
 from models.class_model import ClassModel
 from models.teacher import TeacherModel
@@ -21,15 +21,15 @@ class TeacherScheduleResource(Resource):
         # Get query parameters for filtering
         term_id = request.args.get('term_id')
         year_id = request.args.get('year_id')
+        user_role = getattr(g, 'role', None)
         
         # If no teacher_id provided, try to get from authenticated user
         if not teacher_id:
-            from flask import g
             # Try to get teacher by email_address or username from JWT token
             email = getattr(g, 'email', None)
             username = getattr(g, 'username', None)
             
-            logging.info(f"Looking up teacher - email: {email}, username: {username}")
+            logging.info(f"Looking up teacher - email: {email}, username: {username}, role: {user_role}")
             
             teacher = None
             if email:
@@ -43,6 +43,9 @@ class TeacherScheduleResource(Resource):
             
             if teacher:
                 teacher_id = str(teacher._id)
+            elif user_role == 'admin':
+                # For admins, return all classes (no teacher_id filter)
+                teacher_id = None
             else:
                 # Check if any teachers exist in the database
                 all_teachers = TeacherModel.find_all()
@@ -64,24 +67,30 @@ class TeacherScheduleResource(Resource):
                 }
                 return Response(json.dumps(response), 404)
         
-        # Verify teacher exists
-        teacher = TeacherModel.find_by_id(teacher_id)
-        if not teacher:
-            response = {
-                'success': False,
-                'message': 'Teacher not found'
-            }
-            return Response(json.dumps(response), 404)
-
-        # Get all classes where this teacher is assigned
-        teacher_classes = ClassModel.list_by_teacher_id(teacher_id)
+        # If admin and no teacher_id, get all classes
+        if user_role == 'admin' and not teacher_id:
+            teacher_classes = ClassModel.query.all()
+            teacher_name = "All Teachers (Admin View)"
+        else:
+            # Verify teacher exists
+            teacher = TeacherModel.find_by_id(teacher_id)
+            if not teacher:
+                response = {
+                    'success': False,
+                    'message': 'Teacher not found'
+                }
+                return Response(json.dumps(response), 404)
+            
+            teacher_name = f"{teacher.given_name} {teacher.surname}"
+            # Get all classes where this teacher is assigned
+            teacher_classes = ClassModel.list_by_teacher_id(teacher_id)
         
         if not teacher_classes:
             response = {
                 'success': True,
                 'message': {
-                    'teacher_id': teacher_id,
-                    'teacher_name': f"{teacher.given_name} {teacher.surname}",
+                    'teacher_id': teacher_id if teacher_id else None,
+                    'teacher_name': teacher_name,
                     'timetable': [],
                     'available_terms': [],
                     'available_years': []
@@ -180,8 +189,8 @@ class TeacherScheduleResource(Resource):
         response = {
             'success': True,
             'message': {
-                'teacher_id': teacher_id,
-                'teacher_name': f"{teacher.given_name} {teacher.surname}",
+                'teacher_id': teacher_id if teacher_id else None,
+                'teacher_name': teacher_name,
                 'timetable': all_classes,
                 'all_periods': all_periods_data,
                 'available_terms': list(available_terms_map.values()),

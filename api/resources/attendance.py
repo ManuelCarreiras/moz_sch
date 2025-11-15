@@ -304,6 +304,7 @@ class AttendanceResource(Resource):
                 if existing:
                     # Update existing record
                     existing.status = status
+                    existing.subject_id = class_obj.subject_id  # Ensure subject_id is set
                     if notes:
                         existing.notes = notes
                     existing.updated_date = datetime.now()
@@ -316,11 +317,32 @@ class AttendanceResource(Resource):
                         class_id=data['class_id'],
                         date=attendance_date,
                         status=status,
+                        subject_id=class_obj.subject_id,  # Link to subject for grading
                         notes=notes,
                         created_by=created_by
                     )
                     new_attendance.save_to_db()
                     created_records.append(new_attendance.json())
+            
+            # Recalculate term grades for affected students
+            affected_students = set()
+            for record in created_records + updated_records:
+                rec_student_id = record.get('student_id')
+                if rec_student_id and class_obj.subject_id and class_obj.term_id:
+                    affected_students.add((rec_student_id, str(class_obj.subject_id), str(class_obj.term_id)))
+            
+            # Recalculate term grades
+            for std_id, subj_id, trm_id in affected_students:
+                try:
+                    from models.term_grade import TermGradeModel
+                    TermGradeModel.calculate_and_save(
+                        student_id=std_id,
+                        subject_id=subj_id,
+                        term_id=trm_id,
+                        class_id=data['class_id']
+                    )
+                except Exception as e:
+                    logging.error(f"Error recalculating term grade after attendance: {e}")
             
             response = {
                 'success': True,

@@ -12,17 +12,20 @@ class AssessmentTypeModel(db.Model):
     _id = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     type_name = db.Column(db.String(50), nullable=False, unique=True)
     description = db.Column(db.Text)
+    is_scored = db.Column(db.Boolean, default=True)
     created_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
 
-    def __init__(self, type_name, description=None):
+    def __init__(self, type_name, description=None, is_scored=True):
         self.type_name = type_name
         self.description = description
+        self.is_scored = is_scored
 
     def json(self):
         return {
             '_id': str(self._id),
             'type_name': self.type_name,
             'description': self.description,
+            'is_scored': self.is_scored,
             'created_date': self.created_date.isoformat() if self.created_date else None
         }
 

@@ -26,16 +26,9 @@ interface ClassItem {
   class_name: string;
 }
 
-interface StudentYearGrade {
+interface AssessmentType {
   _id: string;
-  student_id: string;
-  subject_id: string;
-  year_id: string;
-  calculated_average: number;
-  total_weight_graded: number;
-  last_updated: string;
-  subject_name?: string;
-  year_name?: string;
+  type_name: string;
 }
 
 interface StudentAssignment {
@@ -56,7 +49,6 @@ interface StudentAssignment {
     term_id: string;
     due_date: string | null;
     max_score: number;
-    weight: number;
     status: string;
   };
   student_name?: string;
@@ -80,7 +72,6 @@ interface StudentInfo {
 const StudentGrades: React.FC = () => {
   const user = useUser();
   const isAdmin = user?.role === 'admin';
-  const [yearGrades, setYearGrades] = useState<StudentYearGrade[]>([]);
   const [assignments, setAssignments] = useState<StudentAssignment[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
@@ -88,6 +79,7 @@ const StudentGrades: React.FC = () => {
   const [allClasses, setAllClasses] = useState<any[]>([]);
   const [students, setStudents] = useState<StudentInfo[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
+  const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Filters
@@ -95,6 +87,7 @@ const StudentGrades: React.FC = () => {
   const [filterTerm, setFilterTerm] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
+  const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
 
   useEffect(() => {
     if (user?.id) {
@@ -189,6 +182,13 @@ const StudentGrades: React.FC = () => {
         const classesData = (classesResp.data as any)?.message || [];
         setAllClasses(Array.isArray(classesData) ? classesData : []);
       }
+
+      // Load assessment types
+      const typesResp = await apiService.getAssessmentTypes();
+      if (typesResp.success && typesResp.data) {
+        const typesData = (typesResp.data as any)?.assessment_types || (typesResp.data as any)?.message || typesResp.data || [];
+        setAssessmentTypes(Array.isArray(typesData) ? typesData : []);
+      }
     } catch (error) {
       console.error('Error loading initial data:', error);
     } finally {
@@ -232,27 +232,23 @@ const StudentGrades: React.FC = () => {
         });
         
         // Calculate overall scores for each student (across ALL subjects)
+        // Simple average - weight is no longer part of assignments
         const studentsWithScores = Array.from(studentMap.values()).map(student => {
           const studentAssignments = assignmentsData.filter((sa: StudentAssignment) => 
             sa.student_id === student._id && sa.score !== null
           );
           
           if (studentAssignments.length > 0) {
-            let totalWeightedScore = 0;
-            let totalWeight = 0;
+            let totalPercentage = 0;
             
             studentAssignments.forEach((sa: StudentAssignment) => {
               const percentage = (sa.score! / sa.assignment.max_score) * 100;
-              const weightedScore = percentage * sa.assignment.weight;
-              totalWeightedScore += weightedScore;
-              totalWeight += sa.assignment.weight;
+              totalPercentage += percentage;
             });
             
-            if (totalWeight > 0) {
-              const average100 = totalWeightedScore / totalWeight;
-              const average20 = (average100 / 100) * 20;
-              student.overall_score = parseFloat(average20.toFixed(2));
-            }
+            const average100 = totalPercentage / studentAssignments.length;
+            const average20 = (average100 / 100) * 20;
+            student.overall_score = parseFloat(average20.toFixed(2));
           }
           
           return student;
@@ -289,7 +285,6 @@ const StudentGrades: React.FC = () => {
         );
         console.log('[StudentGrades] Student assignments:', studentAssignments.length);
         setAssignments(studentAssignments);
-        calculateYearGrades(studentAssignments);
       }
     } catch (error) {
       console.error('Error loading student assignments:', error);
@@ -329,7 +324,6 @@ const StudentGrades: React.FC = () => {
           const loadedAssignments = assignmentsData.filter((sa: StudentAssignment) => sa.score !== null);
           console.log('[StudentGrades] Graded assignments:', loadedAssignments.length);
           setAssignments(loadedAssignments);
-          calculateYearGrades(loadedAssignments);
         } else {
           console.log('[StudentGrades] No data in response');
         }
@@ -356,7 +350,6 @@ const StudentGrades: React.FC = () => {
           const loadedAssignments = assignmentsData.filter((sa: StudentAssignment) => sa.score !== null);
           console.log('[StudentGrades] Graded assignments:', loadedAssignments.length);
           setAssignments(loadedAssignments);
-          calculateYearGrades(loadedAssignments);
         }
       }
     } catch (error) {
@@ -364,70 +357,25 @@ const StudentGrades: React.FC = () => {
     }
   };
 
-  const calculateYearGrades = (assignmentsData: StudentAssignment[]) => {
-    // Group by subject and year
-    const gradesBySubjectYear = new Map<string, StudentAssignment[]>();
+  const getFilteredAssignments = () => {
+    let filtered = assignments;
     
-    assignmentsData.forEach((sa: StudentAssignment) => {
-      if (sa.score !== null) {
-        const key = `${sa.subject_name}-${sa.year_name}`;
-        if (!gradesBySubjectYear.has(key)) {
-          gradesBySubjectYear.set(key, []);
-        }
-        gradesBySubjectYear.get(key)?.push(sa);
-      }
-    });
-
-    // Calculate averages
-    const yearGradesData: StudentYearGrade[] = [];
-    gradesBySubjectYear.forEach((assignments, key) => {
-      const [subjectName, yearName] = key.split('-');
-      
-      let totalWeightedScore = 0;
-      let totalWeight = 0;
-      
-      assignments.forEach((sa) => {
-        const percentage = (sa.score! / sa.assignment.max_score) * 100;
-        const weightedScore = percentage * sa.assignment.weight;
-        totalWeightedScore += weightedScore;
-        totalWeight += sa.assignment.weight;
-      });
-      
-      if (totalWeight > 0) {
-        const average100 = totalWeightedScore / totalWeight;
-        const average20 = (average100 / 100) * 20;
-        
-        // Find subject and year IDs
-        const subject = subjects.find(s => s.subject_name === subjectName);
-        const year = schoolYears.find(y => y.year_name === yearName);
-        
-        yearGradesData.push({
-          _id: `${subject?._id || ''}-${year?._id || ''}`,
-          student_id: user?.id || '',
-          subject_id: subject?._id || '',
-          year_id: year?._id || '',
-          calculated_average: parseFloat(average20.toFixed(2)),
-          total_weight_graded: totalWeight,
-          last_updated: new Date().toISOString(),
-          subject_name: subjectName,
-          year_name: yearName
+    // Filter by assessment type if selected
+    if (filterAssessmentType) {
+      const selectedType = assessmentTypes.find(t => t._id === filterAssessmentType);
+      if (selectedType) {
+        filtered = filtered.filter(sa => {
+          // Handle case where assessment_type_name might be null/undefined
+          if (!sa.assessment_type_name) {
+            return false;
+          }
+          // Case-insensitive comparison with trimmed strings
+          return sa.assessment_type_name.trim().toLowerCase() === selectedType.type_name.trim().toLowerCase();
         });
       }
-    });
+    }
     
-    setYearGrades(yearGradesData);
-  };
-
-  const getFilteredYearGrades = () => {
-    // No client-side filtering needed - data is already filtered server-side
-    // Just return all year grades
-    return yearGrades;
-  };
-
-  const getFilteredAssignments = () => {
-    // No client-side filtering needed - data is already filtered server-side
-    // Just return all assignments
-    return assignments;
+    return filtered;
   };
 
   // Get filtered options for cascading dropdowns
@@ -507,15 +455,15 @@ const StudentGrades: React.FC = () => {
   }
 
   console.log('[StudentGrades] RENDER - assignments state:', assignments.length);
-  console.log('[StudentGrades] RENDER - yearGrades state:', yearGrades.length);
-  console.log('[StudentGrades] RENDER - filters:', { filterYear, filterTerm, filterSubject, filterClass });
+  console.log('[StudentGrades] RENDER - filters:', { filterYear, filterTerm, filterSubject, filterClass, filterAssessmentType });
+  console.log('[StudentGrades] RENDER - assessmentTypes:', assessmentTypes.length);
   
-  const filteredYearGrades = getFilteredYearGrades();
   const filteredAssignments = getFilteredAssignments();
   
-  console.log('[StudentGrades] RENDER - filteredYearGrades:', filteredYearGrades.length);
   console.log('[StudentGrades] RENDER - filteredAssignments:', filteredAssignments.length);
-  console.log('[StudentGrades] RENDER - filteredAssignments data:', filteredAssignments);
+  if (filterAssessmentType) {
+    console.log('[StudentGrades] RENDER - Filter active, showing', filteredAssignments.length, 'of', assignments.length, 'assignments');
+  }
 
   return (
     <div className="student-grades">
@@ -643,7 +591,33 @@ const StudentGrades: React.FC = () => {
           </div>
         )}
 
-        {(filterYear || filterTerm || filterClass || filterSubject) && (
+        {/* Assessment Type filter */}
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+            Type:
+          </label>
+          <select
+            value={filterAssessmentType}
+            onChange={(e) => setFilterAssessmentType(e.target.value)}
+            style={{
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+              color: 'var(--text)',
+              minWidth: '150px'
+            }}
+          >
+            <option value="">All Types</option>
+            {assessmentTypes.map((type) => (
+              <option key={type._id} value={type._id}>
+                {type.type_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {(filterYear || filterTerm || filterClass || filterSubject || filterAssessmentType) && (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               onClick={() => {
@@ -651,6 +625,7 @@ const StudentGrades: React.FC = () => {
                 setFilterTerm('');
                 setFilterSubject('');
                 setFilterClass('');
+                setFilterAssessmentType('');
                 setSelectedStudent(null);
               }}
               style={{
@@ -767,75 +742,10 @@ const StudentGrades: React.FC = () => {
         </div>
       )}
 
-      {/* Year Averages Section */}
+      {/* Individual Assignment Grades Section */}
       {(!isAdmin || selectedStudent) && (
-        <>
-        <div style={{ marginBottom: '3rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>📊 Year Averages (0-20 Scale)</h3>
-        
-        {filteredYearGrades.length === 0 ? (
-          <div style={{ 
-            padding: '2rem', 
-            textAlign: 'center', 
-            background: 'var(--card)',
-            borderRadius: '8px',
-            color: 'var(--muted)'
-          }}>
-            No year grades available yet
-          </div>
-        ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-            gap: '1rem'
-          }}>
-            {filteredYearGrades.map(yg => (
-              <div
-                key={yg._id}
-                style={{
-                  padding: '1.5rem',
-                  background: 'var(--card)',
-                  borderRadius: '8px',
-                  border: '2px solid',
-                  borderColor: getGradeColor(yg.calculated_average)
-                }}
-              >
-                <div style={{ 
-                  fontSize: '0.9rem', 
-                  color: 'var(--muted)',
-                  marginBottom: '0.5rem'
-                }}>
-                  {yg.subject_name} • {yg.year_name}
-                </div>
-                <div style={{ 
-                  fontSize: '2.5rem', 
-                  fontWeight: 700,
-                  color: getGradeColor(yg.calculated_average),
-                  marginBottom: '0.25rem'
-                }}>
-                  {yg.calculated_average.toFixed(2)}
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                  / 20
-                </div>
-                <div style={{ 
-                  marginTop: '0.75rem', 
-                  fontSize: '0.8rem', 
-                  color: 'var(--muted)',
-                  borderTop: '1px solid var(--border)',
-                  paddingTop: '0.5rem'
-                }}>
-                  {yg.total_weight_graded.toFixed(0)}% of assignments graded
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Detailed Grades Section */}
-      <div>
-        <h3 style={{ marginBottom: '1rem' }}>📝 Individual Assignment Grades</h3>
+        <div>
+          <h3 style={{ marginBottom: '1rem' }}>📝 Individual Assignment Grades</h3>
         
         {filteredAssignments.length === 0 ? (
           <div style={{ 
@@ -864,7 +774,6 @@ const StudentGrades: React.FC = () => {
                   <th style={{ padding: '1rem', textAlign: 'center' }}>Year</th>
                   <th style={{ padding: '1rem', textAlign: 'center' }}>Score</th>
                   <th style={{ padding: '1rem', textAlign: 'center' }}>Percentage</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Weight</th>
                   <th style={{ padding: '1rem', textAlign: 'center' }}>Graded On</th>
                 </tr>
               </thead>
@@ -902,9 +811,6 @@ const StudentGrades: React.FC = () => {
                         {percentage !== '-' ? `${percentage}%` : '-'}
                       </td>
                       <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        {sa.assignment.weight}%
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
                         {formatDate(sa.graded_date)}
                       </td>
                     </tr>
@@ -914,9 +820,11 @@ const StudentGrades: React.FC = () => {
             </table>
           </div>
         )}
-      </div>
+        </div>
+      )}
 
-        {/* Legend */}
+      {/* Legend */}
+      {(!isAdmin || selectedStudent) && (
         <div style={{ 
           marginTop: '2rem', 
           padding: '1rem', 
@@ -932,7 +840,6 @@ const StudentGrades: React.FC = () => {
             <span style={{ color: '#dc3545' }}>■ 0-9.9: Needs Improvement</span>
           </div>
         </div>
-        </>
       )}
     </div>
   );

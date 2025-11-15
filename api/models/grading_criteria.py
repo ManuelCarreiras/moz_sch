@@ -127,38 +127,35 @@ class GradingCriteriaModel(db.Model):
                     total_weighted_score += component_score * (float(criteria.tests_weight) / 100)
         
         # Calculate Homework component (if weight > 0)
+        # Homework is completion-based: % of homework done = grade
         if criteria.homework_weight > 0:
             homework_type = AssessmentTypeModel.query.filter_by(type_name='Homework').first()
             if homework_type:
-                student_assignments = StudentAssignmentModel.query.filter_by(
-                    student_id=student_id
+                # Get all homework assignments for this subject/term
+                all_homework = AssignmentModel.query.filter_by(
+                    subject_id=subject_id,
+                    term_id=term_id,
+                    assessment_type_id=homework_type._id,
+                    status='published'
                 ).all()
                 
-                homework_scores = []
-                for sa in student_assignments:
-                    if sa.score is None or sa.status != 'graded':
-                        continue
+                if all_homework:
+                    total_homework = len(all_homework)
+                    completed_homework = 0
                     
-                    assignment = AssignmentModel.find_by_id(sa.assignment_id)
-                    if not assignment:
-                        continue
+                    for hw in all_homework:
+                        # Check if student completed this homework (has any score or is graded)
+                        sa = StudentAssignmentModel.query.filter_by(
+                            student_id=student_id,
+                            assignment_id=hw._id
+                        ).first()
+                        
+                        if sa and sa.status == 'graded':
+                            completed_homework += 1
                     
-                    if str(assignment.subject_id) != str(subject_id):
-                        continue
-                    if str(assignment.term_id) != str(term_id):
-                        continue
-                    if str(assignment.assessment_type_id) != str(homework_type._id):
-                        continue
-                    
-                    homework_scores.append({
-                        'score': float(sa.score),
-                        'max_score': float(assignment.max_score)
-                    })
-                
-                if homework_scores:
-                    total_percentage = sum((s['score'] / s['max_score']) * 100 for s in homework_scores)
-                    average_percentage = total_percentage / len(homework_scores)
-                    component_score = (average_percentage / 100) * 20
+                    # Completion percentage → converted to 0-20 scale
+                    completion_percentage = (completed_homework / total_homework) * 100
+                    component_score = (completion_percentage / 100) * 20
                     total_weighted_score += component_score * (float(criteria.homework_weight) / 100)
         
         # Calculate Attendance component (if weight > 0)

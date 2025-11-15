@@ -7,6 +7,8 @@ import { TeacherSchedule } from './TeacherSchedule';
 import AssignmentList from './teacher/AssignmentList';
 import Gradebook from './teacher/Gradebook';
 import TeacherAttendance from './teacher/TeacherAttendance';
+import TeacherStudents from './teacher/TeacherStudents';
+import TeacherOverview from './teacher/TeacherOverview';
 import apiService from '../services/apiService';
 
 type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments';
@@ -55,8 +57,6 @@ export function TeacherDashboard() {
   const [filterYear, setFilterYear] = useState<string>('');
   const [filterTerm, setFilterTerm] = useState<string>('');
   const [filterSubject, setFilterSubject] = useState<string>('');
-  
-  const isAdmin = user?.role === 'admin';
 
   // Load teacher's classes when dashboard loads OR when Grades tab is opened
   useEffect(() => {
@@ -177,18 +177,12 @@ export function TeacherDashboard() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'overview':
+        return <TeacherOverview />;
       case 'classes':
         return <TeacherSchedule />;
       case 'students':
-        return (
-          <div className="teacher-content">
-            <h2>Students</h2>
-            <p>Access student information and track academic progress.</p>
-            <div className="placeholder-content">
-              <p>Student management functionality coming soon...</p>
-            </div>
-          </div>
-        );
+        return <TeacherStudents />;
       case 'grades':
         console.log('[Gradebook] === RENDER START ===');
         console.log('[Gradebook] Filter State:', { filterYear, filterTerm, filterSubject, selectedClassId });
@@ -508,29 +502,7 @@ export function TeacherDashboard() {
 
         {/* Main Content */}
         <main className="teacher-main">
-          {activeTab === 'overview' && (
-            <div className="teacher-content">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-                <div>
-                  <h2>Teacher Portal</h2>
-                  <p>Manage your classes, students, and teaching resources.</p>
-                </div>
-                {isAdmin && (
-                  <button 
-                    className="btn btn--primary"
-                    onClick={() => setShowCreateTeacher(true)}
-                    style={{ fontSize: 'var(--text-sm)', padding: 'var(--space-sm) var(--space-md)' }}
-                  >
-                    Create New Teacher
-                  </button>
-                )}
-              </div>
-              <div className="welcome-message">
-                <p>Welcome to your teacher portal! Use the sidebar to navigate to different sections.</p>
-              </div>
-            </div>
-          )}
-          {activeTab !== 'overview' && renderTabContent()}
+          {renderTabContent()}
         </main>
       </div>
 

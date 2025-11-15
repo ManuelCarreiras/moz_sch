@@ -23,6 +23,7 @@ interface Assignment {
 interface AssessmentType {
   _id: string;
   type_name: string;
+  is_scored: boolean;
 }
 
 interface Department {
@@ -89,6 +90,9 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
   const [filteredClasses, setFilteredClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Get selected assessment type details
+  const selectedAssessmentType = assessmentTypes.find(t => t._id === formData.assessment_type_id);
 
   useEffect(() => {
     loadData();
@@ -492,7 +496,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: selectedAssessmentType?.is_scored === false ? '1fr' : '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
               <label>Due Date</label>
               <input
@@ -502,19 +506,36 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
               />
             </div>
 
-            <div className="form-group">
-              <label>Max Score *</label>
-              <input
-                type="number"
-                value={formData.max_score}
-                onChange={(e) => setFormData({ ...formData, max_score: Number(e.target.value) })}
-                min="1"
-                step="0.01"
-                required
-              />
-              <small>Points possible</small>
-            </div>
+            {selectedAssessmentType?.is_scored !== false && (
+              <div className="form-group">
+                <label>Max Score *</label>
+                <input
+                  type="number"
+                  value={formData.max_score}
+                  onChange={(e) => setFormData({ ...formData, max_score: Number(e.target.value) })}
+                  min="1"
+                  step="0.01"
+                  required
+                />
+                <small>Points possible</small>
+              </div>
+            )}
           </div>
+
+          {selectedAssessmentType?.is_scored === false && (
+            <div style={{ 
+              padding: '1rem', 
+              background: 'rgba(72, 187, 120, 0.1)',
+              border: '1px solid var(--success)',
+              borderRadius: '4px',
+              marginBottom: '1rem'
+            }}>
+              <strong style={{ color: 'var(--success)' }}>✓ Completion-Based Assignment</strong>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: 'var(--muted)' }}>
+                This assignment type is tracked as done/not done (no score required).
+              </p>
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
             <div className="form-group">

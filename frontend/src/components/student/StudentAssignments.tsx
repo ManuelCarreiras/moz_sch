@@ -52,6 +52,11 @@ interface ClassItem {
   class_name: string;
 }
 
+interface AssessmentType {
+  _id: string;
+  type_name: string;
+}
+
 type ViewMode = 'list' | 'calendar';
 
 const StudentAssignments: React.FC = () => {
@@ -64,6 +69,7 @@ const StudentAssignments: React.FC = () => {
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   
@@ -73,11 +79,13 @@ const StudentAssignments: React.FC = () => {
   const [filterSubject, setFilterSubject] = useState<string>('');
   const [filterClass, setFilterClass] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
 
   useEffect(() => {
     loadSubjects();
     loadSchoolYears();
     loadTerms();
+    loadAssessmentTypes();
     if (isAdmin) {
       loadClasses();
     }
@@ -88,7 +96,7 @@ const StudentAssignments: React.FC = () => {
     if (isAdmin) {
       loadAssignments();
     }
-  }, [filterYear, filterTerm, filterSubject, filterClass, filterStatus]);
+  }, [filterYear, filterTerm, filterSubject, filterClass, filterStatus, filterAssessmentType]);
 
   useEffect(() => {
     // Load assignments on mount for students
@@ -99,10 +107,10 @@ const StudentAssignments: React.FC = () => {
 
   useEffect(() => {
     // Reload assignments when filters change (for students too - server-side filtering)
-    if (!isAdmin && (filterYear || filterTerm || filterSubject || filterStatus)) {
+    if (!isAdmin && (filterYear || filterTerm || filterSubject || filterStatus || filterAssessmentType)) {
       loadAssignments();
     }
-  }, [filterYear, filterTerm, filterSubject, filterStatus]);
+  }, [filterYear, filterTerm, filterSubject, filterStatus, filterAssessmentType]);
 
   const loadAssignments = async () => {
     try {
@@ -211,6 +219,18 @@ const StudentAssignments: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading terms:', error);
+    }
+  };
+
+  const loadAssessmentTypes = async () => {
+    try {
+      const response = await apiService.getAssessmentTypes();
+      if (response.success && response.data) {
+        const typesData = (response.data as any)?.assessment_types || (response.data as any)?.message || response.data || [];
+        setAssessmentTypes(Array.isArray(typesData) ? typesData : []);
+      }
+    } catch (error) {
+      console.error('Error loading assessment types:', error);
     }
   };
 
@@ -370,6 +390,20 @@ const StudentAssignments: React.FC = () => {
         )}
 
         <div>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Type</label>
+          <select
+            value={filterAssessmentType}
+            onChange={(e) => setFilterAssessmentType(e.target.value)}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+          >
+            <option value="">All Types</option>
+            {assessmentTypes.map((type) => (
+              <option key={type._id} value={type._id}>{type.type_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Status</label>
           <select
             value={filterStatus}
@@ -384,7 +418,7 @@ const StudentAssignments: React.FC = () => {
           </select>
         </div>
 
-        {(filterYear || filterTerm || filterSubject || filterClass || filterStatus) && (
+        {(filterYear || filterTerm || filterSubject || filterClass || filterStatus || filterAssessmentType) && (
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               className="btn btn-secondary"
@@ -394,6 +428,7 @@ const StudentAssignments: React.FC = () => {
                 setFilterSubject('');
                 setFilterClass('');
                 setFilterStatus('');
+                setFilterAssessmentType('');
               }}
               style={{ width: '100%' }}
             >

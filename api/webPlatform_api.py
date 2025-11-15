@@ -204,6 +204,14 @@ api.add_resource(GradingCriteriaResource, "/grading_criteria", "/grading_criteri
 api.add_resource(TermGradeResource, "/term_grade", "/term_grade/<grade_id>")
 api.add_resource(TermGradeCalculateResource, "/term_grade/calculate")
 
+# Teacher Students Performance
+from resources.teacher_students import TeacherStudentsResource
+api.add_resource(TeacherStudentsResource, "/teacher/students")
+
+# Student Overview
+from resources.student_overview import StudentOverviewResource
+api.add_resource(StudentOverviewResource, "/student/overview")
+
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers

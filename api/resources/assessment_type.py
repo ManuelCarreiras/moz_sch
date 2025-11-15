@@ -14,7 +14,7 @@ class AssessmentTypeResource(Resource):
     parser.add_argument('type_name', type=str, required=True, help="Type name is required")
     parser.add_argument('description', type=str, required=False)
 
-    @require_any_role(['admin', 'teacher'])
+    @require_any_role(['admin', 'teacher', 'student'])
     def get(self, type_id=None):
         """
         GET /assessment_type - Get all assessment types

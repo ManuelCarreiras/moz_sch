@@ -8,6 +8,7 @@ from models.class_model import ClassModel
 from models.subject import SubjectModel
 from models.score_range import ScoreRangeModel
 from models.teacher import TeacherModel
+from models.assessment_type import AssessmentTypeModel
 from utils.auth_middleware import require_role, require_any_role
 from flask import g
 import json
@@ -425,11 +426,16 @@ class GradebookResource(Resource):
         # Build assignment headers
         assignment_headers = []
         for assignment in assignments:
+            # Get assessment type to check if scored
+            assessment_type = AssessmentTypeModel.find_by_id(assignment.assessment_type_id)
+            
             assignment_headers.append({
                 '_id': str(assignment._id),
                 'title': assignment.title,
                 'max_score': float(assignment.max_score) if assignment.max_score else 100.00,
-                'due_date': assignment.due_date.isoformat() if assignment.due_date else None
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'assessment_type_name': assessment_type.type_name if assessment_type else None,
+                'is_scored': assessment_type.is_scored if assessment_type else True
             })
         
         return {
