@@ -44,6 +44,8 @@ class TestTeacher(unittest.TestCase):
         with open("tests/configs/teacher_config_update.json",
                   "r") as fr:
             self.teacher_update = json.load(fr)
+        
+        self.teacher_id = None
 
     def tearDown(self) -> None:
         """
@@ -182,3 +184,25 @@ class TestTeacher(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"],
                          "Professor not found")
+
+    def test_update_teacher_base_salary(self):
+        """Test updating teacher base_salary field"""
+        response = self.client.post('/teacher',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.teacher)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.teacher_id = res_answer["message"]["_id"]
+
+        # Update with base_salary
+        update_data = {
+            "_id": self.teacher_id,
+            "base_salary": 2500.00
+        }
+        response = self.client.put("/teacher",
+                                   headers={"Authorization": API_KEY},
+                                   json=update_data)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"]["base_salary"], 2500.00)

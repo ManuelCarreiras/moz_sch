@@ -1,0 +1,10 @@
+{
+  "student_id": "",
+  "value": 500.00,
+  "due_date": "2026-02-01",
+  "month": 2,
+  "year": 2026,
+  "paid": false,
+  "notes": "Test mensality record"
+}
+
