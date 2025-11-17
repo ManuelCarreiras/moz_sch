@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from db import db
+from decimal import Decimal
 
 # Initializing the class gender with its values
 # class Gender(Enum):
@@ -18,16 +19,18 @@ class TeacherModel(db.Model):
     email_address = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.VARCHAR(20), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=True)
+    base_salary = db.Column(db.Numeric(10, 2), nullable=True)  # Base monthly salary
     # department_id removed - now using junction table for many-to-many relationship
 
     def __init__(self, given_name, surname, gender, email_address,
-                 phone_number, username=None):
+                 phone_number, username=None, base_salary=None):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
         self.username = username
+        self.base_salary = Decimal(str(base_salary)) if base_salary is not None else None
 
     def json(self):
         return {
@@ -37,7 +40,8 @@ class TeacherModel(db.Model):
             'gender': self.gender,
             'email_address': self.email_address,
             'phone_number': self.phone_number,
-            'username': self.username
+            'username': self.username,
+            'base_salary': float(self.base_salary) if self.base_salary else None
         }
 
     def json_with_departments(self):
@@ -107,6 +111,8 @@ class TeacherModel(db.Model):
             self.phone_number = data['phone_number']
         if data.get('username') is not None:
             self.username = data['username']
+        if data.get('base_salary') is not None:
+            self.base_salary = Decimal(str(data['base_salary'])) if data['base_salary'] else None
         # department_id handling removed - now managed through junction table
 
         self.save_to_db()

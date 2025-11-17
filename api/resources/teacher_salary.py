@@ -203,18 +203,111 @@ class TeacherSalaryResource(Resource):
             return Response(json.dumps(response), 500, mimetype='application/json')
 
 
+class TeacherSalaryGridResource(Resource):
+    """
+    Resource for managing teacher base salary grid
+    """
+
+    @require_any_role(['admin'])
+    def get(self):
+        """
+        GET /teacher_salary/grid - Get all teachers with their base salaries
+        Query params: department_id (optional) - filter by department
+        Returns a grid/list of all teachers with their base salary values
+        """
+        from uuid import UUID
+        
+        department_id = request.args.get('department_id')
+        
+        if department_id:
+            try:
+                # Convert string to UUID
+                department_uuid = UUID(department_id)
+                teachers = TeacherModel.find_by_department_id(department_uuid)
+                from flask import current_app
+                current_app.logger.debug(f"Filtering teachers by department_id: {department_id}, found {len(teachers)} teachers")
+            except (ValueError, TypeError) as e:
+                # Invalid UUID format, return empty list
+                from flask import current_app
+                current_app.logger.warning(f"Invalid department_id format: {department_id}, error: {str(e)}")
+                return {'salary_grid': [], 'count': 0}, 200
+        else:
+            teachers = TeacherModel.find_all()
+        
+        grid = []
+        for teacher in teachers:
+            # Get teacher's departments for display
+            from models.teacher_department import TeacherDepartmentModel
+            from models.department import DepartmentModel
+            assignments = TeacherDepartmentModel.find_by_teacher_id(teacher._id)
+            departments = []
+            for assignment in assignments:
+                department = DepartmentModel.find_by_id(assignment.department_id)
+                if department:
+                    departments.append(department.json())
+            
+            grid.append({
+                'teacher_id': str(teacher._id),
+                'teacher_name': f"{teacher.given_name} {teacher.surname}",
+                'email': teacher.email_address,
+                'base_salary': float(teacher.base_salary) if teacher.base_salary else None,
+                'departments': departments
+            })
+        
+        return {'salary_grid': grid, 'count': len(grid)}, 200
+
+    @require_any_role(['admin'])
+    def put(self):
+        """
+        PUT /teacher_salary/grid - Update base salaries for multiple teachers
+        Body: { salaries: [{ teacher_id: uuid, base_salary: decimal }, ...] }
+        """
+        data = request.get_json()
+        
+        if not data or not data.get('salaries'):
+            return {'message': 'Salaries array is required'}, 400
+        
+        updated_count = 0
+        errors = []
+        
+        for item in data['salaries']:
+            if not item.get('teacher_id'):
+                errors.append('Missing teacher_id in salary item')
+                continue
+            
+            teacher = TeacherModel.find_by_id(item['teacher_id'])
+            if not teacher:
+                errors.append(f'Teacher {item["teacher_id"]} not found')
+                continue
+            
+            try:
+                base_salary = Decimal(str(item['base_salary'])) if item.get('base_salary') else None
+                teacher.update_entry({'base_salary': base_salary})
+                updated_count += 1
+            except Exception as e:
+                errors.append(f"Error updating salary for teacher {item['teacher_id']}: {str(e)}")
+        
+        response = {
+            'success': True,
+            'message': f'Updated {updated_count} teacher salaries',
+            'updated': updated_count,
+            'errors': errors if errors else None
+        }
+        return Response(json.dumps(response), 200, mimetype='application/json')
+
+
 class GenerateSalaryResource(Resource):
     """
     Resource for generating monthly salary records for all teachers
+    Uses base_salary from teacher table
     """
 
     @require_any_role(['admin'])
     def post(self):
         """
         POST /teacher_salary/generate - Generate salary records for all teachers for a given month/year
-        Body: { month: int, year: int, value: decimal, due_date: 'YYYY-MM-DD' }
-        OR Body: { month: int, year: int, due_date: 'YYYY-MM-DD', salaries: [{ teacher_id: uuid, value: decimal }] }
-        If salaries array is provided, uses individual values per teacher. Otherwise uses single value for all.
+        Body: { month: int, year: int, due_date: 'YYYY-MM-DD', notes?: string }
+        Uses base_salary from each teacher's record. Skips teachers without base_salary set.
         """
         data = request.get_json()
 
@@ -231,25 +324,13 @@ class GenerateSalaryResource(Resource):
         except ValueError:
             return {'message': 'Invalid date format. Use YYYY-MM-DD'}, 400
 
-        # Check if we have individual salaries or a single value
-        salaries_by_teacher = {}
-        if data.get('salaries') and isinstance(data['salaries'], list):
-            # Individual salaries per teacher
-            for item in data['salaries']:
-                if item.get('teacher_id') and item.get('value'):
-                    salaries_by_teacher[item['teacher_id']] = Decimal(str(item['value']))
-        elif data.get('value'):
-            # Single value for all teachers (will be set below)
-            default_value = Decimal(str(data['value']))
-        else:
-            return {'message': 'Either value or salaries array is required'}, 400
-
         # Get all teachers
         all_teachers = TeacherModel.find_all()
         
         created_count = 0
         skipped_count = 0
         errors = []
+        skipped_no_salary = []
 
         for teacher in all_teachers:
             # Check if salary already exists
@@ -258,21 +339,15 @@ class GenerateSalaryResource(Resource):
                 skipped_count += 1
                 continue
 
-            # Get value for this teacher
-            teacher_id_str = str(teacher._id)
-            if salaries_by_teacher:
-                if teacher_id_str not in salaries_by_teacher:
-                    # Skip teachers not in the salaries list
-                    skipped_count += 1
-                    continue
-                value = salaries_by_teacher[teacher_id_str]
-            else:
-                value = default_value
+            # Get base_salary from teacher record
+            if not teacher.base_salary:
+                skipped_no_salary.append(f"{teacher.given_name} {teacher.surname}")
+                continue
 
             try:
                 new_salary = TeacherSalaryModel(
                     teacher_id=teacher._id,
-                    value=value,
+                    value=teacher.base_salary,
                     due_date=due_date,
                     month=month,
                     year=year,
@@ -289,6 +364,7 @@ class GenerateSalaryResource(Resource):
             'message': f'Generated {created_count} salary records',
             'created': created_count,
             'skipped': skipped_count,
+            'skipped_no_base_salary': skipped_no_salary if skipped_no_salary else None,
             'errors': errors if errors else None
         }
         return Response(json.dumps(response), 200, mimetype='application/json')

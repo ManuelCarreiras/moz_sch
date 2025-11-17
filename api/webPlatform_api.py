@@ -127,6 +127,15 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
         app.logger.info(f"Student is_active column check: {str(e)}")
+    
+    # Add base_salary column to professor table if it doesn't exist
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE professor ADD COLUMN IF NOT EXISTS base_salary NUMERIC(10, 2)"))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.info(f"Professor base_salary column check: {str(e)}")
 
 
 # Add authentication middleware
@@ -256,10 +265,11 @@ api.add_resource(StudentMensalityResource, "/mensality", "/mensality/<mensality_
 api.add_resource(GenerateMensalityResource, "/mensality/generate")
 
 # Teacher Salary (Monthly Salaries)
-from resources.teacher_salary import TeacherSalaryResource, GenerateSalaryResource
+from resources.teacher_salary import TeacherSalaryResource, GenerateSalaryResource, TeacherSalaryGridResource
 # Models already imported above for SQLAlchemy registration
 api.add_resource(TeacherSalaryResource, "/teacher_salary", "/teacher_salary/<salary_id>")
 api.add_resource(GenerateSalaryResource, "/teacher_salary/generate")
+api.add_resource(TeacherSalaryGridResource, "/teacher_salary/grid")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

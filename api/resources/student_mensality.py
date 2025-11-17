@@ -32,32 +32,41 @@ class StudentMensalityResource(Resource):
         year = request.args.get('year', type=int)
         paid = request.args.get('paid')  # Can be 'true' or 'false'
 
-        if student_id and month and year:
-            mensality = StudentMensalityModel.find_by_student_and_month(student_id, month, year)
-            if mensality:
-                return {'mensality': mensality.json_with_student()}, 200
-            return {'mensality': None}, 200
-        elif student_id:
-            records = StudentMensalityModel.find_by_student_id(student_id)
-            enhanced_records = [r.json_with_student() for r in records]
-            return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
-        elif month and year:
-            records = StudentMensalityModel.find_by_month_year(month, year)
-            enhanced_records = [r.json_with_student() for r in records]
-            return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
-        elif paid:
+        # Build query incrementally based on provided filters
+        # Start with base query
+        query = StudentMensalityModel.query
+        
+        # Apply filters
+        if student_id:
+            query = query.filter_by(student_id=student_id)
+        if month is not None:
+            query = query.filter_by(month=month)
+        if year is not None:
+            query = query.filter_by(year=year)
+        if paid is not None:
+            # Convert string 'true'/'false' to boolean
             is_paid = paid.lower() == 'true'
-            if student_id:
-                records = [r for r in StudentMensalityModel.find_by_student_id(student_id) if r.paid == is_paid]
-            else:
-                records = StudentMensalityModel.find_unpaid() if not is_paid else StudentMensalityModel.find_all()
-                records = [r for r in records if r.paid == is_paid]
-            enhanced_records = [r.json_with_student() for r in records]
-            return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
-        else:
-            records = StudentMensalityModel.find_all()
-            enhanced_records = [r.json_with_student() for r in records]
-            return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
+            query = query.filter_by(paid=is_paid)
+        
+        # Execute query and order results
+        records = query.order_by(StudentMensalityModel.year.desc(), StudentMensalityModel.month.desc()).all()
+        
+        # Debug logging (can be removed later)
+        from flask import current_app
+        # Log the actual SQL query being executed
+        current_app.logger.debug(f"Mensality query - month={month}, year={year}, paid={paid}, student_id={student_id}, found {len(records)} records")
+        current_app.logger.debug(f"Query SQL: {str(query.statement.compile(compile_kwargs={'literal_binds': True}))}")
+        current_app.logger.debug(f"Table name: {StudentMensalityModel.__tablename__}")
+        
+        # Special case: if student_id, month, and year are all provided, return single record format
+        if student_id and month is not None and year is not None:
+            if records:
+                return {'mensality': records[0].json_with_student()}, 200
+            return {'mensality': None}, 200
+        
+        # Otherwise return list format
+        enhanced_records = [r.json_with_student() for r in records]
+        return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
 
     @require_any_role(['admin'])
     def post(self):

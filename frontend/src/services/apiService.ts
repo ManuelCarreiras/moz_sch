@@ -950,6 +950,17 @@ class ApiService {
     return this.get(`/teacher_salary/${id}`);
   }
 
+  async getTeacherSalaryGrid(departmentId?: string) {
+    const params = new URLSearchParams();
+    if (departmentId) params.append('department_id', departmentId);
+    const queryString = params.toString();
+    return this.get(queryString ? `/teacher_salary/grid?${queryString}` : '/teacher_salary/grid');
+  }
+
+  async updateTeacherSalaryGrid(salaries: Array<{ teacher_id: string; base_salary: number | null }>) {
+    return this.put('/teacher_salary/grid', { salaries });
+  }
+
   async createTeacherSalary(data: {
     teacher_id: string;
     value: number;
