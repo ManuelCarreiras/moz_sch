@@ -3,17 +3,15 @@ import { apiService } from '../../services/apiService';
 import { StudentWizard } from './StudentWizard';
 
 export interface Student {
-  id: string;
+  _id: string;
   given_name: string;
   middle_name: string;
   surname: string;
-  email_address: string;
-  phone_number: string;
+  email: string;
   date_of_birth: string;
   gender: 'Male' | 'Female';
-  address: string;
-  enrolment_date: string;
-  status: 'active' | 'inactive' | 'graduated';
+  enrollment_date: string;
+  is_active: boolean;
 }
 
 export function StudentsTable() {
@@ -41,7 +39,9 @@ export function StudentsTable() {
       const response = await apiService.getStudents();
       
       if (response.success && response.data) {
-        setStudents(Array.isArray(response.data) ? response.data : []);
+        // The backend returns { success: true, message: [...] } format
+        const studentData = (response.data as any).message || response.data;
+        setStudents(Array.isArray(studentData) ? studentData : []);
       } else {
         setError(response.error || 'Failed to load students');
       }
@@ -141,7 +141,7 @@ export function StudentsTable() {
   // Filter students based on search term
   const filteredStudents = students.filter(student =>
     `${student.given_name} ${student.surname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email_address.toLowerCase().includes(searchTerm.toLowerCase())
+    (student.email && student.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Pagination
@@ -184,7 +184,7 @@ export function StudentsTable() {
             className="btn btn--primary"
             onClick={() => setShowWizard(true)}
           >
-            Add New Student
+            ➕ Add New Student
           </button>
         </div>
       </div>
@@ -220,7 +220,6 @@ export function StudentsTable() {
             <tr>
               <th>Name</th>
               <th>Email</th>
-              <th>Phone</th>
               <th>Date of Birth</th>
               <th>Status</th>
               <th>Enrollment Date</th>
@@ -230,35 +229,34 @@ export function StudentsTable() {
           <tbody>
             {paginatedStudents.length === 0 ? (
               <tr>
-                <td colSpan={7} className="empty-state">
+                <td colSpan={6} className="empty-state">
                   {searchTerm ? 'No students found matching your search.' : 'No students found.'}
                 </td>
               </tr>
             ) : (
               paginatedStudents.map((student) => (
-                <tr key={student.id}>
+                <tr key={student._id}>
                   <td>
                     <div className="student-name">
-                      <strong>{student.given_name} {student.surname}</strong>
+                      <strong>{student.given_name} {student.middle_name ? student.middle_name + ' ' : ''}{student.surname}</strong>
                       <span className="student-gender">
                         {student.gender === 'Male' ? '♂' : '♀'}
                       </span>
                     </div>
                   </td>
-                  <td>{student.email_address}</td>
-                  <td>{student.phone_number}</td>
-                  <td>{new Date(student.date_of_birth).toLocaleDateString()}</td>
+                  <td>{student.email || 'N/A'}</td>
+                  <td>{student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : 'N/A'}</td>
                   <td>
-                    <span className={`status-badge status-badge--${student.status}`}>
-                      {student.status}
+                    <span className={`status-badge status-badge--${student.is_active ? 'active' : 'inactive'}`}>
+                      {student.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td>{new Date(student.enrolment_date).toLocaleDateString()}</td>
+                  <td>{student.enrollment_date ? new Date(student.enrollment_date).toLocaleDateString() : 'N/A'}</td>
                   <td>
                     <div className="action-buttons">
                       <button
                         className="btn btn--small btn--danger"
-                        onClick={() => handleDeleteStudent(student.id)}
+                        onClick={() => handleDeleteStudent(student._id)}
                         title="Delete student"
                       >
                         Delete

@@ -181,34 +181,57 @@ class TeacherBulkImportResource(Resource):
                         })
                         continue
                     
+                    # Generate username FIRST (before Cognito operations) so it's always saved
+                    given_name_clean = given_name.strip()
+                    surname_clean = surname.strip()
+                    
+                    username_parts = []
+                    if given_name_clean:
+                        username_parts.append(given_name_clean[0].lower())
+                    if surname_clean:
+                        username_parts.append(surname_clean.lower())
+                    
+                    unique_username = ''.join(username_parts) if username_parts else f"teacher_{uuid.uuid4().hex[:12]}"
+                    
+                    # Save username to database IMMEDIATELY (before Cognito operations)
+                    new_teacher.username = unique_username
+                    new_teacher.save_to_db()
+                    
                     # Create Cognito user if configured (same logic as single teacher creation)
                     cognito_result = None
                     if email_address and cognito:
                         try:
-                            # Generate username from first initial + surname (e.g., "John Smith" -> "jsmith")
-                            given_name_clean = given_name.strip()
-                            surname_clean = surname.strip()
+                            logging.info(f"Creating Cognito user: username={unique_username}, email={email_address}, pool={user_pool_id}")
                             
-                            username_parts = []
-                            if given_name_clean:
-                                username_parts.append(given_name_clean[0].lower())
-                            if surname_clean:
-                                username_parts.append(surname_clean.lower())
-                            
-                            unique_username = ''.join(username_parts) if username_parts else f"teacher_{uuid.uuid4().hex[:12]}"
-                            
-                            cognito.admin_create_user(
-                                UserPoolId=user_pool_id,
-                                Username=unique_username,
-                                UserAttributes=[
-                                    {'Name': 'email', 'Value': email_address},
-                                    {'Name': 'email_verified', 'Value': 'true'},
-                                ],
-                                DesiredDeliveryMediums=['EMAIL']
-                            )
-                            
-                            new_teacher.username = unique_username
-                            new_teacher.save_to_db()
+                            try:
+                                # Try to create user with email delivery first
+                                cognito.admin_create_user(
+                                    UserPoolId=user_pool_id,
+                                    Username=unique_username,
+                                    UserAttributes=[
+                                        {'Name': 'email', 'Value': email_address},
+                                        {'Name': 'email_verified', 'Value': 'true'},
+                                    ],
+                                    DesiredDeliveryMediums=['EMAIL']
+                                )
+                                logging.info(f"Cognito user created successfully with email: {unique_username}")
+                            except ClientError as email_limit_error:
+                                # If email limit exceeded, create user without sending email
+                                if email_limit_error.response.get('Error', {}).get('Code') == 'LimitExceededException':
+                                    logging.warning(f"Email limit exceeded, creating user without email delivery: {unique_username}")
+                                    cognito.admin_create_user(
+                                        UserPoolId=user_pool_id,
+                                        Username=unique_username,
+                                        UserAttributes=[
+                                            {'Name': 'email', 'Value': email_address},
+                                            {'Name': 'email_verified', 'Value': 'true'},
+                                        ],
+                                        MessageAction='SUPPRESS'  # Suppress email to avoid limit
+                                    )
+                                    logging.info(f"Cognito user created successfully (email suppressed): {unique_username}")
+                                else:
+                                    # Re-raise if it's a different error
+                                    raise
                             
                             try:
                                 cognito.admin_add_user_to_group(
@@ -216,41 +239,50 @@ class TeacherBulkImportResource(Resource):
                                     Username=unique_username,
                                     GroupName=group_name
                                 )
+                                logging.info(f"User {unique_username} added to group '{group_name}'")
                             except ClientError as group_e:
+                                logging.warning(f"Failed to add user to group with username, trying email: {group_e}")
                                 try:
                                     cognito.admin_add_user_to_group(
                                         UserPoolId=user_pool_id,
                                         Username=email_address,
                                         GroupName=group_name
                                     )
+                                    logging.info(f"User {email_address} added to group '{group_name}' using email")
                                 except ClientError as email_e:
-                                    logging.warning(f"Failed to add user to group: {group_e}, {email_e}")
+                                    logging.error(f"CRITICAL: Failed to add user to group '{group_name}' (tried both username and email): {group_e}, {email_e}")
                             
                             cognito_result = 'created'
                         except ClientError as e:
-                            if getattr(e, 'response', {}).get('Error', {}).get('Code') == 'UsernameExistsException':
-                                # User already exists, try to add to group
+                            error_code = getattr(e, 'response', {}).get('Error', {}).get('Code')
+                            error_message = getattr(e, 'response', {}).get('Error', {}).get('Message', str(e))
+                            
+                            logging.error(f"Cognito ClientError: Code={error_code}, Message={error_message}")
+                            
+                            if error_code == 'UsernameExistsException':
+                                logging.info(f"User {unique_username} already exists in Cognito, adding to group")
+                                # Username already saved above, just use it to add to group
                                 try:
-                                    if unique_username:
-                                        cognito.admin_add_user_to_group(
-                                            UserPoolId=user_pool_id,
-                                            Username=unique_username,
-                                            GroupName=group_name
-                                        )
-                                except:
+                                    cognito.admin_add_user_to_group(
+                                        UserPoolId=user_pool_id,
+                                        Username=unique_username,
+                                        GroupName=group_name
+                                    )
+                                    logging.info(f"Existing user {unique_username} added to group '{group_name}'")
+                                except Exception:
                                     try:
                                         cognito.admin_add_user_to_group(
                                             UserPoolId=user_pool_id,
                                             Username=email_address,
                                             GroupName=group_name
                                         )
-                                    except:
-                                        pass
-                                new_teacher.username = unique_username
-                                new_teacher.save_to_db()
+                                        logging.info(f"Existing user {email_address} added to group '{group_name}' using email")
+                                    except Exception as inner:
+                                        logging.error(f"CRITICAL: Add existing user to group failed (tried both username and email): {inner}")
                                 cognito_result = 'exists'
                             else:
-                                logging.warning(f"Cognito user creation failed: {e}")
+                                logging.error(f"CRITICAL: Cognito user creation FAILED - Code: {error_code}, Message: {error_message}")
+                                logging.error(f"Failed to create user: username={unique_username}, email={email_address}, pool={user_pool_id}")
                                 cognito_result = 'error'
                         except Exception as e:
                             logging.warning(f"Cognito setup issue: {e}")

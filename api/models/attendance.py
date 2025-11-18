@@ -41,6 +41,12 @@ class AttendanceModel(db.Model):
 
     @classmethod
     def find_by_id(cls, id):
+        # Convert string UUID to UUID object if needed
+        if isinstance(id, str):
+            try:
+                id = uuid.UUID(id)
+            except (ValueError, AttributeError):
+                return None
         return cls.query.filter_by(_id=id).first()
 
     @classmethod
@@ -49,20 +55,49 @@ class AttendanceModel(db.Model):
     
     @classmethod
     def find_by_student_id(cls, student_id):
+        # Convert string UUID to UUID object if needed
+        if isinstance(student_id, str):
+            try:
+                student_id = uuid.UUID(student_id)
+            except (ValueError, AttributeError):
+                return []
         return cls.query.filter_by(student_id=student_id).order_by(cls.date.desc()).all()
     
     @classmethod
     def find_by_class_id(cls, class_id):
+        # Convert string UUID to UUID object if needed
+        if isinstance(class_id, str):
+            try:
+                class_id = uuid.UUID(class_id)
+            except (ValueError, AttributeError):
+                return []
         return cls.query.filter_by(class_id=class_id).order_by(cls.date.desc()).all()
     
     @classmethod
     def find_by_class_and_date(cls, class_id, date):
         """Get all attendance records for a specific class on a specific date"""
+        # Convert string UUID to UUID object if needed
+        if isinstance(class_id, str):
+            try:
+                class_id = uuid.UUID(class_id)
+            except (ValueError, AttributeError):
+                return []
         return cls.query.filter_by(class_id=class_id, date=date).all()
     
     @classmethod
     def find_by_student_class_date(cls, student_id, class_id, date):
         """Find specific attendance record"""
+        # Convert string UUIDs to UUID objects if needed
+        if isinstance(student_id, str):
+            try:
+                student_id = uuid.UUID(student_id)
+            except (ValueError, AttributeError):
+                return None
+        if isinstance(class_id, str):
+            try:
+                class_id = uuid.UUID(class_id)
+            except (ValueError, AttributeError):
+                return None
         return cls.query.filter_by(student_id=student_id, class_id=class_id, date=date).first()
     
     @classmethod
@@ -71,8 +106,20 @@ class AttendanceModel(db.Model):
         query = cls.query.filter(cls.date >= start_date, cls.date <= end_date)
         
         if student_id:
+            # Convert string UUID to UUID object if needed
+            if isinstance(student_id, str):
+                try:
+                    student_id = uuid.UUID(student_id)
+                except (ValueError, AttributeError):
+                    pass
             query = query.filter_by(student_id=student_id)
         if class_id:
+            # Convert string UUID to UUID object if needed
+            if isinstance(class_id, str):
+                try:
+                    class_id = uuid.UUID(class_id)
+                except (ValueError, AttributeError):
+                    pass
             query = query.filter_by(class_id=class_id)
         
         return query.order_by(cls.date.desc()).all()

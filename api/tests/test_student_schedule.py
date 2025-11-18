@@ -5,6 +5,7 @@ import os
 from flask import Flask
 from webPlatform_api import Webapi
 import uuid
+import time
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -31,12 +32,24 @@ class TestStudentSchedule(unittest.TestCase):
                                                  POSTGRES_DB)
         db.init_app(self.app)
 
+        # Create all tables
+        with self.app.app_context():
+            db.create_all()
+
         self.api = Webapi()
         self.client = self.api.app.test_client()
 
         # Create student
         with open("tests/configs/student_config.json", "r") as fr:
             student_data = json.load(fr)
+        
+        # Add unique email field (required for student creation)
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        student_data['email'] = unique_student_email
+        
         response = self.client.post('/student',
                                    headers={"Authorization": API_KEY},
                                    json=student_data)
@@ -44,6 +57,9 @@ class TestStudentSchedule(unittest.TestCase):
             res_answer = json.loads(response.get_data())
             self.student_id = res_answer["message"]["_id"]
         else:
+            # Debug: print error if student creation fails
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed in setUp: {res_answer}")
             self.student_id = None
 
     def tearDown(self) -> None:
@@ -65,7 +81,9 @@ class TestStudentSchedule(unittest.TestCase):
         self.assertIn(response.status_code, [200, 404])
         if response.status_code == 200:
             res_answer = json.loads(response.get_data())
-            self.assertIn("schedule", res_answer)
+            # Response structure: {'success': True, 'message': {'timetable': [], ...}}
+            self.assertIn("message", res_answer)
+            self.assertIn("timetable", res_answer["message"])
 
     def test_get_student_schedule_invalid(self):
         """Test getting schedule for invalid student"""

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
+import { TeacherWizard } from './TeacherWizard';
 
 export interface Teacher {
   _id: string;
@@ -20,6 +21,7 @@ export function TeachersTable() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
+  const [showCreateTeacher, setShowCreateTeacher] = useState(false);
 
   useEffect(() => {
     loadTeachers();
@@ -108,6 +110,28 @@ export function TeachersTable() {
     }
   };
 
+  const handleTeacherCreated = () => {
+    loadTeachers(); // Reload the teacher list
+  };
+
+  const handleDeleteTeacher = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this teacher?')) {
+      return;
+    }
+
+    try {
+      const response = await apiService.deleteTeacher(id);
+      if (response.success) {
+        await loadTeachers(); // Reload the list
+      } else {
+        setError(response.error || 'Failed to delete teacher');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error deleting teacher:', err);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ 
@@ -138,8 +162,11 @@ export function TeachersTable() {
           >
             📥 Import from Excel
           </button>
-          <button className="btn btn--primary">
-            Add New Teacher
+          <button 
+            className="btn btn--primary"
+            onClick={() => setShowCreateTeacher(true)}
+          >
+            ➕ Add New Teacher
           </button>
         </div>
       </div>
@@ -189,7 +216,13 @@ export function TeachersTable() {
                   <td>
                     <div className="action-buttons">
                       <button className="btn btn--small btn--secondary">Edit</button>
-                      <button className="btn btn--small btn--danger">Delete</button>
+                      <button 
+                        className="btn btn--small btn--danger"
+                        onClick={() => handleDeleteTeacher(teacher._id)}
+                        title="Delete teacher"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -366,6 +399,17 @@ export function TeachersTable() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create Teacher Modal */}
+      {showCreateTeacher && (
+        <TeacherWizard
+          onClose={() => setShowCreateTeacher(false)}
+          onSuccess={() => {
+            handleTeacherCreated();
+            setShowCreateTeacher(false);
+          }}
+        />
       )}
     </div>
   );

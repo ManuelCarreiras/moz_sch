@@ -12,7 +12,8 @@ interface StudentFormData {
   surname: string;
   date_of_birth: string;
   gender: 'Male' | 'Female';
-  enrolment_date: string;
+  enrollment_date: string;
+  email: string;
 }
 
 export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
@@ -24,7 +25,8 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
     surname: '',
     date_of_birth: '',
     gender: 'Male',
-    enrolment_date: new Date().toISOString().split('T')[0], // Today's date
+    enrollment_date: new Date().toISOString().split('T')[0], // Today's date
+    email: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -134,14 +136,29 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="enrolment_date">Enrolment Date *</label>
+                <label htmlFor="enrollment_date">Enrollment Date *</label>
                 <input
                   type="date"
-                  id="enrolment_date"
-                  name="enrolment_date"
-                  value={formData.enrolment_date}
+                  id="enrollment_date"
+                  name="enrollment_date"
+                  value={formData.enrollment_date}
                   onChange={handleInputChange}
                   required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="email">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Enter email address"
                 />
               </div>
             </div>
@@ -163,7 +180,7 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
               </button>
               <button
                 type="submit"
-                disabled={loading || !formData.given_name || !formData.surname}
+                disabled={loading || !formData.given_name || !formData.surname || !formData.email}
                 className="btn btn--primary"
               >
                 {loading ? 'Creating...' : 'Create Student'}
