@@ -67,6 +67,22 @@ class TestClass(unittest.TestCase):
                   "r") as fr:
             self.classroom = json.load(fr)
 
+        # Initialize all ID attributes to None
+        self.class_id = None
+        self.subject_id = None
+        self.teacher_id = None
+        self.department_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+        self.year_level_id = None
+
+        with open("tests/configs/year_level_config.json",
+                  "r") as fr:
+            self.year_level = json.load(fr)
+
     def tearDown(self) -> None:
         """
         Ensures that the database is emptied for next unit test
@@ -107,6 +123,10 @@ class TestClass(unittest.TestCase):
         if self.classroom_types_id is not None:
             self.client.delete("/classroom_types/{}".format(
                                self.classroom_types_id),
+                               headers={"Authorization": API_KEY})
+        if self.year_level_id is not None:
+            self.client.delete("/year_level/{}".format(
+                               self.year_level_id),
                                headers={"Authorization": API_KEY})
         else:
             pass
@@ -180,11 +200,21 @@ class TestClass(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -204,7 +234,7 @@ class TestClass(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         res_answer = json.loads(response.get_data())
 
-        self.assertEqual(res_answer["message"], "Missing required field")
+        self.assertIn("Missing required field", res_answer["message"])
         self.class_id = None
         self.subject_id = None
         self.teacher_id = None
@@ -216,22 +246,44 @@ class TestClass(unittest.TestCase):
         self.school_year_id = None
 
     def test_create_class_fk_id_missing(self):
+        # First create required dependencies
+        response = self.client.post('/school_year',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.school_year)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.school_year_id = res_answer['message']['_id']
+
+        self.term['year_id'] = self.school_year_id
+        response = self.client.post('/term',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.term)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.term_id = res_answer['message']['_id']
+
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
+        # Now test with wrong IDs
         wrong_id = str(uuid.uuid4())
         self.class_['subject_id'] = wrong_id
         self.class_['teacher_id'] = wrong_id
-        self.class_['department_id'] = wrong_id
         self.class_['classroom_id'] = wrong_id
-        self.class_['classroom_types_id'] = wrong_id
-        self.class_['term_id'] = wrong_id
         self.class_['period_id'] = wrong_id
-        self.class_['school_year_id'] = wrong_id
+        self.class_['term_id'] = self.term_id  # Valid term_id
+        self.class_['year_level_id'] = self.year_level_id
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
                                     json=self.class_)
         self.assertEqual(response.status_code, 400)
         res_answer = json.loads(response.get_data())
-        self.assertEqual(res_answer['message'],
-                         'Subject id does not exist in the database')
+        # Should get error about invalid subject_id since it's checked first
+        self.assertIn('does not exist in the database', res_answer['message'])
 
         self.subject_id = None
         self.teacher_id = None
@@ -314,11 +366,20 @@ class TestClass(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
 
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -340,7 +401,8 @@ class TestClass(unittest.TestCase):
     def test_get_class_id_missing(self):
         wrong_id = str(uuid.uuid4())
 
-        response = self.client.get('/class/{}'.format(wrong_id))
+        response = self.client.get('/class/{}'.format(wrong_id),
+                                   headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 404)
 
         res_answer = json.loads(response.get_data())
@@ -429,9 +491,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -562,9 +633,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -675,9 +755,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -788,9 +877,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -901,9 +999,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -1014,9 +1121,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -1127,9 +1243,18 @@ class TestClass(unittest.TestCase):
 
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},

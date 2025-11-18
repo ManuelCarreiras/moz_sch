@@ -5,7 +5,7 @@ import os
 from flask import Flask
 from webPlatform_api import Webapi
 import uuid
-from datetime import date
+import time
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -38,10 +38,22 @@ class TestStudentMensality(unittest.TestCase):
         # Create a student first (required for mensality)
         with open("tests/configs/student_config.json", "r") as fr:
             student_data = json.load(fr)
-        
+
+        # Add unique email field (required for student creation)
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        student_data['email'] = unique_student_email
+        # Ensure student is active (required for mensality)
+        student_data['is_active'] = True
+
         response = self.client.post('/student',
-                                   headers={"Authorization": API_KEY},
-                                   json=student_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=student_data)
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.student_id = res_answer["message"]["_id"]
@@ -52,11 +64,11 @@ class TestStudentMensality(unittest.TestCase):
             self.mensality = json.load(fr)
             if self.student_id:
                 self.mensality["student_id"] = self.student_id
-        
-        with open("tests/configs/student_mensality_config_missing.json", "r") as fr:
+
+        with open("tests/configs/student_mensality_config_missing.json", "r") as fr:   # noqa: E501
             self.mensality_missing = json.load(fr)
-        
-        with open("tests/configs/student_mensality_config_update.json", "r") as fr:
+
+        with open("tests/configs/student_mensality_config_update.json", "r") as fr:   # noqa: E501
             self.mensality_update = json.load(fr)
 
         self.mensality_id = None
@@ -81,6 +93,9 @@ class TestStudentMensality(unittest.TestCase):
                                     headers={"Authorization": API_KEY},
                                     json=self.mensality)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Mensality creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.assertIn("_id", res_answer["mensality"])
@@ -154,7 +169,7 @@ class TestStudentMensality(unittest.TestCase):
         self.mensality_id = res_answer["mensality"]["_id"]
 
         # Get with student_id filter
-        response = self.client.get("/mensality?student_id={}".format(self.student_id),
+        response = self.client.get("/mensality?student_id={}".format(self.student_id),  # noqa: E501
                                    headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
@@ -225,11 +240,11 @@ class TestStudentMensality(unittest.TestCase):
         self.mensality_id = res_answer["mensality"]["_id"]
 
         # Delete mensality
-        response = self.client.delete("/mensality/{}".format(self.mensality_id),
+        response = self.client.delete("/mensality/{}".format(self.mensality_id),  # noqa: E501
                                       headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
-        self.assertEqual(res_answer["message"], "Mensality record deleted successfully")
+        self.assertEqual(res_answer["message"], "Mensality record deleted successfully")  # noqa: E501
         self.mensality_id = None  # Already deleted
 
     def test_delete_mensality_wrong(self):
@@ -265,4 +280,3 @@ class TestStudentMensality(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

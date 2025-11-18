@@ -38,8 +38,8 @@ class TestClassTimetable(unittest.TestCase):
         with open("tests/configs/year_level_config.json", "r") as fr:
             level_data = json.load(fr)
         response = self.client.post('/year_level',
-                                   headers={"Authorization": API_KEY},
-                                   json=level_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=level_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.year_level_id = res_answer["message"]["_id"]
@@ -58,14 +58,16 @@ class TestClassTimetable(unittest.TestCase):
         """Test getting timetable for a year level"""
         if not self.year_level_id:
             self.skipTest("Year level not created")
-        
-        response = self.client.get("/class/timetable/{}".format(self.year_level_id),
+
+        response = self.client.get("/class/timetable/{}".format(self.year_level_id),   # noqa: E501
                                    headers={"Authorization": API_KEY})
         # Should return 200 even if no classes found
         self.assertIn(response.status_code, [200, 404])
         if response.status_code == 200:
             res_answer = json.loads(response.get_data())
-            self.assertIn("timetable", res_answer)
+            self.assertTrue(res_answer["success"])
+            self.assertIn("message", res_answer)
+            self.assertIn("timetable", res_answer["message"])
 
     def test_get_class_timetable_invalid(self):
         """Test getting timetable for invalid year level"""
@@ -77,4 +79,3 @@ class TestClassTimetable(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

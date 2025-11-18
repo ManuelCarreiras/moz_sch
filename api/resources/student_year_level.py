@@ -215,7 +215,7 @@ class StudentYearLevelResourceYear(Resource):
 
     @require_role('admin')
     def delete(self, id):
-        student_year_level = StudentYearLevelModel.find_by_level_id(id)
+        student_year_level = StudentYearLevelModel.find_by_year_id(id)
 
         if student_year_level is None:
             response = {

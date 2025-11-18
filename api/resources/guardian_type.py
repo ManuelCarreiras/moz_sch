@@ -18,7 +18,8 @@ class GuardianTypeResource(Resource):
             }
             return Response(json.dumps(response), status=400)
 
-        new_guardian_type = GuardianTypeModel(**data)
+        # Map guardian_type_name to name for the model
+        new_guardian_type = GuardianTypeModel(name=data['guardian_type_name'])
         new_guardian_type.save_to_db()
 
         response = {
@@ -45,10 +46,10 @@ class GuardianTypeResource(Resource):
         else:
             # Create default guardian types if they don't exist
             GuardianTypeModel.create_default_types()
-            
+
             # Get all guardian types
             guardian_types = GuardianTypeModel.find_all()
-            guardian_types_list = [guardian_type.json() for guardian_type in guardian_types]
+            guardian_types_list = [guardian_type.json() for guardian_type in guardian_types]  # noqa: E501
             response = {
                 'success': True,
                 'message': guardian_types_list

@@ -94,7 +94,7 @@ class TestTeacher(unittest.TestCase):
 
         response = self.client.get("/teacher/{}".format(self.teacher_id),
                                    headers={"Authorization": API_KEY})
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"]["given_name"],
                          "Venâncio")

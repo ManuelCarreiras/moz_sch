@@ -4,7 +4,6 @@ from db import db
 import os
 from flask import Flask
 from webPlatform_api import Webapi
-import uuid
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -38,8 +37,8 @@ class TestGradingCriteria(unittest.TestCase):
         with open("tests/configs/school_year_config.json", "r") as fr:
             year_data = json.load(fr)
         response = self.client.post('/school_year',
-                                   headers={"Authorization": API_KEY},
-                                   json=year_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=year_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.school_year_id = res_answer["message"]["_id"]
@@ -49,8 +48,8 @@ class TestGradingCriteria(unittest.TestCase):
         with open("tests/configs/department_config.json", "r") as fr:
             dept_data = json.load(fr)
         response = self.client.post('/department',
-                                   headers={"Authorization": API_KEY},
-                                   json=dept_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=dept_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.department_id = res_answer["message"]["_id"]
@@ -62,8 +61,8 @@ class TestGradingCriteria(unittest.TestCase):
             if self.department_id:
                 subject_data["department_id"] = self.department_id
         response = self.client.post('/subject',
-                                   headers={"Authorization": API_KEY},
-                                   json=subject_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=subject_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.subject_id = res_answer["message"]["_id"]
@@ -73,8 +72,8 @@ class TestGradingCriteria(unittest.TestCase):
         with open("tests/configs/year_level_config.json", "r") as fr:
             level_data = json.load(fr)
         response = self.client.post('/year_level',
-                                   headers={"Authorization": API_KEY},
-                                   json=level_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=level_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.year_level_id = res_answer["message"]["_id"]
@@ -82,13 +81,14 @@ class TestGradingCriteria(unittest.TestCase):
             self.year_level_id = None
 
         # Create grading criteria data
+        # Weights must be in percentage format (add up to 100)
         self.grading_criteria = {
             "subject_id": self.subject_id,
             "year_level_id": self.year_level_id,
             "school_year_id": self.school_year_id,
-            "tests_weight": 0.4,
-            "homework_weight": 0.3,
-            "attendance_weight": 0.3
+            "tests_weight": 40.0,
+            "homework_weight": 30.0,
+            "attendance_weight": 30.0
         }
 
         self.grading_criteria_id = None
@@ -98,21 +98,21 @@ class TestGradingCriteria(unittest.TestCase):
         Ensures that the database is emptied for next unit test
         """
         if self.grading_criteria_id is not None:
-            self.client.delete("/grading_criteria/{}".format(self.grading_criteria_id),
+            self.client.delete("/grading_criteria/{}".format(self.grading_criteria_id),   # noqa: E501
                                headers={"Authorization": API_KEY})
-        
+
         if self.subject_id is not None:
             self.client.delete("/subject/{}".format(self.subject_id),
                                headers={"Authorization": API_KEY})
-        
+
         if self.department_id is not None:
             self.client.delete("/department/{}".format(self.department_id),
                                headers={"Authorization": API_KEY})
-        
+
         if self.year_level_id is not None:
             self.client.delete("/year_level/{}".format(self.year_level_id),
                                headers={"Authorization": API_KEY})
-        
+
         if self.school_year_id is not None:
             self.client.delete("/school_year/{}".format(self.school_year_id),
                                headers={"Authorization": API_KEY})
@@ -121,15 +121,16 @@ class TestGradingCriteria(unittest.TestCase):
         """Test creating grading criteria"""
         if not all([self.subject_id, self.year_level_id, self.school_year_id]):
             self.skipTest("Missing required dependencies")
-        
+
         response = self.client.post('/grading_criteria',
                                     headers={"Authorization": API_KEY},
                                     json=self.grading_criteria)
 
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
-        self.assertIn("_id", res_answer)
-        self.grading_criteria_id = res_answer["_id"]
+        self.assertIn("grading_criteria", res_answer)
+        self.assertIn("_id", res_answer["grading_criteria"])
+        self.grading_criteria_id = res_answer["grading_criteria"]["_id"]
 
     def test_create_grading_criteria_missing(self):
         """Test creating grading criteria with missing required fields"""
@@ -145,17 +146,17 @@ class TestGradingCriteria(unittest.TestCase):
         """Test getting grading criteria"""
         if not all([self.subject_id, self.year_level_id, self.school_year_id]):
             self.skipTest("Missing required dependencies")
-        
+
         # Create first
         response = self.client.post('/grading_criteria',
                                     headers={"Authorization": API_KEY},
                                     json=self.grading_criteria)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
-            self.grading_criteria_id = res_answer["_id"]
+            self.grading_criteria_id = res_answer["grading_criteria"]["_id"]
 
         # Get with filters
-        response = self.client.get("/grading_criteria?subject_id={}&year_level_id={}&school_year_id={}".format(
+        response = self.client.get("/grading_criteria?subject_id={}&year_level_id={}&school_year_id={}".format(  # noqa: E501
             self.subject_id, self.year_level_id, self.school_year_id),
                                    headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
@@ -174,4 +175,3 @@ class TestGradingCriteria(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

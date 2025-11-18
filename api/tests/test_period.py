@@ -37,10 +37,10 @@ class TestPeriod(unittest.TestCase):
         # Create a school year first (required for period)
         with open("tests/configs/school_year_config.json", "r") as fr:
             year_data = json.load(fr)
-        
+
         response = self.client.post('/school_year',
-                                   headers={"Authorization": API_KEY},
-                                   json=year_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=year_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.year_id = res_answer["message"]["_id"]
@@ -51,10 +51,10 @@ class TestPeriod(unittest.TestCase):
             self.period = json.load(fr)
             if self.year_id:
                 self.period["year_id"] = self.year_id
-        
+
         with open("tests/configs/period_config_missing.json", "r") as fr:
             self.period_missing = json.load(fr)
-        
+
         with open("tests/configs/period_config_update.json", "r") as fr:
             self.period_update = json.load(fr)
 
@@ -67,7 +67,7 @@ class TestPeriod(unittest.TestCase):
         if self.period_id is not None:
             self.client.delete("/period/{}".format(self.period_id),
                                headers={"Authorization": API_KEY})
-        
+
         if self.year_id is not None:
             self.client.delete("/school_year/{}".format(self.year_id),
                                headers={"Authorization": API_KEY})
@@ -99,7 +99,7 @@ class TestPeriod(unittest.TestCase):
         """Test creating period with invalid year_id"""
         invalid_period = self.period.copy()
         invalid_period["year_id"] = str(uuid.uuid4())
-        
+
         response = self.client.post('/period',
                                     headers={"Authorization": API_KEY},
                                     json=invalid_period)
@@ -115,7 +115,7 @@ class TestPeriod(unittest.TestCase):
         invalid_period = self.period.copy()
         invalid_period["start_time"] = "invalid"
         invalid_period["end_time"] = "invalid"
-        
+
         response = self.client.post('/period',
                                     headers={"Authorization": API_KEY},
                                     json=invalid_period)
@@ -131,7 +131,7 @@ class TestPeriod(unittest.TestCase):
         invalid_period = self.period.copy()
         invalid_period["start_time"] = "10:00"
         invalid_period["end_time"] = "08:00"  # End before start
-        
+
         response = self.client.post('/period',
                                     headers={"Authorization": API_KEY},
                                     json=invalid_period)
@@ -139,7 +139,7 @@ class TestPeriod(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         res_answer = json.loads(response.get_data())
         self.assertFalse(res_answer["success"])
-        self.assertIn("Start time must be before end time", res_answer["message"])
+        self.assertIn("Start time must be before end time", res_answer["message"])  # noqa: E501
         self.period_id = None
 
     def test_get_period(self):
@@ -257,4 +257,3 @@ class TestPeriod(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

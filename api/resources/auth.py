@@ -15,8 +15,8 @@ class AuthLoginResource(Resource):
             response = {"success": False, "message": "Missing credentials"}
             return Response(json.dumps(response), status=400)
 
-        admin_user = os.getenv('ADMIN_USERNAME', '')
-        admin_pass = os.getenv('ADMIN_PASSWORD', '')
+        admin_user = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_pass = os.getenv('ADMIN_PASSWORD', 'admin')
 
         # Simple env-based auth for now; replace with DB lookup when available
         if username != admin_user or password != admin_pass:

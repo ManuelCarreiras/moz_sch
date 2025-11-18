@@ -123,6 +123,44 @@ class PeriodResource(Resource):
             }
             return Response(json.dumps(response), 404)
 
+        # Convert time strings to datetime objects if provided
+        from datetime import datetime, date, time
+        if data.get('start_time') or data.get('end_time'):
+            try:
+                # Parse time strings (e.g., "08:00", "10:00") if provided
+                if data.get('start_time'):
+                    start_time_str = data.get('start_time')
+                    if isinstance(start_time_str, str) and ':' in start_time_str:
+                        start_hour, start_minute = map(int, start_time_str.split(':'))
+                        start_time_obj = time(start_hour, start_minute)
+                        today = date.today()
+                        data['start_time'] = datetime.combine(today, start_time_obj)
+                
+                if data.get('end_time'):
+                    end_time_str = data.get('end_time')
+                    if isinstance(end_time_str, str) and ':' in end_time_str:
+                        end_hour, end_minute = map(int, end_time_str.split(':'))
+                        end_time_obj = time(end_hour, end_minute)
+                        today = date.today()
+                        data['end_time'] = datetime.combine(today, end_time_obj)
+                
+                # Validate time logic if both times are provided
+                if data.get('start_time') and data.get('end_time'):
+                    start_dt = data['start_time'] if isinstance(data['start_time'], datetime) else period.start_time
+                    end_dt = data['end_time'] if isinstance(data['end_time'], datetime) else period.end_time
+                    if start_dt >= end_dt:
+                        response = {
+                            'success': False,
+                            'message': 'Start time must be before end time'
+                        }
+                        return Response(json.dumps(response), 400)
+            except ValueError:
+                response = {
+                    'success': False,
+                    'message': 'Invalid time format. Use HH:MM format'
+                }
+                return Response(json.dumps(response), 400)
+
         period.update_entry(data)
 
         response = {

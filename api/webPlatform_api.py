@@ -98,6 +98,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
                                          POSTGRES_DB)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
+
+# Initialize JWT Manager for flask-jwt-extended
+from flask_jwt_extended import JWTManager
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # Tokens don't expire by default
+jwt = JWTManager(app)
+
 api = Api(app)
 
 db.init_app(app)

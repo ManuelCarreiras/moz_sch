@@ -89,6 +89,12 @@ class TestAuth(unittest.TestCase):
                                         "username": self.admin_username,
                                         "password": self.admin_password
                                     })
+
+        if response.status_code != 200:
+            res_answer = json.loads(response.get_data())
+            print(f"Error response: {res_answer}")
+            print(f"Username used: {self.admin_username}")
+            print(f"Password used: {self.admin_password}")
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
         self.assertTrue(res_answer["success"])
@@ -114,8 +120,13 @@ class TestAuth(unittest.TestCase):
         token = login_data["token"]
 
         # Use token to access /auth/me
-        response = self.client.get('/auth/me',
-                                   headers={"Authorization": f"Bearer {token}"})
+        response = self.client.get(
+            '/auth/me',
+            headers={"Authorization": f"Bearer {token}"})
+
+        if response.status_code != 200:
+            res_answer = json.loads(response.get_data())
+            print(f"Error response: {res_answer}")
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
         self.assertTrue(res_answer["success"])
@@ -126,4 +137,3 @@ class TestAuth(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

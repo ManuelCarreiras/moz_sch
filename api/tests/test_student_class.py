@@ -5,6 +5,7 @@ import os
 from flask import Flask
 from webPlatform_api import Webapi
 import uuid
+import time
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -73,6 +74,23 @@ class TestStudent_Class(unittest.TestCase):
         with open("tests/configs/classroom_config.json",
                   "r") as fr:
             self.classroom = json.load(fr)
+        with open("tests/configs/year_level_config.json",
+                  "r") as fr:
+            self.year_level = json.load(fr)
+
+        # Initialize all ID attributes to None
+        self.student_class_id = None
+        self.student_id = None
+        self.class_id = None
+        self.subject_id = None
+        self.department_id = None
+        self.teacher_id = None
+        self.term_id = None
+        self.period_id = None
+        self.school_year_id = None
+        self.classroom_id = None
+        self.classroom_types_id = None
+        self.year_level_id = None
 
     def tearDown(self) -> None:
         """
@@ -110,7 +128,7 @@ class TestStudent_Class(unittest.TestCase):
         if self.period_id is not None:
             self.client.delete("/period/{}".format(
                                self.period_id),
-                               headers={"Authorization": API_KEY})     
+                               headers={"Authorization": API_KEY})
         if self.school_year_id is not None:
             self.client.delete("/school_year/{}".format(
                                self.school_year_id),
@@ -123,8 +141,10 @@ class TestStudent_Class(unittest.TestCase):
             self.client.delete("/classroom_types/{}".format(
                                self.classroom_types_id),
                                headers={"Authorization": API_KEY})
-        else:
-            pass
+        if self.year_level_id is not None:
+            self.client.delete("/year_level/{}".format(
+                               self.year_level_id),
+                               headers={"Authorization": API_KEY})
 
     def test_create_student_class(self):
 
@@ -196,11 +216,22 @@ class TestStudent_Class(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -210,10 +241,21 @@ class TestStudent_Class(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.class_id = res_answer['message']['_id']
 
+        # Add email field (required for student creation)
+        test_student = self.student.copy()
+        unique_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer['message']['_id']
@@ -225,6 +267,9 @@ class TestStudent_Class(unittest.TestCase):
                                     headers={"Authorization": API_KEY},
                                     json=self.student_class)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student class creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_class_id = res_answer['message']['_id']
@@ -346,11 +391,22 @@ class TestStudent_Class(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -360,10 +416,21 @@ class TestStudent_Class(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.class_id = res_answer['message']['_id']
 
+        # Add email field (required for student creation)
+        test_student = self.student.copy()
+        unique_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer['message']['_id']
@@ -375,6 +442,9 @@ class TestStudent_Class(unittest.TestCase):
                                     headers={"Authorization": API_KEY},
                                     json=self.student_class)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student class creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_class_id = res_answer['message']['_id']
@@ -477,11 +547,22 @@ class TestStudent_Class(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -491,10 +572,21 @@ class TestStudent_Class(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.class_id = res_answer['message']['_id']
 
+        # Add email field (required for student creation)
+        test_student = self.student.copy()
+        unique_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer['message']['_id']
@@ -506,6 +598,9 @@ class TestStudent_Class(unittest.TestCase):
                                     headers={"Authorization": API_KEY},
                                     json=self.student_class)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student class creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_class_id = res_answer['message']['_id']
@@ -610,11 +705,22 @@ class TestStudent_Class(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.period_id = res_answer['message']['_id']
+
+        # Create year_level (required for class creation)
+        response = self.client.post('/year_level',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.year_level)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.year_level_id = res_answer['message']['_id']
+
         self.class_['subject_id'] = self.subject_id
         self.class_['teacher_id'] = self.teacher_id
         self.class_['term_id'] = self.term_id
         self.class_['period_id'] = self.period_id
         self.class_['classroom_id'] = self.classroom_id
+        self.class_['year_level_id'] = self.year_level_id
 
         response = self.client.post('/class',
                                     headers={"Authorization": API_KEY},
@@ -624,10 +730,21 @@ class TestStudent_Class(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.class_id = res_answer['message']['_id']
 
+        # Add email field (required for student creation)
+        test_student = self.student.copy()
+        unique_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer['message']['_id']
@@ -639,6 +756,9 @@ class TestStudent_Class(unittest.TestCase):
                                     headers={"Authorization": API_KEY},
                                     json=self.student_class)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student class creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_class_id = res_answer['message']['_id']

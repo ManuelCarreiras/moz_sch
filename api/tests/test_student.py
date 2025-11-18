@@ -5,6 +5,7 @@ import os
 from flask import Flask
 from webPlatform_api import Webapi
 import uuid
+import time
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -45,6 +46,9 @@ class TestStudent(unittest.TestCase):
                   "r") as fr:
             self.student_update = json.load(fr)
 
+        # Initialize student_id to None
+        self.student_id = None
+
     def tearDown(self) -> None:
         """
         Ensures that the database is emptied for next unit test
@@ -58,11 +62,21 @@ class TestStudent(unittest.TestCase):
             pass
 
     def test_create_student(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
 
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.assertIn("_id", res_answer["message"])
@@ -82,10 +96,21 @@ class TestStudent(unittest.TestCase):
         self.student_id = None
 
     def test_get_student(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
@@ -98,10 +123,21 @@ class TestStudent(unittest.TestCase):
                          "Vena")
 
     def test_get_student_missing(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
@@ -114,10 +150,21 @@ class TestStudent(unittest.TestCase):
         self.assertEqual(res_answer["message"], "Student not found")
 
     def test_put_student(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
@@ -132,10 +179,21 @@ class TestStudent(unittest.TestCase):
                          "Manuel")
 
     def test_put_student_wrong(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
@@ -150,34 +208,55 @@ class TestStudent(unittest.TestCase):
                          "Student not found")
 
     def test_delete_student(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
         response = self.client.delete("/student/{}".format(self.student_id),
-                                      headers={"Authorization": API_KEY},
-                                      json=self.student)
+                                      headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
+        self.student_id = None  # Already deleted
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"],
                          "Student deleted")
 
     def test_delete_student_wrong(self):
+        # Add unique email field (required for student creation)
+        test_student = self.student.copy()
+        unique_student_email = (
+            f"student.{int(time.time() * 1000)}."
+            f"{uuid.uuid4().hex[:8]}@example.com"
+        )
+        test_student['email'] = unique_student_email
+
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
-                                    json=self.student)
+                                    json=test_student)
 
+        if response.status_code != 201:
+            res_answer = json.loads(response.get_data())
+            print(f"Student creation failed: {res_answer}")
         self.assertEqual(response.status_code, 201)
         res_answer = json.loads(response.get_data())
         self.student_id = res_answer["message"]["_id"]
 
         wrong_id = str(uuid.uuid4())
         response = self.client.delete("/student/{}".format(wrong_id),
-                                      headers={"Authorization": API_KEY},
-                                      json=self.student)
+                                      headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 404)
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"],

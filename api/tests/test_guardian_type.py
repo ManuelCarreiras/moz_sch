@@ -4,7 +4,6 @@ from db import db
 import os
 from flask import Flask
 from webPlatform_api import Webapi
-import uuid
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -45,7 +44,7 @@ class TestGuardianType(unittest.TestCase):
         Ensures that the database is emptied for next unit test
         """
         if self.guardian_type_id is not None:
-            self.client.delete("/guardian/types/{}".format(self.guardian_type_id),
+            self.client.delete("/guardian/types/{}".format(self.guardian_type_id),   # noqa: E501
                                headers={"Authorization": API_KEY})
 
     def test_create_guardian_type(self):
@@ -83,7 +82,7 @@ class TestGuardianType(unittest.TestCase):
             self.guardian_type_id = res_answer["message"]["_id"]
 
         # Get the guardian type
-        response = self.client.get("/guardian/types/{}".format(self.guardian_type_id),
+        response = self.client.get("/guardian/types/{}".format(self.guardian_type_id),   # noqa: E501
                                    headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
@@ -101,4 +100,3 @@ class TestGuardianType(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

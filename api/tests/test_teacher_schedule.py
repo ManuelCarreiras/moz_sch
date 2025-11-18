@@ -37,9 +37,10 @@ class TestTeacherSchedule(unittest.TestCase):
         # Create teacher
         with open("tests/configs/teacher_config.json", "r") as fr:
             teacher_data = json.load(fr)
-        response = self.client.post('/teacher',
-                                   headers={"Authorization": API_KEY},
-                                   json=teacher_data)
+        response = self.client.post(
+            '/teacher',
+            headers={"Authorization": API_KEY},
+            json=teacher_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.teacher_id = res_answer["message"]["_id"]
@@ -58,14 +59,16 @@ class TestTeacherSchedule(unittest.TestCase):
         """Test getting schedule for a teacher"""
         if not self.teacher_id:
             self.skipTest("Teacher not created")
-        
-        response = self.client.get("/teacher/schedule/{}".format(self.teacher_id),
-                                   headers={"Authorization": API_KEY})
+
+        response = self.client.get(
+            "/teacher/schedule/{}".format(self.teacher_id),
+            headers={"Authorization": API_KEY})
         # Should return 200 even if no schedule found
         self.assertIn(response.status_code, [200, 404])
         if response.status_code == 200:
             res_answer = json.loads(response.get_data())
-            self.assertIn("schedule", res_answer)
+            self.assertIn("message", res_answer)
+            self.assertIn("timetable", res_answer["message"])
 
     def test_get_teacher_schedule_invalid(self):
         """Test getting schedule for invalid teacher"""
@@ -77,4 +80,3 @@ class TestTeacherSchedule(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

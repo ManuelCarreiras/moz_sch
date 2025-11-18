@@ -30,8 +30,12 @@ def check_if_is_device_request():
 # Auth validation
 def validAuth():
 
-    exempt_routes = ["home"]
-    if request.endpoint in exempt_routes:
+    exempt_routes = ["home", "authloginresource", "authmeresource"]
+    # Also exempt auth endpoints that use flask-jwt-extended
+    exempt_paths = ['/auth/login', '/auth/me']
+    if (request.endpoint in exempt_routes or
+            request.path in exempt_paths or
+            request.path.startswith('/auth/login')):
         return
 
     # Check for API key first (for admin/debug access)

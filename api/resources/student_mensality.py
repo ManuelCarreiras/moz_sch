@@ -27,7 +27,7 @@ class StudentMensalityResource(Resource):
             return {'mensality': mensality.json_with_student()}, 200
 
         # Get all mensality records with optional filters
-        student_id = request.args.get('student_id')
+        student_id_str = request.args.get('student_id')
         month = request.args.get('month', type=int)
         year = request.args.get('year', type=int)
         paid = request.args.get('paid')  # Can be 'true' or 'false'
@@ -37,8 +37,14 @@ class StudentMensalityResource(Resource):
         query = StudentMensalityModel.query
         
         # Apply filters
-        if student_id:
-            query = query.filter_by(student_id=student_id)
+        if student_id_str:
+            # Convert string to UUID for database query (frontend sends string)
+            try:
+                from uuid import UUID
+                student_id_uuid = UUID(student_id_str)
+                query = query.filter_by(student_id=student_id_uuid)
+            except (ValueError, TypeError):
+                return {'message': 'Invalid student_id format'}, 400
         if month is not None:
             query = query.filter_by(month=month)
         if year is not None:
@@ -54,12 +60,12 @@ class StudentMensalityResource(Resource):
         # Debug logging (can be removed later)
         from flask import current_app
         # Log the actual SQL query being executed
-        current_app.logger.debug(f"Mensality query - month={month}, year={year}, paid={paid}, student_id={student_id}, found {len(records)} records")
-        current_app.logger.debug(f"Query SQL: {str(query.statement.compile(compile_kwargs={'literal_binds': True}))}")
+        current_app.logger.debug(f"Mensality query - month={month}, year={year}, paid={paid}, student_id={student_id_str}, found {len(records)} records")
+        # Note: Cannot use literal_binds=True with UUID types, so we skip SQL compilation
         current_app.logger.debug(f"Table name: {StudentMensalityModel.__tablename__}")
         
         # Special case: if student_id, month, and year are all provided, return single record format
-        if student_id and month is not None and year is not None:
+        if student_id_str and month is not None and year is not None:
             if records:
                 return {'mensality': records[0].json_with_student()}, 200
             return {'mensality': None}, 200

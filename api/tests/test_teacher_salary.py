@@ -5,7 +5,7 @@ import os
 from flask import Flask
 from webPlatform_api import Webapi
 import uuid
-from datetime import date
+from models.teacher_salary import TeacherSalaryModel
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
@@ -38,10 +38,10 @@ class TestTeacherSalary(unittest.TestCase):
         # Create a teacher first (required for salary)
         with open("tests/configs/teacher_config.json", "r") as fr:
             teacher_data = json.load(fr)
-        
+
         response = self.client.post('/teacher',
-                                   headers={"Authorization": API_KEY},
-                                   json=teacher_data)
+                                    headers={"Authorization": API_KEY},
+                                    json=teacher_data)
         if response.status_code == 201:
             res_answer = json.loads(response.get_data())
             self.teacher_id = res_answer["message"]["_id"]
@@ -52,11 +52,11 @@ class TestTeacherSalary(unittest.TestCase):
             self.salary = json.load(fr)
             if self.teacher_id:
                 self.salary["teacher_id"] = self.teacher_id
-        
-        with open("tests/configs/teacher_salary_config_missing.json", "r") as fr:
+
+        with open("tests/configs/teacher_salary_config_missing.json", "r") as fr:  # noqa: E501
             self.salary_missing = json.load(fr)
-        
-        with open("tests/configs/teacher_salary_config_update.json", "r") as fr:
+
+        with open("tests/configs/teacher_salary_config_update.json", "r") as fr:  # noqa: E501
             self.salary_update = json.load(fr)
 
         self.salary_id = None
@@ -65,11 +65,22 @@ class TestTeacherSalary(unittest.TestCase):
         """
         Ensures that the database is emptied for next unit test
         """
-        # Delete salary entry
+        # Delete all salary records for the teacher first
+        # (to avoid foreign key constraint violations)
+        if self.teacher_id is not None:
+            with self.app.app_context():
+                salary_records = TeacherSalaryModel.find_by_teacher_id(
+                    self.teacher_id
+                )
+                for salary_record in salary_records:
+                    db.session.delete(salary_record)
+                db.session.commit()
+
+        # Delete specific salary entry if tracked
         if self.salary_id is not None:
             self.client.delete("/teacher_salary/{}".format(self.salary_id),
                                headers={"Authorization": API_KEY})
-        
+
         # Delete teacher entry
         if self.teacher_id is not None:
             self.client.delete("/teacher/{}".format(self.teacher_id),
@@ -102,7 +113,7 @@ class TestTeacherSalary(unittest.TestCase):
         """Test creating salary with invalid teacher_id"""
         invalid_salary = self.salary.copy()
         invalid_salary["teacher_id"] = str(uuid.uuid4())
-        
+
         response = self.client.post('/teacher_salary',
                                     headers={"Authorization": API_KEY},
                                     json=invalid_salary)
@@ -154,8 +165,9 @@ class TestTeacherSalary(unittest.TestCase):
         self.salary_id = res_answer["salary"]["_id"]
 
         # Get with teacher_id filter
-        response = self.client.get("/teacher_salary?teacher_id={}".format(self.teacher_id),
-                                   headers={"Authorization": API_KEY})
+        response = self.client.get(
+            "/teacher_salary?teacher_id={}".format(self.teacher_id),
+            headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
         self.assertIn("salary_records", res_answer)
@@ -218,11 +230,13 @@ class TestTeacherSalary(unittest.TestCase):
         self.salary_id = res_answer["salary"]["_id"]
 
         # Delete salary
-        response = self.client.delete("/teacher_salary/{}".format(self.salary_id),
-                                      headers={"Authorization": API_KEY})
+        response = self.client.delete(
+            "/teacher_salary/{}".format(self.salary_id),
+            headers={"Authorization": API_KEY})
         self.assertEqual(response.status_code, 200)
         res_answer = json.loads(response.get_data())
-        self.assertEqual(res_answer["message"], "Salary record deleted successfully")
+        self.assertEqual(
+            res_answer["message"], "Salary record deleted successfully")
         self.salary_id = None  # Already deleted
 
     def test_delete_salary_wrong(self):
@@ -273,8 +287,10 @@ class TestTeacherSalary(unittest.TestCase):
             res_answer = json.loads(response.get_data())
             if res_answer.get("message") and len(res_answer["message"]) > 0:
                 department_id = res_answer["message"][0]["_id"]
-                response = self.client.get("/teacher_salary/grid?department_id={}".format(department_id),
-                                         headers={"Authorization": API_KEY})
+                response = self.client.get(
+                    "/teacher_salary/grid?department_id={}".format(
+                        department_id),
+                    headers={"Authorization": API_KEY})
                 self.assertEqual(response.status_code, 200)
                 res_answer = json.loads(response.get_data())
                 self.assertIn("salary_grid", res_answer)
@@ -284,11 +300,11 @@ class TestTeacherSalary(unittest.TestCase):
         # First ensure teacher exists and get its ID
         if not self.teacher_id:
             return  # Skip if teacher creation failed
-        
+
         with open("tests/configs/teacher_salary_grid_config.json", "r") as fr:
             grid_data = json.load(fr)
             grid_data["salaries"][0]["teacher_id"] = self.teacher_id
-        
+
         response = self.client.put("/teacher_salary/grid",
                                    headers={"Authorization": API_KEY},
                                    json=grid_data)
@@ -303,7 +319,7 @@ class TestTeacherSalary(unittest.TestCase):
         # First set base_salary for teacher
         if not self.teacher_id:
             return  # Skip if teacher creation failed
-        
+
         # Set base_salary
         update_data = {
             "_id": self.teacher_id,
@@ -317,7 +333,7 @@ class TestTeacherSalary(unittest.TestCase):
         # Generate salaries
         with open("tests/configs/salary_generate_config.json", "r") as fr:
             generate_data = json.load(fr)
-        
+
         response = self.client.post("/teacher_salary/generate",
                                     headers={"Authorization": API_KEY},
                                     json=generate_data)
@@ -328,7 +344,5 @@ class TestTeacherSalary(unittest.TestCase):
         self.assertGreaterEqual(res_answer["created"], 0)
 
 
-
 if __name__ == '__main__':
     unittest.main()
-
