@@ -35,17 +35,50 @@ class AuthService {
 
   private async initializeAuth() {
     try {
-      const user = await getCurrentUser();
-      if (user) {
-        // Mark as authenticated immediately; load details in background
+      // First check if we have a valid session (this is more reliable than getCurrentUser)
+      const session = await fetchAuthSession({ forceRefresh: false });
+      
+      if (session.tokens?.accessToken) {
+        // We have a valid session, mark as authenticated and load user data
+        console.log('[AuthService] Valid session found, loading user data...');
         this.updateAuthState({ isAuthenticated: true, isLoading: true, error: null });
         this.loadUserData();
       } else {
-        this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+        // No valid session, try getCurrentUser as fallback
+        console.log('[AuthService] No session token, checking getCurrentUser...');
+        try {
+          const user = await getCurrentUser();
+          if (user) {
+            console.log('[AuthService] User found via getCurrentUser, loading data...');
+            this.updateAuthState({ isAuthenticated: true, isLoading: true, error: null });
+            this.loadUserData();
+          } else {
+            console.log('[AuthService] No user found');
+            this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+          }
+        } catch (userError) {
+          // No user found - this is expected if not logged in
+          console.log('[AuthService] getCurrentUser threw error (expected if not logged in):', userError);
+          this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+        }
       }
     } catch (error) {
-      console.log('No authenticated user');
-      this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+      console.log('[AuthService] fetchAuthSession failed, trying getCurrentUser as fallback:', error);
+      // Final fallback - check if there's any stored auth data
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          console.log('[AuthService] User found in fallback check, loading data...');
+          this.updateAuthState({ isAuthenticated: true, isLoading: true, error: null });
+          this.loadUserData();
+        } else {
+          console.log('[AuthService] No user in fallback check');
+          this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+        }
+      } catch (finalError) {
+        console.log('[AuthService] Final check failed - user not authenticated');
+        this.updateAuthState({ user: null, isAuthenticated: false, isLoading: false });
+      }
     }
   }
 

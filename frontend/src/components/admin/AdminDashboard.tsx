@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../../contexts/AuthContext';
 import { ClassesTable } from './ClassesTable';
-import { ReportsView } from './ReportsView';
 import { DepartmentTable } from './DepartmentTable';
 import { SubjectTable } from './SubjectTable';
 import { ClassroomManagement } from './ClassroomManagement';
@@ -11,14 +10,14 @@ import { StudentGuardianAssignment } from './StudentGuardianAssignment';
 import { TeacherDepartmentAssignment } from './TeacherDepartmentAssignment';
 import { SchoolYearManagement } from './SchoolYearManagement';
 import AcademicFoundationManagement from './AcademicFoundationManagement';
-import AcademicSetupWizard from './AcademicSetupWizard';
 import { StudentClassEnrollment } from './StudentClassEnrollment';
 import { YearLevelTimetable } from './YearLevelTimetable';
 import GradingCriteriaTable from './GradingCriteriaTable';
 import { FinancialManagement } from './FinancialManagement';
+import apiService from '../../services/apiService';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'academic-wizard' | 'classes' | 'reports' | 'portals' | 'settings' | 'financial';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
@@ -31,6 +30,19 @@ export function AdminDashboard() {
   const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
   const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
   const [activeClassTab, setActiveClassTab] = useState<ClassManagementTab>('classes');
+  
+  // Overview dropdowns state
+  const [schoolYears, setSchoolYears] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  
+  const [selectedYearId, setSelectedYearId] = useState<string>('');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
+  
+  const [loadingOverview, setLoadingOverview] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -39,10 +51,6 @@ export function AdminDashboard() {
     } catch (error) {
       console.error('Sign out failed:', error);
     }
-  };
-
-  const handlePortalAccess = (portalType: 'teacher' | 'student') => {
-    navigate(`/${portalType}`);
   };
 
   // Handle navigation when tab changes
@@ -54,6 +62,197 @@ export function AdminDashboard() {
     }
     // Guardians now handled within Admin Dashboard (no redirect)
   }, [activeTab, navigate]);
+
+  // Load overview data
+  useEffect(() => {
+    if (activeTab === 'overview') {
+      loadSchoolYears();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedYearId) {
+      loadClasses();
+    } else {
+      setClasses([]);
+      setSelectedClassId('');
+    }
+  }, [selectedYearId]);
+
+  useEffect(() => {
+    if (selectedClassId && selectedYearId) {
+      loadStudentsInClass();
+      loadTeachersInClass();
+    } else {
+      setStudents([]);
+      setTeachers([]);
+      setSelectedStudentId('');
+      setSelectedTeacherId('');
+    }
+  }, [selectedClassId, selectedYearId]);
+
+  const loadSchoolYears = async () => {
+    try {
+      const response = await apiService.getSchoolYears();
+      if (response.success && response.data) {
+        const data = (response.data as any)?.message || response.data;
+        setSchoolYears(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error loading school years:', error);
+    }
+  };
+
+  const loadClasses = async () => {
+    setLoadingOverview(true);
+    try {
+      const response = await apiService.getClasses();
+      if (response.success && response.data) {
+        const allClasses = (response.data as any)?.message || response.data;
+        const classesArray = Array.isArray(allClasses) ? allClasses : [];
+        
+        // Filter classes by year_id (already included in API response)
+        let filteredClasses = classesArray;
+        if (selectedYearId) {
+          filteredClasses = classesArray.filter((cls: any) => {
+            return cls.year_id === selectedYearId;
+          });
+        }
+        
+        // Deduplicate by class_name (same class can appear multiple times for different subjects/terms/periods)
+        const uniqueClasses = new Map<string, any>();
+        filteredClasses.forEach((cls: any) => {
+          if (cls.class_name && !uniqueClasses.has(cls.class_name)) {
+            uniqueClasses.set(cls.class_name, cls);
+          }
+        });
+        
+        setClasses(Array.from(uniqueClasses.values()));
+      }
+    } catch (error) {
+      console.error('Error loading classes:', error);
+    } finally {
+      setLoadingOverview(false);
+    }
+  };
+
+  const loadStudentsInClass = async () => {
+    try {
+      // Get the selected class to find its class_name
+      const selectedClass = classes.find((cls: any) => cls._id === selectedClassId);
+      if (!selectedClass) {
+        setStudents([]);
+        return;
+      }
+      
+      // Get all classes with the same name (in case there are duplicates)
+      const allClassesRes = await apiService.getClasses();
+      if (!allClassesRes.success || !allClassesRes.data) {
+        setStudents([]);
+        return;
+      }
+      
+      const allClasses = (allClassesRes.data as any)?.message || allClassesRes.data;
+      const classesArray = Array.isArray(allClasses) ? allClasses : [];
+      
+      // Filter classes by year and class_name
+      const matchingClasses = classesArray.filter((cls: any) => {
+        return cls.year_id === selectedYearId && cls.class_name === selectedClass.class_name;
+      });
+      
+      const matchingClassIds = matchingClasses.map((cls: any) => cls._id);
+      
+      // Get students enrolled in any of these matching classes
+      const enrollmentsRes = await apiService.getStudentClasses();
+      if (enrollmentsRes.success && enrollmentsRes.data) {
+        const enrollments = (enrollmentsRes.data as any)?.message || enrollmentsRes.data;
+        const enrollmentsArray = Array.isArray(enrollments) ? enrollments : [];
+        
+        // Filter enrollments by matching class IDs
+        const classEnrollments = enrollmentsArray.filter((enrollment: any) => 
+          matchingClassIds.includes(enrollment.class_id)
+        );
+        
+        // Get unique student IDs
+        const studentIds = [...new Set(classEnrollments.map((e: any) => e.student_id))];
+        
+        if (studentIds.length === 0) {
+          setStudents([]);
+          return;
+        }
+        
+        // Fetch all students and filter by IDs
+        const allStudentsRes = await apiService.getStudents();
+        if (allStudentsRes.success && allStudentsRes.data) {
+          const allStudents = (allStudentsRes.data as any)?.message || allStudentsRes.data;
+          const studentsArray = Array.isArray(allStudents) ? allStudents : [];
+          
+          // Filter to only students enrolled in any matching class
+          const studentsData = studentsArray.filter((student: any) => 
+            studentIds.includes(student._id)
+          );
+          
+          setStudents(studentsData);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading students in class:', error);
+      setStudents([]);
+    }
+  };
+
+  const loadTeachersInClass = async () => {
+    try {
+      // Get the selected class to find its class_name
+      const selectedClass = classes.find((cls: any) => cls._id === selectedClassId);
+      if (!selectedClass) {
+        setTeachers([]);
+        return;
+      }
+      
+      // Get all classes with the same name to find all teachers
+      const allClassesRes = await apiService.getClasses();
+      if (!allClassesRes.success || !allClassesRes.data) {
+        setTeachers([]);
+        return;
+      }
+      
+      const allClasses = (allClassesRes.data as any)?.message || allClassesRes.data;
+      const classesArray = Array.isArray(allClasses) ? allClasses : [];
+      
+      // Filter classes by year and class_name
+      const matchingClasses = classesArray.filter((cls: any) => {
+        return cls.year_id === selectedYearId && cls.class_name === selectedClass.class_name;
+      });
+      
+      // Get unique teacher IDs from matching classes
+      const teacherIds = [...new Set(
+        matchingClasses
+          .map((cls: any) => cls.teacher_id)
+          .filter((id: any) => id) // Remove null/undefined
+      )];
+      
+      if (teacherIds.length === 0) {
+        setTeachers([]);
+        return;
+      }
+      
+      // Fetch teacher details
+      const teachersData: any[] = [];
+      for (const teacherId of teacherIds) {
+        const teacherRes = await apiService.getTeacher(teacherId);
+        if (teacherRes.success && teacherRes.data) {
+          const teacherData = (teacherRes.data as any)?.message || teacherRes.data;
+          teachersData.push(teacherData);
+        }
+      }
+      
+      setTeachers(teachersData);
+    } catch (error) {
+      console.error('Error loading teachers in class:', error);
+      setTeachers([]);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -92,12 +291,8 @@ export function AdminDashboard() {
     { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
     { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
     { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
-    { id: 'academic-wizard' as AdminTab, label: 'Academic Setup Wizard', icon: '🧙‍♂️' },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
     { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰' },
-    { id: 'reports' as AdminTab, label: 'Reports', icon: '📊' },
-    { id: 'portals' as AdminTab, label: 'Portal Access', icon: '🚪' },
-    { id: 'settings' as AdminTab, label: 'Settings', icon: '⚙️' },
   ];
 
   const renderTabContent = () => {
@@ -110,57 +305,205 @@ export function AdminDashboard() {
             
             <div style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-              gap: 'var(--space-lg)', 
+              gridTemplateColumns: '1fr 1fr', 
+              gap: 'var(--space-xl)', 
               marginTop: 'var(--space-lg)' 
             }}>
-              <div className="feature" style={{ 
+              {/* Students Section */}
+              <div style={{ 
                 padding: 'var(--space-lg)',
                 backgroundColor: 'var(--surface)',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border)'
               }}>
-                <h3>User Portal Access</h3>
-                <p>Click "Students", "Teachers", or "Guardians" in the sidebar to navigate to those portals.</p>
-                <div style={{ marginTop: 'var(--space-md)' }}>
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>
-                    • <strong>Students</strong> → localhost:3000/student<br/>
-                    • <strong>Teachers</strong> → localhost:3000/teacher<br/>
-                    • <strong>Guardians</strong> → localhost:3000/guardian
-                  </p>
+                <h3 style={{ marginBottom: 'var(--space-md)' }}>👥 Students</h3>
+                
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    School Year
+                  </label>
+                  <select
+                    value={selectedYearId}
+                    onChange={(e) => {
+                      setSelectedYearId(e.target.value);
+                      setSelectedClassId('');
+                      setSelectedStudentId('');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)'
+                    }}
+                  >
+                    <option value="">Select Year</option>
+                    {schoolYears.map((year) => (
+                      <option key={year._id} value={year._id}>
+                        {year.year_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    Class
+                  </label>
+                  <select
+                    value={selectedClassId}
+                    onChange={(e) => {
+                      setSelectedClassId(e.target.value);
+                      setSelectedStudentId('');
+                    }}
+                    disabled={!selectedYearId || loadingOverview}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: selectedYearId ? 'var(--background)' : 'var(--surface)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)',
+                      opacity: selectedYearId ? 1 : 0.6
+                    }}
+                  >
+                    <option value="">Select Class</option>
+                    {classes.map((cls) => (
+                      <option key={cls._id} value={cls._id}>
+                        {cls.class_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    Student
+                  </label>
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    disabled={!selectedClassId}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: selectedClassId ? 'var(--background)' : 'var(--surface)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)',
+                      opacity: selectedClassId ? 1 : 0.6
+                    }}
+                  >
+                    <option value="">Select Student</option>
+                    {students.map((student) => (
+                      <option key={student._id} value={student._id}>
+                        {student.given_name} {student.middle_name || ''} {student.surname}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              
-              <div className="feature" style={{ 
+
+              {/* Teachers Section */}
+              <div style={{ 
                 padding: 'var(--space-lg)',
                 backgroundColor: 'var(--surface)',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border)'
               }}>
-                <h3>Admin Management Tools</h3>
-                <p>Administrative functions for managing school data (stays within admin dashboard).</p>
-                <div style={{ marginTop: 'var(--space-md)' }}>
-                  <button 
-                    className="btn btn--small" 
-                    onClick={() => setActiveTab('classes')}
-                    style={{ marginRight: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}
+                <h3 style={{ marginBottom: 'var(--space-md)' }}>👨‍🏫 Teachers</h3>
+                
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    School Year
+                  </label>
+                  <select
+                    value={selectedYearId}
+                    onChange={(e) => {
+                      setSelectedYearId(e.target.value);
+                      setSelectedClassId('');
+                      setSelectedTeacherId('');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)'
+                    }}
                   >
-                    📚 Manage Classes
-                  </button>
-                  <button 
-                    className="btn btn--small" 
-                    onClick={() => setActiveTab('reports')}
-                    style={{ marginRight: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}
+                    <option value="">Select Year</option>
+                    {schoolYears.map((year) => (
+                      <option key={year._id} value={year._id}>
+                        {year.year_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    Class
+                  </label>
+                  <select
+                    value={selectedClassId}
+                    onChange={(e) => {
+                      setSelectedClassId(e.target.value);
+                      setSelectedTeacherId('');
+                    }}
+                    disabled={!selectedYearId || loadingOverview}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: selectedYearId ? 'var(--background)' : 'var(--surface)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)',
+                      opacity: selectedYearId ? 1 : 0.6
+                    }}
                   >
-                    📊 View Reports
-                  </button>
-                  <button 
-                    className="btn btn--small" 
-                    onClick={() => setActiveTab('settings')}
-                    style={{ marginBottom: 'var(--space-sm)' }}
+                    <option value="">Select Class</option>
+                    {classes.map((cls) => (
+                      <option key={cls._id} value={cls._id}>
+                        {cls.class_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    Teacher
+                  </label>
+                  <select
+                    value={selectedTeacherId}
+                    onChange={(e) => setSelectedTeacherId(e.target.value)}
+                    disabled={!selectedClassId}
+                    style={{
+                      width: '100%',
+                      padding: 'var(--space-sm)',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: selectedClassId ? 'var(--background)' : 'var(--surface)',
+                      color: 'var(--text)',
+                      fontSize: 'var(--text-base)',
+                      opacity: selectedClassId ? 1 : 0.6
+                    }}
                   >
-                    ⚙️ Settings
-                  </button>
+                    <option value="">Select Teacher</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher._id} value={teacher._id}>
+                        {teacher.given_name} {teacher.surname}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -365,8 +708,6 @@ export function AdminDashboard() {
         );
       case 'academic-foundation':
         return <AcademicFoundationManagement />;
-      case 'academic-wizard':
-        return <AcademicSetupWizard />;
       case 'classes':
         if (activeClassTab === 'enrollments') {
           return <StudentClassEnrollment onBack={() => setActiveClassTab('classes')} />;
@@ -380,79 +721,8 @@ export function AdminDashboard() {
             onNavigateToTimetable={() => setActiveClassTab('timetable')}
           />
         );
-      case 'reports':
-        return <ReportsView />;
-      case 'portals':
-        return (
-          <div className="admin-content">
-            <h2>Portal Access</h2>
-            <p>Access different user portals to experience the system from different perspectives.</p>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-              gap: 'var(--space-lg)', 
-              marginTop: 'var(--space-lg)' 
-            }}>
-              <div className="feature" style={{ 
-                padding: 'var(--space-lg)',
-                backgroundColor: 'var(--surface)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)'
-              }}>
-                <h3>Teacher Portal</h3>
-                <p>Access the teacher dashboard to manage classes, students, and grades.</p>
-                <button 
-                  className="btn btn--primary" 
-                  onClick={() => handlePortalAccess('teacher')}
-                  style={{ marginTop: 'var(--space-md)' }}
-                >
-                  Go to Teacher Portal
-                </button>
-              </div>
-              <div className="feature" style={{ 
-                padding: 'var(--space-lg)',
-                backgroundColor: 'var(--surface)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)'
-              }}>
-                <h3>Student Portal</h3>
-                <p>Access the student dashboard to view grades, schedule, and assignments.</p>
-                <button 
-                  className="btn btn--primary" 
-                  onClick={() => handlePortalAccess('student')}
-                  style={{ marginTop: 'var(--space-md)' }}
-                >
-                  Go to Student Portal
-                </button>
-              </div>
-              <div className="feature" style={{ 
-                padding: 'var(--space-lg)',
-                backgroundColor: 'var(--surface)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)'
-              }}>
-                <h3>Guardian Management</h3>
-                <p>Guardian management is now integrated into the Admin Dashboard.</p>
-                <button 
-                  className="btn btn--primary" 
-                  onClick={() => setActiveTab('guardians')}
-                  style={{ marginTop: 'var(--space-md)' }}
-                >
-                  Go to Guardian Management
-                </button>
-              </div>
-            </div>
-          </div>
-        );
       case 'financial':
         return <FinancialManagement />;
-      case 'settings':
-        return (
-          <div className="admin-content">
-            <h2>Settings</h2>
-            <p>System settings and configuration options will be available here.</p>
-          </div>
-        );
       default:
         return (
           <div className="admin-content">

@@ -11,11 +11,8 @@ import { GuardianDashboard } from './components/GuardianDashboard'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
-  // If we're already authenticated, render children even if loading state is true
-  if (isAuthenticated) {
-    return <>{children}</>
-  }
-
+  // Always wait for auth initialization to complete before making routing decisions
+  // This prevents redirecting to login on page refresh when user is still authenticated
   if (isLoading) {
     return (
       <div style={{ 
@@ -31,7 +28,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  // Only redirect to login if we're sure the user is not authenticated (after loading completes)
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  // User is authenticated, render the protected content
+  return <>{children}</>
 }
 
 // Public Route component (redirects to appropriate dashboard if already authenticated)

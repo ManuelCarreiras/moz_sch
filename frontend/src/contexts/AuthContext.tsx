@@ -15,25 +15,55 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
+  // Start with loading state to prevent premature redirects
+  const [authState, setAuthState] = useState<AuthState>(() => {
+    const initialState = authService.getAuthState();
+    // Ensure we start with loading if not yet initialized
+    if (!initialState.isLoading && !initialState.isAuthenticated && !initialState.user) {
+      return { ...initialState, isLoading: true };
+    }
+    return initialState;
+  });
 
   useEffect(() => {
     // Subscribe to auth state changes
     const unsubscribe = authService.subscribe(setAuthState);
     
-    // Force a re-check of authentication state on mount
+    // Force a re-check of authentication state on mount to ensure we have the latest state
+    // This is important for page refreshes
     const checkAuth = async () => {
       try {
-        const currentState = authService.getAuthState();
+        // Get the current state from the service
+        let currentState = authService.getAuthState();
+        
+        // If not loading and not authenticated, we might still be initializing
+        // Set loading to true to prevent premature redirects
+        if (!currentState.isLoading && !currentState.isAuthenticated && !currentState.user) {
+          currentState = { ...currentState, isLoading: true };
+          setAuthState(currentState);
+        } else {
+          setAuthState(currentState);
+        }
+        
+        // If still loading, set up a polling mechanism to wait for initialization
         if (currentState.isLoading) {
-          // If still loading, wait a bit and check again
-          setTimeout(() => {
+          const checkInterval = setInterval(() => {
             const updatedState = authService.getAuthState();
             setAuthState(updatedState);
+            
+            // Stop polling once loading is complete
+            if (!updatedState.isLoading) {
+              clearInterval(checkInterval);
+            }
           }, 100);
+          
+          // Cleanup interval after 5 seconds max (shouldn't take that long)
+          setTimeout(() => clearInterval(checkInterval), 5000);
         }
       } catch (error) {
         console.error('Error checking auth state:', error);
+        // On error, mark as not loading so we don't hang forever
+        setAuthState(prev => ({ ...prev, isLoading: false }));
       }
     };
     
