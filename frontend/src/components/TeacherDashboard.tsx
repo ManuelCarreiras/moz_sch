@@ -425,7 +425,7 @@ export function TeacherDashboard() {
 
             {/* Gradebook */}
             {selectedClassId ? (
-              <Gradebook classId={selectedClassId} />
+              <Gradebook classId={selectedClassId} termId={filterTerm || undefined} />
             ) : (
               <div style={{ 
                 padding: '2rem', 

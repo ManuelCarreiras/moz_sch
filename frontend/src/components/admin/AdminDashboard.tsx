@@ -14,11 +14,12 @@ import { StudentClassEnrollment } from './StudentClassEnrollment';
 import { YearLevelTimetable } from './YearLevelTimetable';
 import GradingCriteriaTable from './GradingCriteriaTable';
 import { FinancialManagement } from './FinancialManagement';
+import AssessmentTypeTable from './AssessmentTypeTable';
 import apiService from '../../services/apiService';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
 type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial';
-type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria';
+type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria' | 'assessment-types';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
 
@@ -632,6 +633,21 @@ export function AdminDashboard() {
           return <GradingCriteriaTable onBack={() => setActiveAcademicTab('overview')} />;
         }
         
+        if (activeAcademicTab === 'assessment-types') {
+          return (
+            <div className="admin-content">
+              <button 
+                className="btn btn--secondary"
+                onClick={() => setActiveAcademicTab('overview')}
+                style={{ marginBottom: 'var(--space-lg)' }}
+              >
+                ← Back to Academic Setup
+              </button>
+              <AssessmentTypeTable />
+            </div>
+          );
+        }
+        
         return (
           <div className="admin-content">
             <h2>Academic Setup</h2>
@@ -690,6 +706,17 @@ export function AdminDashboard() {
                   onClick={() => setActiveAcademicTab('grading-criteria')}
                 >
                   Manage Grading Criteria
+                </button>
+              </div>
+
+              <div className="feature-card">
+                <h3>📝 Assessment Types</h3>
+                <p>Define types of assignments and evaluations (Homework, Quiz, Test, Project, etc.)</p>
+                <button 
+                  className="btn btn--primary"
+                  onClick={() => setActiveAcademicTab('assessment-types')}
+                >
+                  Manage Assessment Types
                 </button>
               </div>
 

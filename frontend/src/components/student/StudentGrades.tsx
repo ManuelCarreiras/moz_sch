@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import apiService from '../../services/apiService';
 import { useUser } from '../../contexts/AuthContext';
 
@@ -60,6 +60,19 @@ interface StudentAssignment {
   year_id?: string;
 }
 
+interface SubjectGradeBreakdown {
+  subject_id: string;
+  subject_name: string;
+  class_name: string;
+  term_id: string;
+  term_number: number;
+  year_name: string;
+  tests_grade: number | null; // 0-20 scale
+  homework_grade: number | null; // 0-20 scale
+  attendance_grade: number | null; // 0-20 scale
+  final_term_grade: number | null; // 0-20 scale
+}
+
 interface StudentInfo {
   _id: string;
   given_name: string;
@@ -73,6 +86,7 @@ const StudentGrades: React.FC = () => {
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   const [assignments, setAssignments] = useState<StudentAssignment[]>([]);
+  const [subjectGrades, setSubjectGrades] = useState<SubjectGradeBreakdown[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -81,6 +95,7 @@ const StudentGrades: React.FC = () => {
   const [selectedStudent, setSelectedStudent] = useState<StudentInfo | null>(null);
   const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentStudentId, setCurrentStudentId] = useState<string | null>(null);
   
   // Filters
   const [filterYear, setFilterYear] = useState<string>('');
@@ -89,11 +104,37 @@ const StudentGrades: React.FC = () => {
   const [filterClass, setFilterClass] = useState<string>('');
   const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
 
+  // Fetch current student's database ID when user loads
   useEffect(() => {
+    const fetchCurrentStudent = async () => {
+      if (!user || isAdmin) return; // Skip for admins
+      
+      try {
+        // Try to find student by username or email
+        const studentsResp = await apiService.getStudents();
+        if (studentsResp.success && studentsResp.data) {
+          const students = (studentsResp.data as any)?.message || [];
+          const student = students.find((s: any) => 
+            s.username === user.username || s.email === user.email
+          );
+          
+          if (student) {
+            console.log('[StudentGrades] Found student record:', student._id, 'for username:', user.username);
+            setCurrentStudentId(student._id);
+          } else {
+            console.warn('[StudentGrades] No student record found for username:', user.username, 'email:', user.email);
+          }
+        }
+      } catch (error) {
+        console.error('[StudentGrades] Error fetching student record:', error);
+      }
+    };
+    
     if (user?.id) {
+      fetchCurrentStudent();
       loadInitialData();
     }
-  }, [user?.id]);
+  }, [user?.id, user?.username, user?.email, isAdmin]);
 
   // Reset dependent filters when parent filters change
   useEffect(() => {
@@ -126,6 +167,164 @@ const StudentGrades: React.FC = () => {
     setSelectedStudent(null);
   }, [filterYear, filterTerm, filterClass]);
 
+  const calculateSubjectGrades = useCallback(async (studentId: string) => {
+    if (!filterTerm) {
+      setSubjectGrades([]);
+      return;
+    }
+
+    try {
+      // Always fetch assignments for this student to calculate component breakdown
+      const params = new URLSearchParams();
+      if (filterYear) params.append('year_id', filterYear);
+      if (filterTerm) params.append('term_id', filterTerm);
+      if (filterClass) params.append('class_name', filterClass);
+      
+      const queryString = params.toString();
+      const endpoint = queryString ? `/student/assignments?${queryString}` : '/student/assignments';
+      const assignmentsResponse = await apiService.get(endpoint);
+      
+      let studentAssignments: StudentAssignment[] = [];
+      if (assignmentsResponse.success && assignmentsResponse.data) {
+        const assignmentsData = (assignmentsResponse.data as any)?.assignments || [];
+        studentAssignments = assignmentsData.filter((sa: StudentAssignment) => 
+          sa.student_id === studentId
+        );
+      }
+
+      console.log('[calculateSubjectGrades] Found assignments:', studentAssignments.length);
+      
+      // Fetch term grades for final grade (if they exist)
+      const termGradesResp = await apiService.getTermGrades({
+        student_id: studentId,
+        term_id: filterTerm
+      });
+
+      const termGradesMap = new Map<string, any>();
+      if (termGradesResp.success && termGradesResp.data) {
+        const termGrades = (termGradesResp.data as any)?.term_grades || [];
+        console.log('[calculateSubjectGrades] Found term grades:', termGrades.length);
+        termGrades.forEach((tg: any) => {
+          termGradesMap.set(tg.subject_id, tg);
+        });
+      } else {
+        console.log('[calculateSubjectGrades] No term grades found (this is OK - they calculate automatically when assignments are graded)');
+      }
+      
+      // Get test and homework assessment types
+      const testType = assessmentTypes.find(t => t.type_name === 'Test');
+      const homeworkType = assessmentTypes.find(t => t.type_name === 'Homework');
+      
+      // Group assignments by subject
+      const subjectMap = new Map<string, {
+        subject_id: string;
+        subject_name: string;
+        class_name: string;
+        term_id: string;
+        term_number: number;
+        year_name: string;
+        assignments: StudentAssignment[];
+      }>();
+      
+      studentAssignments.forEach(assignment => {
+        const subjectId = assignment.assignment.subject_id;
+        const key = `${subjectId}-${assignment.class_name}`;
+        
+        if (!subjectMap.has(key)) {
+          subjectMap.set(key, {
+            subject_id: subjectId,
+            subject_name: assignment.subject_name,
+            class_name: assignment.class_name,
+            term_id: assignment.assignment.term_id,
+            term_number: assignment.term_number,
+            year_name: assignment.year_name,
+            assignments: []
+          });
+        }
+        
+        subjectMap.get(key)!.assignments.push(assignment);
+      });
+      
+      console.log('[calculateSubjectGrades] Grouped into subjects:', subjectMap.size);
+      
+      // Build subject grade breakdown
+      const breakdown: SubjectGradeBreakdown[] = [];
+      
+      for (const [, subjectData] of subjectMap.entries()) {
+        const subjectAssignments = subjectData.assignments;
+        
+        // Calculate Tests component (0-20 scale)
+        let testsGrade: number | null = null;
+        if (testType) {
+          const testAssignments = subjectAssignments.filter(a => 
+            a.assessment_type_name === 'Test' && a.score !== null && a.status === 'graded'
+          );
+          
+          if (testAssignments.length > 0) {
+            let totalPercentage = 0;
+            testAssignments.forEach(a => {
+              const percentage = (a.score! / a.assignment.max_score) * 100;
+              totalPercentage += percentage;
+            });
+            const avgPercentage = totalPercentage / testAssignments.length;
+            testsGrade = (avgPercentage / 100) * 20; // Convert to 0-20 scale
+          }
+        }
+        
+        // Calculate Homework component (0-20 scale) - completion based
+        let homeworkGrade: number | null = null;
+        if (homeworkType) {
+          const homeworkAssignments = subjectAssignments.filter(a => 
+            a.assessment_type_name === 'Homework'
+          );
+          const completedHomework = subjectAssignments.filter(a => 
+            a.assessment_type_name === 'Homework' && a.status === 'graded'
+          );
+          
+          if (homeworkAssignments.length > 0) {
+            const completionPercentage = (completedHomework.length / homeworkAssignments.length) * 100;
+            homeworkGrade = (completionPercentage / 100) * 20; // Convert to 0-20 scale
+          }
+        }
+        
+        // Attendance - we'll need to fetch this separately or calculate from attendance records
+        // For now, set to null and we can enhance later
+        const attendanceGrade: number | null = null;
+        
+        // Get final term grade if it exists
+        const termGrade = termGradesMap.get(subjectData.subject_id);
+        const finalTermGrade = termGrade?.final_grade ? parseFloat(termGrade.final_grade) : null;
+        
+        breakdown.push({
+          subject_id: subjectData.subject_id,
+          subject_name: subjectData.subject_name,
+          class_name: subjectData.class_name,
+          term_id: subjectData.term_id,
+          term_number: subjectData.term_number,
+          year_name: subjectData.year_name,
+          tests_grade: testsGrade,
+          homework_grade: homeworkGrade,
+          attendance_grade: attendanceGrade,
+          final_term_grade: finalTermGrade
+        });
+      }
+      
+      // Apply filters
+      let filtered = breakdown;
+      if (filterSubject) {
+        filtered = filtered.filter(sg => sg.subject_name === filterSubject);
+      }
+      if (filterClass) {
+        filtered = filtered.filter(sg => sg.class_name === filterClass);
+      }
+      
+      setSubjectGrades(filtered);
+    } catch (error) {
+      console.error('Error calculating subject grades:', error);
+      setSubjectGrades([]);
+    }
+  }, [filterTerm, filterSubject, filterClass, assessmentTypes, filterYear]);
+
   // Reload assignments when filters change or student is selected
   useEffect(() => {
     console.log('[StudentGrades] Filter changed:', { filterYear, filterTerm, filterSubject, filterClass, selectedStudent: selectedStudent?._id });
@@ -150,6 +349,21 @@ const StudentGrades: React.FC = () => {
       }
     }
   }, [filterYear, filterTerm, filterSubject, filterClass, selectedStudent]);
+
+  // Calculate subject grades when term is selected (function will fetch assignments if needed)
+  useEffect(() => {
+    if (filterTerm && assessmentTypes.length > 0) {
+      const studentId = isAdmin && selectedStudent 
+        ? selectedStudent._id 
+        : (currentStudentId || user?.id); // Use database student_id if available
+      if (studentId) {
+        console.log('[StudentGrades] Calculating grades for student_id:', studentId);
+        calculateSubjectGrades(studentId);
+      }
+    } else if (!filterTerm) {
+      setSubjectGrades([]);
+    }
+  }, [filterTerm, selectedStudent, currentStudentId, user?.id, isAdmin, calculateSubjectGrades, assessmentTypes.length]);
 
   const loadInitialData = async () => {
     try {
@@ -356,6 +570,7 @@ const StudentGrades: React.FC = () => {
       console.error('Error loading assignments:', error);
     }
   };
+
 
   const getFilteredAssignments = () => {
     let filtered = assignments;
@@ -681,84 +896,180 @@ const StudentGrades: React.FC = () => {
       </div>
 
 
-      {/* Individual Assignment Grades Section */}
-      {(!isAdmin || selectedStudent) && (
-        <div>
-          <h3 style={{ marginBottom: '1rem' }}>📝 Individual Assignment Grades</h3>
+      {/* Term Grades by Subject Section */}
+      {(!isAdmin || selectedStudent) && filterTerm && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>📊 Term Grades by Subject</h3>
         
-        {filteredAssignments.length === 0 ? (
-          <div style={{ 
-            padding: '2rem', 
-            textAlign: 'center', 
-            background: 'var(--card)',
-            borderRadius: '8px',
-            color: 'var(--muted)'
-          }}>
-            No graded assignments yet
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
+          {subjectGrades.length === 0 ? (
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center', 
               background: 'var(--card)',
               borderRadius: '8px',
-              overflow: 'hidden'
+              color: 'var(--muted)'
             }}>
-              <thead>
-                <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Assignment</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Subject</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Year</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Score</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Percentage</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Graded On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAssignments.map((sa) => {
-                  const percentage = sa.score !== null 
-                    ? ((sa.score / sa.assignment.max_score) * 100).toFixed(1)
-                    : '-';
-                  
-                  return (
-                    <tr key={sa._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '1rem' }}>
-                        <div style={{ fontWeight: 600 }}>{sa.assignment.title}</div>
-                        {sa.assessment_type_name && (
-                          <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                            {sa.assessment_type_name}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: '1rem' }}>{sa.subject_name}</td>
-                      <td style={{ padding: '1rem' }}>{sa.class_name}</td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>{sa.year_name}</td>
-                      <td style={{ 
-                        padding: '1rem', 
-                        textAlign: 'center',
-                        fontWeight: 600
-                      }}>
-                        {sa.score !== null ? `${sa.score} / ${sa.assignment.max_score}` : '-'}
-                      </td>
-                      <td style={{ 
-                        padding: '1rem', 
-                        textAlign: 'center',
-                        color: getGradeColor((parseFloat(percentage) / 100) * 20)
-                      }}>
-                        {percentage !== '-' ? `${percentage}%` : '-'}
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>
-                        {formatDate(sa.graded_date)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+              {filterTerm ? (
+                <div>
+                  <p>No grades found for this term.</p>
+                  <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--muted)' }}>
+                    Term grades are calculated automatically when assignments are graded.
+                    {filterSubject && ' Make sure grading criteria are set up for this subject.'}
+                  </p>
+                </div>
+              ) : (
+                'Please select a term to view grades'
+              )}
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                background: 'var(--card)',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}>
+                <thead>
+                  <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>Subject</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Tests</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Homework</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Attendance</th>
+                    <th style={{ padding: '1rem', textAlign: 'center', background: 'rgba(0, 123, 255, 0.1)' }}>Final Term Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjectGrades.map((sg) => {
+                    const getGradeDisplay = (grade: number | null) => {
+                      if (grade === null) return <span style={{ color: 'var(--muted)' }}>-</span>;
+                      const color = getGradeColor(grade);
+                      return (
+                        <span style={{ 
+                          fontWeight: 600, 
+                          color: color,
+                          fontSize: '1.1rem'
+                        }}>
+                          {grade.toFixed(2)} / 20
+                        </span>
+                      );
+                    };
+                    
+                    return (
+                      <tr key={`${sg.subject_id}-${sg.term_id}-${sg.class_name}`} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '1rem', fontWeight: 600 }}>{sg.subject_name}</td>
+                        <td style={{ padding: '1rem' }}>{sg.class_name}</td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          {getGradeDisplay(sg.tests_grade)}
+                        </td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          {getGradeDisplay(sg.homework_grade)}
+                        </td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          {getGradeDisplay(sg.attendance_grade)}
+                        </td>
+                        <td style={{ 
+                          padding: '1rem', 
+                          textAlign: 'center',
+                          background: sg.final_term_grade !== null ? getGradeColor(sg.final_term_grade!) + '20' : 'transparent',
+                          fontWeight: 700,
+                          fontSize: '1.2rem'
+                        }}>
+                          {sg.final_term_grade !== null ? (
+                            <span style={{ color: getGradeColor(sg.final_term_grade) }}>
+                              {sg.final_term_grade.toFixed(2)} / 20
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--muted)' }}>Not calculated</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Individual Assignment Grades Section (Optional - can be collapsed) */}
+      {(!isAdmin || selectedStudent) && filteredAssignments.length > 0 && (
+        <div style={{ marginTop: '2rem' }}>
+          <details style={{ cursor: 'pointer' }}>
+            <summary style={{ 
+              marginBottom: '1rem', 
+              fontSize: '1.1rem', 
+              fontWeight: 600,
+              padding: '0.5rem',
+              cursor: 'pointer'
+            }}>
+              📝 Individual Assignment Grades ({filteredAssignments.length})
+            </summary>
+        
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                background: 'var(--card)',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}>
+                <thead>
+                  <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>Assignment</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>Subject</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Year</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Score</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Percentage</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>Graded On</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAssignments.map((sa) => {
+                    const percentage = sa.score !== null 
+                      ? ((sa.score / sa.assignment.max_score) * 100).toFixed(1)
+                      : '-';
+                    
+                    return (
+                      <tr key={sa._id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '1rem' }}>
+                          <div style={{ fontWeight: 600 }}>{sa.assignment.title}</div>
+                          {sa.assessment_type_name && (
+                            <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
+                              {sa.assessment_type_name}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ padding: '1rem' }}>{sa.subject_name}</td>
+                        <td style={{ padding: '1rem' }}>{sa.class_name}</td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>{sa.year_name}</td>
+                        <td style={{ 
+                          padding: '1rem', 
+                          textAlign: 'center',
+                          fontWeight: 600
+                        }}>
+                          {sa.score !== null ? `${sa.score} / ${sa.assignment.max_score}` : '-'}
+                        </td>
+                        <td style={{ 
+                          padding: '1rem', 
+                          textAlign: 'center',
+                          color: getGradeColor((parseFloat(percentage) / 100) * 20)
+                        }}>
+                          {percentage !== '-' ? `${percentage}%` : '-'}
+                        </td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          {formatDate(sa.graded_date)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </details>
         </div>
       )}
 

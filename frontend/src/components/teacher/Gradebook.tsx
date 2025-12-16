@@ -22,6 +22,7 @@ interface StudentRow {
   student_name: string;
   grades: Grade[];
   year_average: number | null; // 0-20 scale
+  term_grade?: number | null; // 0-20 scale
 }
 
 interface GradebookData {
@@ -52,21 +53,33 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
   const [editingCell, setEditingCell] = useState<{ studentId: string; assignmentId: string } | null>(null);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('');
   const [filterAssessmentType, setFilterAssessmentType] = useState<string>('');
+  const [termGrades, setTermGrades] = useState<Map<string, number>>(new Map()); // student_id -> term_grade
 
-  useEffect(() => {
-    loadGradebook();
-    loadAssessmentTypes();
-  }, [classId, termId]);
-  
-  useEffect(() => {
-    // Auto-select first assignment when gradebook loads
-    if (gradebook?.assignments && gradebook.assignments.length > 0 && !selectedAssignmentId) {
-      const filteredAssignments = getFilteredAssignments();
-      if (filteredAssignments.length > 0) {
-        setSelectedAssignmentId(filteredAssignments[0]._id);
+  const loadTermGrades = useCallback(async () => {
+    if (!termId || !classId) return;
+    
+    try {
+      const response = await apiService.getTermGrades({
+        class_id: classId,
+        term_id: termId
+      });
+      
+      if (response.success && response.data) {
+        const grades = (response.data as any)?.term_grades || [];
+        const gradeMap = new Map<string, number>();
+        
+        grades.forEach((grade: any) => {
+          if (grade.student_id && grade.final_grade !== null && grade.final_grade !== undefined) {
+            gradeMap.set(grade.student_id, parseFloat(grade.final_grade));
+          }
+        });
+        
+        setTermGrades(gradeMap);
       }
+    } catch (error) {
+      console.error('Error loading term grades:', error);
     }
-  }, [gradebook, filterAssessmentType]);
+  }, [termId, classId]);
 
   const loadGradebook = async () => {
     try {
@@ -110,6 +123,38 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
     return gradebook.assignments;
   };
 
+  useEffect(() => {
+    loadGradebook();
+    loadAssessmentTypes();
+  }, [classId, termId]);
+
+  useEffect(() => {
+    if (termId && classId) {
+      loadTermGrades();
+    } else {
+      setTermGrades(new Map());
+    }
+  }, [termId, classId, loadTermGrades]);
+  
+  useEffect(() => {
+    // Auto-select first assignment when gradebook loads
+    if (gradebook?.assignments && gradebook.assignments.length > 0 && !selectedAssignmentId) {
+      const filteredAssignments = getFilteredAssignments();
+      if (filteredAssignments.length > 0) {
+        setSelectedAssignmentId(filteredAssignments[0]._id);
+      }
+    }
+  }, [gradebook, filterAssessmentType]);
+
+  const getGradeColor = (grade: number): string => {
+    // Convert 0-20 scale to percentage for color coding
+    const percentage = (grade / 20) * 100;
+    if (percentage >= 80) return 'rgba(40, 167, 69, 0.2)'; // Green (16+/20)
+    if (percentage >= 70) return 'rgba(23, 162, 184, 0.2)'; // Blue (14-15.9/20)
+    if (percentage >= 60) return 'rgba(255, 193, 7, 0.2)'; // Yellow (12-13.9/20)
+    return 'rgba(220, 53, 69, 0.2)'; // Red (<12/20)
+  };
+
   const handleScoreChange = useCallback(async (
     studentId: string,
     assignmentId: string,
@@ -138,6 +183,10 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
       if (response.success) {
         // Reload gradebook to get updated averages
         await loadGradebook();
+        // Reload term grades as they may have changed
+        if (termId && classId) {
+          await loadTermGrades();
+        }
       } else {
         alert('Error saving grade: ' + (response.message || response.error));
       }
@@ -210,6 +259,10 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
       
       if (response.success) {
         await loadGradebook();
+        // Reload term grades as they may have changed
+        if (termId && classId) {
+          await loadTermGrades();
+        }
       } else {
         alert('Error updating status: ' + (response.message || response.error));
       }
@@ -338,12 +391,17 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                   <th style={{ padding: '1rem', textAlign: 'center', minWidth: '150px' }}>Score</th>
                   <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>Percentage</th>
                   <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>Status</th>
+                  {termId && (
+                    <th style={{ padding: '1rem', textAlign: 'center', minWidth: '140px', background: 'rgba(0, 123, 255, 0.1)' }}>
+                      Term Grade
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {gradebook.students.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
+                    <td colSpan={termId ? 5 : 4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
                       No students enrolled in this class
                     </td>
                   </tr>
@@ -353,6 +411,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                     const isEditing = editingCell?.studentId === student.student_id && 
                                     editingCell?.assignmentId === grade.assignment_id;
                     const percentage = grade.score !== null ? ((grade.score / selectedAssignment.max_score) * 100).toFixed(1) : null;
+                    const termGrade = termGrades.get(student.student_id);
                     
                     return (
                       <tr key={student.student_id} style={{ borderBottom: '1px solid var(--border)' }}>
@@ -474,6 +533,29 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                             <option value="late" style={{ background: '#dc3545', color: 'white' }}>Late</option>
                           </select>
                         </td>
+                        {termId && (
+                          <td style={{ 
+                            padding: '1rem', 
+                            textAlign: 'center',
+                            background: termGrade !== undefined && termGrade !== null 
+                              ? getGradeColor(termGrade) 
+                              : 'transparent'
+                          }}>
+                            {termGrade !== undefined && termGrade !== null ? (
+                              <div style={{ 
+                                fontSize: '1.2rem', 
+                                fontWeight: 700, 
+                                color: 'var(--text)'
+                              }}>
+                                {termGrade.toFixed(2)} / 20
+                              </div>
+                            ) : (
+                              <span style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+                                Not calculated
+                              </span>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     );
                   })
@@ -507,8 +589,8 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
             <strong style={{ color: 'var(--text)' }}>How Grading Works:</strong>
             <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
               • Each assignment has a max score and weight<br/>
-              • Year average is calculated on a 0-20 scale<br/>
-              • Weighted by assignment importance<br/>
+              • Term grade is calculated on a 0-20 scale using grading criteria<br/>
+              • Weighted by tests, homework, and attendance<br/>
               • Updates automatically when you enter grades
             </div>
           </div>
