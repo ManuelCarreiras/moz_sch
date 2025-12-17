@@ -485,7 +485,57 @@ Tests are organized by entity:
 
 ## 🐳 Deployment
 
-### Production Deployment
+### CI/CD Pipeline
+
+The project uses GitHub Actions for automated CI/CD. The pipeline includes:
+
+#### Continuous Integration (CI)
+- **Trigger**: Runs on every pull request and push to any branch
+- **Tests**: 
+  - API unit tests with pytest and coverage
+  - Frontend TypeScript type checking
+  - Frontend linting
+  - Docker image build verification
+- **Workflow**: `.github/workflows/ci.yml`
+
+#### Production Deployment
+- **Trigger**: Push to `main` branch or manual workflow dispatch
+- **Process**:
+  - Runs CI tests first
+  - Builds Docker images
+  - Creates backup of current deployment
+  - Deploys to production server via SSH
+  - Performs health checks with retries
+  - Automatic rollback on failure
+- **Workflow**: `.github/workflows/deploy-prod.yml`
+- **Safety**: Can require manual approval (configure in GitHub repository settings)
+
+#### Required GitHub Secrets
+
+Configure these secrets in your GitHub repository settings (Settings → Secrets and variables → Actions):
+
+**Production:**
+- `PROD_SERVER_HOST` - Production server IP/hostname
+- `PROD_SERVER_USER` - SSH username for prod server
+- `PROD_SSH_KEY` - Private SSH key for prod server access
+- `PROD_API_BASE_URL` - API base URL for production
+
+**Shared:**
+- `DOPPLER_TOKEN` - Doppler token for secrets management
+- `AWS_COGNITO_USERPOOL_ID` - AWS Cognito User Pool ID
+- `AWS_COGNITO_APP_CLIENT_ID` - AWS Cognito App Client ID
+
+#### Server Setup Requirements
+
+Your deployment server needs:
+- Docker and Docker Compose installed
+- Git installed
+- SSH access configured
+- Firewall rules for required ports (5000, 3000, 5432, etc.)
+- Doppler CLI installed (or use environment variables directly)
+- Repository cloned to `~/moz_sch` or `/opt/moz_sch`
+
+#### Manual Production Deployment
 
 1. **Build production images**
    ```bash

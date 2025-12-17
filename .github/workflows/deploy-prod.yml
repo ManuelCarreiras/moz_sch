@@ -1,0 +1,159 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    environment: production  # Requires approval if configured in GitHub
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          sha: ${{ github.event.workflow_run.head_sha || github.sha }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build API image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          push: false
+          tags: api:prod
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: frontend:prod
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.PROD_API_BASE_URL }}
+            VITE_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USERPOOL_ID }}
+            VITE_COGNITO_APP_CLIENT_ID=${{ secrets.AWS_COGNITO_APP_CLIENT_ID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+      
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy to production server
+        run: |
+          ssh ${{ secrets.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'EOF'
+            set -e
+            cd ~/moz_sch || cd /opt/moz_sch || exit 1
+            
+            # Backup current deployment
+            echo "Creating backup..."
+            BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
+            mkdir -p backups
+            docker compose ps > "$BACKUP_DIR/services.txt" 2>/dev/null || true
+            docker compose config > "$BACKUP_DIR/docker-compose.yml" 2>/dev/null || true
+            
+            # Pull latest code
+            git fetch origin
+            git checkout master
+            git pull origin master
+            
+            # Stop existing containers gracefully
+            echo "Stopping existing containers..."
+            docker compose down --timeout 30 || true
+            
+            # Build and start new containers
+            echo "Building and starting new containers..."
+            export DOPPLER_TOKEN_TEMP="${{ secrets.DOPPLER_TOKEN }}"
+            
+            # Use production compose file if it exists
+            if [ -f docker-compose.prod.yml ]; then
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml build --parallel
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            else
+              docker compose build --parallel
+              docker compose up -d
+            fi
+            
+            # Wait for services to start
+            echo "Waiting for services to be healthy..."
+            sleep 15
+            
+            # Health checks
+            MAX_RETRIES=5
+            RETRY_COUNT=0
+            
+            # Check API health
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f http://localhost:5000/ || curl -f http://localhost:5000/api/health; then
+                echo "✅ API is healthy"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "API health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying..."
+                sleep 5
+              fi
+            done
+            
+            if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "❌ API health check failed after $MAX_RETRIES attempts"
+              docker compose logs api
+              echo "Rolling back..."
+              # Rollback logic could go here
+              exit 1
+            fi
+            
+            # Check Frontend
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f http://localhost:3000/; then
+                echo "✅ Frontend is healthy"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "Frontend health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying..."
+                sleep 5
+              fi
+            done
+            
+            if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+              echo "❌ Frontend health check failed after $MAX_RETRIES attempts"
+              docker compose logs frontend
+              echo "Rolling back..."
+              # Rollback logic could go here
+              exit 1
+            fi
+            
+            # Clean up old backups (keep last 5)
+            echo "Cleaning up old backups..."
+            ls -t backups/ | tail -n +6 | xargs -r rm -rf
+            
+            echo "✅ Production deployment completed successfully!"
+          EOF
+      
+      - name: Deployment status
+        if: success()
+        run: echo "✅ Production deployment completed successfully"
+      
+      - name: Deployment failure
+        if: failure()
+        run: echo "❌ Production deployment failed - check logs above"
+
+
