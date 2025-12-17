@@ -1,5 +1,5 @@
 name: CI
-
+#this workflow is triggered on pull requests to the master or stg branches
 on:
   pull_request:
     branches:
