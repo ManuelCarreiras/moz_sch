@@ -20,6 +20,8 @@ services:
 
   frontend:
     restart: always
+    ports:
+      - "80:80"
     deploy:
       resources:
         limits:
