@@ -83,6 +83,9 @@ jobs:
             echo "Stopping existing containers..."
             docker compose down --timeout 30 || true
             
+            # Wait for ports to fully release (prevents "address already in use" errors)
+            sleep 5
+            
             # Build and start new containers using Doppler to inject all env vars
             echo "Building and starting new containers..."
             export DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}"
