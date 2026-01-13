@@ -1,14 +1,16 @@
 name: CI
-#this workflow is triggered on pull requests to the master or stg branches
+# This workflow runs on all branches (dev, stg, master)
 on:
   pull_request:
     branches:
       - master
       - stg
+      - dev
   push:
     branches:
       - master
       - stg
+      - dev
 
 jobs:
   test-api-unittests:
@@ -141,8 +143,9 @@ jobs:
           file: ./api/Dockerfile
           push: false
           tags: api:test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          load: true
+          # cache-from: type=gha  # Temporarily disabled due to GitHub Actions cache issues
+          # cache-to: type=gha,mode=max
       
       - name: Build Frontend image
         uses: docker/build-push-action@v5
@@ -151,10 +154,11 @@ jobs:
           file: ./frontend/Dockerfile
           push: false
           tags: frontend:test
+          load: true
           build-args: |
             VITE_API_BASE_URL=http://localhost:5000
             VITE_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USERPOOL_ID }}
             VITE_COGNITO_APP_CLIENT_ID=${{ secrets.AWS_COGNITO_APP_CLIENT_ID }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha  # Temporarily disabled due to GitHub Actions cache issues
+          # cache-to: type=gha,mode=max
 

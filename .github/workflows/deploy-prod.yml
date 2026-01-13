@@ -24,15 +24,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
+      # NOTE: GitHub Actions Cache temporarily disabled due to GitHub infrastructure issues (502/504 errors)
+      # Re-enable cache-from/cache-to when GitHub resolves the issue
       - name: Build API image
         uses: docker/build-push-action@v5
         with:
           context: ./api
           file: ./api/Dockerfile
           push: false
+          load: true
           tags: api:prod
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
       
       - name: Build Frontend image
         uses: docker/build-push-action@v5
@@ -40,13 +43,14 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: false
+          load: true
           tags: frontend:prod
           build-args: |
             VITE_API_BASE_URL=${{ secrets.PROD_API_BASE_URL }}
             VITE_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USERPOOL_ID }}
             VITE_COGNITO_APP_CLIENT_ID=${{ secrets.AWS_COGNITO_APP_CLIENT_ID }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
       
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
