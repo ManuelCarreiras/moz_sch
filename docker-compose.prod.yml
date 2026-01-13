@@ -35,6 +35,8 @@ services:
 
   postgres-db:
     restart: always
+    ports:
+      - "127.0.0.1:5432:5432"  # Only accessible via SSH tunnel
     deploy:
       resources:
         limits:
@@ -46,4 +48,15 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  postgres-adminer:
+    ports:
+      - "127.0.0.1:8080:8080"  # Only accessible via SSH tunnel
 
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"  # Only accessible via SSH tunnel
+
+  minio:
+    ports:
+      - "127.0.0.1:9000:9000"  # Only accessible via SSH tunnel
+      - "127.0.0.1:9001:9001"  # Minio console only via SSH tunnel
