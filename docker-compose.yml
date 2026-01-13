@@ -1,9 +1,11 @@
 services:
   postgres-db:
+    image: postgres:17
     container_name: postgres-db
-    build:
-      context: .
-      dockerfile: ./Dockerfile.postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-app_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-app_password}
+      - POSTGRES_DB=${POSTGRES_DB:-app_db}
     ports:
       - 5432:5432
     volumes:
