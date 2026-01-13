@@ -9,9 +9,6 @@ services:
         limits:
           cpus: '2'
           memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 1G
     logging:
       driver: "json-file"
       options:
@@ -20,8 +17,8 @@ services:
 
   frontend:
     restart: always
-    ports: !reset
-      - "80:80"  # Reset base port 3000, use 80 for production
+    ports:
+      - "80:80"
     deploy:
       resources:
         limits:
@@ -35,8 +32,6 @@ services:
 
   postgres-db:
     restart: always
-    ports: !reset
-      - "127.0.0.1:5432:5432"  # Reset base, bind to localhost only
     deploy:
       resources:
         limits:
@@ -47,13 +42,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-  postgres-adminer:
-    ports: !reset
-      - "127.0.0.1:8080:8080"  # Reset base, bind to localhost only
-
-  redis:
-    ports: !reset []  # Reset base ports - internal only
-
-  minio:
-    ports: !reset []  # Reset base ports - internal only
