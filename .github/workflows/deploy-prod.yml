@@ -83,24 +83,17 @@ jobs:
             echo "Stopping existing containers..."
             docker compose down --timeout 30 || true
             
-            # Build and start new containers
+            # Build and start new containers using Doppler to inject all env vars
             echo "Building and starting new containers..."
+            export DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}"
             
-            # Export environment variables for docker-compose
-            export DOPPLER_TOKEN_TEMP="${{ secrets.DOPPLER_TOKEN }}"
-            export POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-            export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-            export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-            export AWS_COGNITO_USERPOOL_ID="${{ secrets.AWS_COGNITO_USERPOOL_ID }}"
-            export AWS_COGNITO_APP_CLIENT_ID="${{ secrets.AWS_COGNITO_APP_CLIENT_ID }}"
-            
-            # Use production compose file if it exists
+            # Use doppler run to inject all environment variables from Doppler
             if [ -f docker-compose.prod.yml ]; then
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml build --parallel
-              docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+              doppler run -- docker compose -f docker-compose.yml -f docker-compose.prod.yml build --parallel
+              doppler run -- docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
             else
-              docker compose build --parallel
-              docker compose up -d
+              doppler run -- docker compose build --parallel
+              doppler run -- docker compose up -d
             fi
             
             # Wait for services to start
