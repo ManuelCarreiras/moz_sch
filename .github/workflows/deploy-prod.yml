@@ -84,7 +84,7 @@ jobs:
             docker compose down --timeout 30 || true
             
             # Wait for ports to fully release (prevents "address already in use" errors)
-            sleep 5
+            sleep 10
             
             # Build and start new containers using Doppler to inject all env vars
             echo "Building and starting new containers..."
