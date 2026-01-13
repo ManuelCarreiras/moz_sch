@@ -53,10 +53,7 @@ services:
       - "127.0.0.1:8080:8080"  # Only accessible via SSH tunnel
 
   redis:
-    ports:
-      - "127.0.0.1:6379:6379"  # Only accessible via SSH tunnel
+    ports: []  # Internal only - API connects via Docker network
 
   minio:
-    ports:
-      - "127.0.0.1:9000:9000"  # Only accessible via SSH tunnel
-      - "127.0.0.1:9001:9001"  # Minio console only via SSH tunnel
+    ports: []  # Internal only - API connects via Docker network
