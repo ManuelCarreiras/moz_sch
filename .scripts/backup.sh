@@ -1,11 +1,29 @@
 #!/bin/bash
 # PostgreSQL backup script
 # Runs daily via cron to backup the database
+# Only creates backup if there is data in the database
 
 BACKUP_DIR="/opt/backups/postgres"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/backup_$TIMESTAMP.sql.gz"
 RETENTION_DAYS=7
+
+# Check if database has any data (count total rows in key tables)
+ROW_COUNT=$(docker exec postgres-db psql -U app_user -d app_db -t -c \
+    "SELECT COUNT(*) FROM (
+        SELECT 1 FROM students LIMIT 1
+        UNION ALL
+        SELECT 1 FROM teachers LIMIT 1
+        UNION ALL
+        SELECT 1 FROM school_year LIMIT 1
+    ) AS data;" 2>/dev/null | tr -d ' ')
+
+if [ -z "$ROW_COUNT" ] || [ "$ROW_COUNT" -eq 0 ]; then
+    echo "$(date): No data in database, skipping backup"
+    exit 0
+fi
+
+echo "$(date): Database has data, proceeding with backup..."
 
 # Create backup directory
 mkdir -p $BACKUP_DIR
