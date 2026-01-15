@@ -39,6 +39,15 @@ else
     exit 1
 fi
 
+# Upload to Cloudflare R2
+echo "$(date): Uploading to Cloudflare R2..."
+rclone copy $BACKUP_FILE r2:sta-isabe-backup/
+if [ $? -eq 0 ]; then
+    echo "$(date): Upload to R2 successful"
+else
+    echo "$(date): Upload to R2 FAILED"
+fi
+
 # Delete backups older than retention period
 find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +$RETENTION_DAYS -delete
 echo "$(date): Cleaned up backups older than $RETENTION_DAYS days"
