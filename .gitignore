@@ -1,1 +1,7 @@
 GA40/
+
+# SSL certificates - never commit these
+frontend/ssl/
+*.pem
+*.key
+*.crt
