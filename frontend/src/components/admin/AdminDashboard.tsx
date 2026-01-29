@@ -270,7 +270,9 @@ export function AdminDashboard() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  // Allow admin, financial, and secretary roles to access this dashboard
+  const allowedRoles = ['admin', 'financial', 'secretary'];
+  if (!user || !allowedRoles.includes(user.role)) {
     return (
       <div style={{ 
         display: 'flex', 
@@ -280,21 +282,29 @@ export function AdminDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Access denied. Admin privileges required.
+        Access denied. Admin, Financial, or Secretary privileges required.
       </div>
     );
   }
 
-  const tabs = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠' },
-    { id: 'students' as AdminTab, label: 'Students', icon: '👥' },
-    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
-    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
-    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
-    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
-    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
-    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰' },
+  const isAdmin = user.role === 'admin';
+  const isFinancial = user.role === 'financial';
+  const isSecretary = user.role === 'secretary';
+
+  // Define all tabs with role-based visibility
+  const allTabs = [
+    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'financial', 'secretary'] },
+    { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'financial', 'secretary'] },
+    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin'] },
+    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
+    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin'] },
+    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin'] },
+    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'financial', 'secretary'] },
+    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰', roles: ['admin', 'financial'] },
   ];
+
+  // Filter tabs based on user role
+  const tabs = allTabs.filter(tab => tab.roles.includes(user.role));
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -772,7 +782,7 @@ export function AdminDashboard() {
             loading="eager" 
           />
           <div className="admin-header__title">
-            <h1>Admin Portal</h1>
+            <h1>{isAdmin ? 'Admin Portal' : isFinancial ? 'Financial Portal' : 'Secretary Portal'}</h1>
             <span className="admin-header__subtitle">Santa Isabel Escola</span>
           </div>
         </div>

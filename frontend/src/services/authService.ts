@@ -6,7 +6,7 @@ export interface User {
   email: string;
   username: string;
   groups: string[];
-  role: 'admin' | 'teacher' | 'student';
+  role: 'admin' | 'teacher' | 'student' | 'financial' | 'secretary';
 }
 
 export interface AuthState {
@@ -145,11 +145,13 @@ class AuthService {
     }
   }
 
-  private determineRole(groups: string[]): 'admin' | 'teacher' | 'student' {
+  private determineRole(groups: string[]): 'admin' | 'teacher' | 'student' | 'financial' | 'secretary' {
     const normalized = (groups || []).map(g => g.toLowerCase());
     if (normalized.includes('admin')) return 'admin';
     if (normalized.includes('teacher') || normalized.includes('teachers')) return 'teacher';
     if (normalized.includes('student') || normalized.includes('students')) return 'student';
+    if (normalized.includes('financial')) return 'financial';
+    if (normalized.includes('secretary')) return 'secretary';
     return 'student'; // default role
   }
 

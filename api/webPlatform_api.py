@@ -45,6 +45,8 @@ from resources.resource import ResourceResource, ResourceDownloadResource, Teach
 from models.resource import ResourceModel  # noqa: F401
 from models.student_mensality import StudentMensalityModel  # noqa: F401
 from models.teacher_salary import TeacherSalaryModel  # noqa: F401
+from models.staff import StaffModel  # noqa: F401
+from models.staff_salary import StaffSalaryModel  # noqa: F401
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -277,6 +279,17 @@ from resources.teacher_salary import TeacherSalaryResource, GenerateSalaryResour
 api.add_resource(TeacherSalaryResource, "/teacher_salary", "/teacher_salary/<salary_id>")
 api.add_resource(GenerateSalaryResource, "/teacher_salary/generate")
 api.add_resource(TeacherSalaryGridResource, "/teacher_salary/grid")
+
+# ========== Staff Management ==========
+from resources.staff import StaffResource
+api.add_resource(StaffResource, "/staff", "/staff/<id>")
+
+# Staff Salary (Monthly Salaries)
+from resources.staff_salary import StaffSalaryResource, StaffSalaryByStaffResource, StaffSalaryGridResource, GenerateStaffSalaryResource
+api.add_resource(StaffSalaryResource, "/staff_salary", "/staff_salary/<salary_id>")
+api.add_resource(StaffSalaryByStaffResource, "/staff_salary/staff/<staff_id>")
+api.add_resource(StaffSalaryGridResource, "/staff_salary/grid")
+api.add_resource(GenerateStaffSalaryResource, "/staff_salary/generate")
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

@@ -7,6 +7,7 @@ import { Dashboard } from './components/Dashboard'
 import { StudentDashboard } from './components/StudentDashboard'
 import { TeacherDashboard } from './components/TeacherDashboard'
 import { GuardianDashboard } from './components/GuardianDashboard'
+import { AdminDashboard } from './components/admin/AdminDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -44,7 +45,9 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isAuthenticated && user) {
     // Redirect to appropriate dashboard based on user role
-    const redirectPath = user.role === 'admin' ? '/dashboard' : `/${user.role}`
+    // Admin, financial, and secretary all go to /dashboard (AdminDashboard with role-based tabs)
+    const adminRoles = ['admin', 'financial', 'secretary']
+    const redirectPath = adminRoles.includes(user.role) ? '/dashboard' : `/${user.role}`
     return <Navigate to={redirectPath} replace />
   }
 
@@ -103,6 +106,23 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <GuardianDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        {/* Financial and Secretary routes - redirect to dashboard which handles role-based tabs */}
+        <Route 
+          path="/financial" 
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/secretary" 
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           } 
         />
