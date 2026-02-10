@@ -38,7 +38,7 @@ COPY . .
 EXPOSE 5000
 
 CMD ["doppler", "run", "--", \
-     "gunicorn", "-t", "30", "--workers=4", "-b", "0.0.0.0:5000", \
+     "gunicorn", "-t", "30", "--workers=4", "--preload", "-b", "0.0.0.0:5000", \
      "--log-level=debug", \
      "wsgi:app"]
 
