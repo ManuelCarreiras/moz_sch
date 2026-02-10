@@ -13,7 +13,7 @@ class StudentMensalityResource(Resource):
     Resource for managing student monthly payments (mensality)
     """
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def get(self, mensality_id=None):
         """
         GET /mensality - Get all mensality records (with filters)
@@ -74,7 +74,7 @@ class StudentMensalityResource(Resource):
         enhanced_records = [r.json_with_student() for r in records]
         return {'mensality_records': enhanced_records, 'count': len(enhanced_records)}, 200
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def post(self):
         """
         POST /mensality - Create a new mensality record
@@ -144,7 +144,7 @@ class StudentMensalityResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def put(self):
         """
         PUT /mensality - Update mensality record
@@ -225,7 +225,7 @@ class GenerateMensalityResource(Resource):
     Resource for generating monthly mensality records for all active students
     """
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def post(self):
         """
         POST /mensality/generate - Generate mensality records for all active students for a given month/year

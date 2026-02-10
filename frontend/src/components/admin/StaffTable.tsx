@@ -130,18 +130,21 @@ export function StaffTable() {
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
+          className="role-filter-select"
           style={{
             padding: 'var(--space-sm)',
             borderRadius: 'var(--radius)',
             border: '1px solid var(--border)',
-            backgroundColor: 'var(--background)',
+            backgroundColor: 'var(--card)',
             color: 'var(--text)',
-            fontSize: 'var(--text-base)'
+            fontSize: 'var(--text-base)',
+            cursor: 'pointer',
+            minWidth: '150px'
           }}
         >
-          <option value="">All Roles</option>
-          <option value="financial">Financial</option>
-          <option value="secretary">Secretary</option>
+          <option value="" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>All Roles</option>
+          <option value="financial" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>Financial</option>
+          <option value="secretary" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>Secretary</option>
         </select>
       </div>
 

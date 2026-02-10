@@ -209,7 +209,7 @@ class StaffResource(Resource):
             response['message']['cognito'] = cognito_result
         return Response(json.dumps(response), 201)
 
-    @require_role('admin')
+    @require_any_role(['admin', 'financial', 'secretary'])
     def get(self, id=None):
         if id:
             # Get specific staff member by ID

@@ -1009,6 +1009,14 @@ body {
 .action-buttons {
   display: flex;
   gap: var(--space-xs);
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.action-buttons .btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: fit-content;
 }
 
 .btn--danger {
@@ -1189,6 +1197,42 @@ body {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.2);
+}
+
+/* Role Filter Select Dropdown Styling */
+.role-filter-select {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 500 !important;
+}
+
+.role-filter-select:hover {
+  border-color: var(--primary) !important;
+  background-color: rgba(79, 124, 255, 0.05) !important;
+}
+
+.role-filter-select:focus {
+  outline: none;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.3) !important;
+  background-color: var(--card) !important;
+}
+
+/* Note: Native select option styling is limited by browser, 
+   but we can improve the select element itself */
+.role-filter-select option {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+  padding: var(--space-sm) !important;
+  font-weight: 500 !important;
+}
+
+/* For browsers that support it */
+.role-filter-select option:checked {
+  background-color: var(--primary) !important;
+  color: white !important;
+  font-weight: 600 !important;
 }
 
 .form-section {

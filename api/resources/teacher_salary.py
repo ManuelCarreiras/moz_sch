@@ -13,7 +13,7 @@ class TeacherSalaryResource(Resource):
     Resource for managing teacher monthly salary payments
     """
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def get(self, salary_id=None):
         """
         GET /teacher_salary - Get all salary records (with filters)
@@ -59,7 +59,7 @@ class TeacherSalaryResource(Resource):
             enhanced_records = [r.json_with_teacher() for r in records]
             return {'salary_records': enhanced_records, 'count': len(enhanced_records)}, 200
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def post(self):
         """
         POST /teacher_salary - Create a new salary record
@@ -127,7 +127,7 @@ class TeacherSalaryResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def put(self):
         """
         PUT /teacher_salary - Update salary record
@@ -208,7 +208,7 @@ class TeacherSalaryGridResource(Resource):
     Resource for managing teacher base salary grid
     """
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def get(self):
         """
         GET /teacher_salary/grid - Get all teachers with their base salaries
@@ -256,7 +256,7 @@ class TeacherSalaryGridResource(Resource):
         
         return {'salary_grid': grid, 'count': len(grid)}, 200
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def put(self):
         """
         PUT /teacher_salary/grid - Update base salaries for multiple teachers
@@ -302,7 +302,7 @@ class GenerateSalaryResource(Resource):
     Uses base_salary from teacher table
     """
 
-    @require_any_role(['admin'])
+    @require_any_role(['admin', 'financial'])
     def post(self):
         """
         POST /teacher_salary/generate - Generate salary records for all teachers for a given month/year

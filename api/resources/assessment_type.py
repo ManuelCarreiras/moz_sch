@@ -34,10 +34,10 @@ class AssessmentTypeResource(Resource):
             'count': len(assessment_types)
         }, 200
 
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         """
-        POST /assessment_type - Create new assessment type (admin only)
+        POST /assessment_type - Create new assessment type (admin and secretary only)
         """
         data = request.get_json()
         
@@ -76,10 +76,10 @@ class AssessmentTypeResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def put(self):
         """
-        PUT /assessment_type - Update assessment type (admin only)
+        PUT /assessment_type - Update assessment type (admin and secretary only)
         """
         data = request.get_json()
         
@@ -119,10 +119,10 @@ class AssessmentTypeResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def delete(self, type_id):
         """
-        DELETE /assessment_type/<type_id> - Delete assessment type (admin only)
+        DELETE /assessment_type/<type_id> - Delete assessment type (admin and secretary only)
         """
         assessment_type = AssessmentTypeModel.find_by_id(type_id)
         

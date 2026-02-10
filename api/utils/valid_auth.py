@@ -27,6 +27,61 @@ def check_if_is_device_request():
     return False
 
 
+def _normalize_claim_values(raw_value):
+    """Normalize JWT claim values that may arrive as string/list/tuple/set."""
+    if raw_value is None:
+        return []
+    if isinstance(raw_value, str):
+        # Cognito/custom claims may arrive as comma-separated string.
+        return [item.strip().lower() for item in raw_value.split(",") if item.strip()]
+    if isinstance(raw_value, (list, tuple, set)):
+        return [str(item).strip().lower() for item in raw_value if str(item).strip()]
+    return [str(raw_value).strip().lower()]
+
+
+def _extract_role_from_claims(claims):
+    """Derive app role from explicit role claims first, then Cognito groups."""
+    candidate_roles = []
+    for role_key in ("role", "custom:role", "custom:roles", "roles"):
+        candidate_roles.extend(_normalize_claim_values(claims.get(role_key)))
+
+    # Include groups as fallback role source.
+    groups = []
+    groups.extend(_normalize_claim_values(claims.get("cognito:groups")))
+    groups.extend(_normalize_claim_values(claims.get("groups")))
+    groups.extend(_normalize_claim_values(claims.get("custom:groups")))
+
+    normalized = candidate_roles + groups
+    if not normalized:
+        return None, groups
+
+    # Canonical role mapping used across backend decorators/resources.
+    role_aliases = {
+        "admin": "admin",
+        "administrador": "admin",
+        "administrator": "admin",
+        "teacher": "teacher",
+        "teachers": "teacher",
+        "student": "student",
+        "students": "student",
+        "financial": "financial",
+        "finance": "financial",
+        "financeiro": "financial",
+        "secretary": "secretary",
+        "secretaria": "secretary",
+        "secretariat": "secretary",
+        "revisor": "revisor",
+    }
+
+    for value in normalized:
+        mapped = role_aliases.get(value)
+        if mapped:
+            return mapped, groups
+
+    # If no alias matched, still surface first explicit role for visibility.
+    return normalized[0], groups
+
+
 # Auth validation
 def validAuth():
 
@@ -86,18 +141,8 @@ def validAuth():
                     g.user = claims.get("sub")
                     g.username = claims.get("username") or claims.get("cognito:username")
                     g.email = claims.get("email")
-                    groups = claims.get('cognito:groups') or claims.get('groups') or []
-                    groups_norm = [str(grp).lower() for grp in groups]
-                    g.admin = 'admin' in groups_norm
-                    # Derive role for downstream decorators
-                    if 'admin' in groups_norm:
-                        g.role = 'admin'
-                    elif 'teacher' in groups_norm or 'teachers' in groups_norm:
-                        g.role = 'teacher'
-                    elif 'student' in groups_norm or 'students' in groups_norm:
-                        g.role = 'student'
-                    else:
-                        g.role = None
+                    g.role, groups_norm = _extract_role_from_claims(claims)
+                    g.admin = g.role == "admin" or "admin" in groups_norm
                     logging.info(f"Auth success: user={g.user}, role={g.role}, groups={groups_norm}")
                     return
                 else:
@@ -122,17 +167,8 @@ def validAuth():
                                 logging.warning(f"Email not found in token. Available fields: {unverified_claims.keys()}")
                                 logging.warning(f"Token contents: {json.dumps({k: v for k, v in unverified_claims.items() if k not in ['sub', 'iat', 'exp', 'aud', 'iss']})}")
                             
-                            groups = unverified_claims.get('cognito:groups') or unverified_claims.get('groups') or []
-                            groups_norm = [str(grp).lower() for grp in groups]
-                            g.admin = 'admin' in groups_norm
-                            if 'admin' in groups_norm:
-                                g.role = 'admin'
-                            elif 'teacher' in groups_norm or 'teachers' in groups_norm:
-                                g.role = 'teacher'
-                            elif 'student' in groups_norm or 'students' in groups_norm:
-                                g.role = 'student'
-                            else:
-                                g.role = None
+                            g.role, groups_norm = _extract_role_from_claims(unverified_claims)
+                            g.admin = g.role == "admin" or "admin" in groups_norm
                             logging.info(f"DEBUG mode: Using unverified token - email={g.email}, username={g.username}, role={g.role}")
                             return
                         else:

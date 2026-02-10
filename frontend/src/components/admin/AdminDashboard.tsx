@@ -28,6 +28,7 @@ export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
   const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
@@ -45,6 +46,13 @@ export function AdminDashboard() {
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
   
   const [loadingOverview, setLoadingOverview] = useState(false);
+
+  // Set initial tab based on user role - financial users should see Financial Management by default
+  useEffect(() => {
+    if (user?.role === 'financial' && activeTab === 'overview') {
+      setActiveTab('financial');
+    }
+  }, [user, activeTab]);
 
   const handleSignOut = async () => {
     try {
@@ -293,13 +301,13 @@ export function AdminDashboard() {
 
   // Define all tabs with role-based visibility
   const allTabs = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'financial', 'secretary'] },
-    { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'financial', 'secretary'] },
+    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'secretary'] },
+    { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'secretary'] },
     { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin'] },
     { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
-    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin'] },
-    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin'] },
-    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'financial', 'secretary'] },
+    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin', 'secretary'] },
+    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin', 'secretary'] },
+    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'secretary'] },
     { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰', roles: ['admin', 'financial'] },
     { id: 'staff' as AdminTab, label: 'Staff Management', icon: '👔', roles: ['admin'] },
   ];
@@ -308,6 +316,12 @@ export function AdminDashboard() {
   const tabs = allTabs.filter(tab => tab.roles.includes(user.role));
 
   const renderTabContent = () => {
+    // Financial users should not see the overview - redirect to financial management
+    if (activeTab === 'overview' && user?.role === 'financial') {
+      // This should be handled by useEffect, but as a safeguard, return financial content
+      return <FinancialManagement />;
+    }
+    
     switch (activeTab) {
       case 'overview':
         return (
