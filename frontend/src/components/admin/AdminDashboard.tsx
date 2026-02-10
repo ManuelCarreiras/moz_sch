@@ -326,8 +326,8 @@ export function AdminDashboard() {
       case 'overview':
         return (
           <div className="admin-content">
-            <h2>Admin Overview</h2>
-            <p>Welcome to the Santa Isabel Escola Admin Portal. Manage all aspects of the school system from here.</p>
+            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
+            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Manage all aspects of the school system from here.</p>
             
             <div style={{ 
               display: 'grid', 
@@ -780,8 +780,8 @@ export function AdminDashboard() {
       default:
         return (
           <div className="admin-content">
-            <h2>Admin Overview</h2>
-            <p>Welcome to the Santa Isabel Escola Admin Portal. Use the sidebar to navigate.</p>
+            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
+            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Use the sidebar to navigate.</p>
           </div>
         );
     }

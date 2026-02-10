@@ -3,7 +3,7 @@ from flask_restful import Resource
 from models.student import StudentModel
 from db import db
 import json
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_role, require_any_role
 import os
 import logging
 import uuid
@@ -16,7 +16,7 @@ except Exception:
 
 
 class StudentResource(Resource):
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         data = request.get_json()
 

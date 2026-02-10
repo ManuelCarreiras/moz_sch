@@ -6,12 +6,14 @@ from models.subject import SubjectModel
 from models.term import TermModel
 from models.class_model import ClassModel
 from models.school_year import SchoolYearModel
+from utils.auth_middleware import require_any_role
 import json
 import logging
 
 class TermGradeResource(Resource):
     """CRUD operations for term grades"""
     
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, grade_id=None):
         """Get term grade(s)"""
         if grade_id:

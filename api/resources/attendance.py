@@ -15,7 +15,7 @@ class AttendanceResource(Resource):
     Attendance Resource - Manage student attendance
     """
 
-    @require_any_role(['admin', 'teacher', 'student'])
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, attendance_id=None):
         """
         GET /attendance/<attendance_id> - Get specific attendance record
