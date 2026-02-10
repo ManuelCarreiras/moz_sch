@@ -15,10 +15,11 @@ import { YearLevelTimetable } from './YearLevelTimetable';
 import GradingCriteriaTable from './GradingCriteriaTable';
 import { FinancialManagement } from './FinancialManagement';
 import AssessmentTypeTable from './AssessmentTypeTable';
+import { StaffTable } from './StaffTable';
 import apiService from '../../services/apiService';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial' | 'staff';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria' | 'assessment-types';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
@@ -289,7 +290,6 @@ export function AdminDashboard() {
 
   const isAdmin = user.role === 'admin';
   const isFinancial = user.role === 'financial';
-  const isSecretary = user.role === 'secretary';
 
   // Define all tabs with role-based visibility
   const allTabs = [
@@ -301,6 +301,7 @@ export function AdminDashboard() {
     { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin'] },
     { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'financial', 'secretary'] },
     { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰', roles: ['admin', 'financial'] },
+    { id: 'staff' as AdminTab, label: 'Staff Management', icon: '👔', roles: ['admin'] },
   ];
 
   // Filter tabs based on user role
@@ -760,6 +761,8 @@ export function AdminDashboard() {
         );
       case 'financial':
         return <FinancialManagement />;
+      case 'staff':
+        return <StaffTable />;
       default:
         return (
           <div className="admin-content">

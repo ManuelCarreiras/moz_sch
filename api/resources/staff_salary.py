@@ -2,7 +2,7 @@ from flask_restful import Resource
 from flask import Response, request
 from models.staff_salary import StaffSalaryModel
 from models.staff import StaffModel
-from utils.auth_middleware import require_any_role
+from utils.auth_middleware import require_role
 import json
 from datetime import datetime
 from decimal import Decimal
@@ -13,7 +13,7 @@ class StaffSalaryResource(Resource):
     Resource for managing staff monthly salary payments
     """
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def get(self, salary_id=None):
         """
         GET /staff_salary - Get all salary records (with filters)
@@ -59,7 +59,7 @@ class StaffSalaryResource(Resource):
             enhanced_records = [r.json_with_staff() for r in records]
             return {'salary_records': enhanced_records, 'count': len(enhanced_records)}, 200
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def post(self):
         """
         POST /staff_salary - Create a new salary record
@@ -127,7 +127,7 @@ class StaffSalaryResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def put(self):
         """
         PUT /staff_salary - Update salary record
@@ -175,7 +175,7 @@ class StaffSalaryResource(Resource):
             }
             return Response(json.dumps(response), 500, mimetype='application/json')
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def delete(self, salary_id=None):
         """
         DELETE /staff_salary/<salary_id> - Delete salary record
@@ -208,7 +208,7 @@ class StaffSalaryByStaffResource(Resource):
     Resource for getting salary records for a specific staff member
     """
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def get(self, staff_id):
         """
         GET /staff_salary/staff/<staff_id> - Get all salary records for a staff member
@@ -233,7 +233,7 @@ class StaffSalaryGridResource(Resource):
     Resource for managing staff base salary grid
     """
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def get(self):
         """
         GET /staff_salary/grid - Get all staff with their base salaries
@@ -260,7 +260,7 @@ class StaffSalaryGridResource(Resource):
         
         return {'salary_grid': grid, 'count': len(grid)}, 200
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def put(self):
         """
         PUT /staff_salary/grid - Update base salaries for multiple staff members
@@ -306,7 +306,7 @@ class GenerateStaffSalaryResource(Resource):
     Uses base_salary from staff table
     """
 
-    @require_any_role(['admin', 'financial'])
+    @require_role('admin')
     def post(self):
         """
         POST /staff_salary/generate - Generate salary records for all staff for a given month/year
