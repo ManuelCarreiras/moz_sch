@@ -1,5 +1,6 @@
 {
   "common": {
+    "openMenu": "Abrir menu",
     "signOut": "Sair",
     "backToDashboard": "Voltar ao Painel",
     "backToHome": "Voltar ao Início",

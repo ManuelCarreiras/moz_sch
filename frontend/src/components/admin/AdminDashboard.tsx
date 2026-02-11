@@ -34,6 +34,7 @@ export function AdminDashboard() {
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
   const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
   const [activeClassTab, setActiveClassTab] = useState<ClassManagementTab>('classes');
@@ -333,12 +334,7 @@ export function AdminDashboard() {
             <h2>{isAdmin ? t('admin.adminOverview') : t('admin.overview')}</h2>
             <p>{isAdmin ? t('admin.welcomeAdmin') : t('admin.welcomeSecretary')}</p>
             
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: '1fr 1fr', 
-              gap: 'var(--space-xl)', 
-              marginTop: 'var(--space-lg)' 
-            }}>
+            <div className="admin-overview-grid">
               {/* Students Section */}
               <div style={{ 
                 padding: 'var(--space-lg)',
@@ -793,9 +789,26 @@ export function AdminDashboard() {
 
   return (
     <div className="admin-dashboard">
+      {/* Sidebar backdrop - mobile only */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        role="button"
+        tabIndex={-1}
+        onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
+        aria-label="Close menu"
+      />
       {/* Header */}
       <header className="admin-header">
         <div className="admin-header__brand">
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(true)}
+            aria-label={t('common.openMenu')}
+          >
+            ☰
+          </button>
           <img 
             className="admin-header__logo" 
             src={logoSrc} 
@@ -822,13 +835,16 @@ export function AdminDashboard() {
       {/* Main Content */}
       <div className="admin-main">
         {/* Sidebar Navigation */}
-        <nav className="admin-sidebar">
+        <nav className={`admin-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
           <div className="admin-nav">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`admin-nav__item ${activeTab === tab.id ? 'admin-nav__item--active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                }}
               >
                 <span className="admin-nav__icon">{tab.icon}</span>
                 <span className="admin-nav__label">{t(tab.labelKey)}</span>

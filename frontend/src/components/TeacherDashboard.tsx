@@ -54,6 +54,7 @@ export function TeacherDashboard() {
   const isAdmin = user?.role === 'admin';
   const isSecretary = user?.role === 'secretary';
   const [activeTab, setActiveTab] = useState<TeacherTab>(isAdmin ? 'classes' : isSecretary ? 'teachers' : 'overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCreateTeacher, setShowCreateTeacher] = useState(false);
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
@@ -476,9 +477,26 @@ export function TeacherDashboard() {
 
   return (
     <div className="teacher-dashboard">
+      {/* Sidebar backdrop - mobile only */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        role="button"
+        tabIndex={-1}
+        onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
+        aria-label="Close menu"
+      />
       {/* Header */}
       <header className="teacher-header">
         <div className="teacher-header__brand">
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(true)}
+            aria-label={t('common.openMenu')}
+          >
+            ☰
+          </button>
           <img 
             className="teacher-header__logo" 
             src={logoSrc} 
@@ -507,13 +525,16 @@ export function TeacherDashboard() {
 
       <div className="teacher-dashboard__content">
         {/* Sidebar */}
-        <aside className="teacher-sidebar">
+        <aside className={`teacher-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
           <nav className="teacher-nav">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`teacher-nav__item ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                }}
               >
                 <span className="teacher-nav__icon">{tab.icon}</span>
                 <span className="teacher-nav__label">{t(tab.labelKey)}</span>

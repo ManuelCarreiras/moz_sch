@@ -21,6 +21,7 @@ export function StudentDashboard() {
   const user = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StudentTab>('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isAdmin = user?.role === 'admin';
   const isSecretary = user?.role === 'secretary';
 
@@ -118,9 +119,26 @@ export function StudentDashboard() {
 
   return (
     <div className="student-dashboard">
+      {/* Sidebar backdrop - mobile only */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+        role="button"
+        tabIndex={-1}
+        onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
+        aria-label="Close menu"
+      />
       {/* Header */}
       <header className="student-header">
         <div className="student-header__brand">
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(true)}
+            aria-label={t('common.openMenu')}
+          >
+            ☰
+          </button>
           <img 
             className="student-header__logo" 
             src={logoSrc} 
@@ -149,13 +167,16 @@ export function StudentDashboard() {
 
       <div className="student-dashboard__content">
         {/* Sidebar */}
-        <aside className="student-sidebar">
+        <aside className={`student-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
           <nav className="student-nav">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`student-nav__item ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                }}
               >
                 <span className="student-nav__icon">{tab.icon}</span>
                 <span className="student-nav__label">{t(tab.labelKey)}</span>

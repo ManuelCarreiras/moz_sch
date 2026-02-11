@@ -600,6 +600,80 @@ body {
   background: var(--background);
 }
 
+/* Admin Overview Grid - 2 columns desktop, 1 column mobile */
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  margin-top: var(--space-lg);
+}
+
+/* Features Grid - used in Guardian Management, Academic Setup, etc. */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card h3 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-lg);
+  color: var(--text);
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Hamburger button for mobile sidebar */
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: var(--space-sm);
+  border-radius: var(--radius);
+  font-size: var(--text-xl);
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(79, 124, 255, 0.1);
+}
+
+/* Sidebar backdrop for mobile overlay */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+.sidebar-backdrop.is-open {
+  display: block;
+}
+
 /* Student Dashboard Styles */
 .student-dashboard {
   min-height: 100vh;
@@ -892,6 +966,158 @@ body {
   color: var(--muted);
   font-size: var(--text-base);
   line-height: 1.6;
+}
+
+/* Mobile responsive: Admin, Student, Teacher dashboards */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Admin Dashboard */
+  .admin-header__logo {
+    height: 2.5rem;
+  }
+
+  .admin-header__title h1 {
+    font-size: var(--text-base);
+  }
+
+  .admin-header__user-info {
+    display: none;
+  }
+
+  .admin-main {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .admin-content {
+    padding: var(--space-md);
+  }
+
+  .admin-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Student Dashboard */
+  .student-header__logo {
+    height: 2.5rem;
+  }
+
+  .student-header__title h1 {
+    font-size: var(--text-base);
+  }
+
+  .student-header__user-info {
+    display: none;
+  }
+
+  .student-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .student-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .student-main {
+    padding: var(--space-md);
+  }
+
+  /* Teacher Dashboard */
+  .teacher-header__logo {
+    height: 2.5rem;
+  }
+
+  .teacher-header__title h1 {
+    font-size: var(--text-base);
+  }
+
+  .teacher-header__user-info {
+    display: none;
+  }
+
+  .teacher-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .teacher-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .teacher-main {
+    padding: var(--space-md);
+  }
+
+  /* Tables and forms */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+
+  .table-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    max-width: none;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Portal header (GuardianDashboard) */
+  .portal-header {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .portal-header__actions {
+    flex-wrap: wrap;
+  }
 }
 
 /* Table Styles */

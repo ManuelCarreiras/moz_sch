@@ -1,5 +1,6 @@
 {
   "common": {
+    "openMenu": "Open menu",
     "signOut": "Sign Out",
     "backToDashboard": "Back to Dashboard",
     "backToHome": "Back to Home",
