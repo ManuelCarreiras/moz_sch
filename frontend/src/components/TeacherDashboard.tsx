@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
@@ -11,6 +12,8 @@ import TeacherStudents from './teacher/TeacherStudents';
 import TeacherOverview from './teacher/TeacherOverview';
 import TeacherResources from './teacher/TeacherResources';
 import { TeachersTable } from './admin/TeachersTable';
+import { ThemeSelector } from './ThemeSelector';
+import { LanguageSelector } from './LanguageSelector';
 import apiService from '../services/apiService';
 
 type TeacherTab = 'overview' | 'classes' | 'students' | 'grades' | 'resources' | 'attendance' | 'assignments' | 'teachers';
@@ -44,6 +47,7 @@ interface Subject {
 }
 
 export function TeacherDashboard() {
+  const { t } = useTranslation();
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
@@ -172,21 +176,21 @@ export function TeacherDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Please sign in to access the portal
+        {t('dashboard.pleaseSignIn')}
       </div>
     );
   }
 
   // Filter tabs by role: admin sees Teachers; secretary sees Overview+Teachers; teacher sees full set
   const allTeacherTabs = [
-    { id: 'overview' as TeacherTab, label: 'Overview', icon: '🏠' },
-    { id: 'classes' as TeacherTab, label: 'My Classes', icon: '📚' },
-    { id: 'students' as TeacherTab, label: 'Students', icon: '👥' },
-    { id: 'grades' as TeacherTab, label: 'Grades', icon: '📊' },
-    { id: 'resources' as TeacherTab, label: 'Resources', icon: '📖' },
-    { id: 'teachers' as TeacherTab, label: 'Teachers', icon: '👨‍🏫' },
-    { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
-    { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' },
+    { id: 'overview' as TeacherTab, labelKey: 'teacher.tabs.overview', icon: '🏠' },
+    { id: 'classes' as TeacherTab, labelKey: 'teacher.tabs.classes', icon: '📚' },
+    { id: 'students' as TeacherTab, labelKey: 'teacher.tabs.students', icon: '👥' },
+    { id: 'grades' as TeacherTab, labelKey: 'teacher.tabs.grades', icon: '📊' },
+    { id: 'resources' as TeacherTab, labelKey: 'teacher.tabs.resources', icon: '📖' },
+    { id: 'teachers' as TeacherTab, labelKey: 'teacher.tabs.teachers', icon: '👨‍🏫' },
+    { id: 'attendance' as TeacherTab, labelKey: 'teacher.tabs.attendance', icon: '✅' },
+    { id: 'assignments' as TeacherTab, labelKey: 'teacher.tabs.assignments', icon: '📝' },
   ];
   const tabs = isAdmin
     ? allTeacherTabs.filter(t => ['overview', 'classes', 'students', 'grades', 'resources', 'teachers'].includes(t.id))
@@ -460,10 +464,10 @@ export function TeacherDashboard() {
       default:
         return (
           <div className="teacher-content">
-            <h2>Teacher Portal</h2>
-            <p>Manage your classes, students, and teaching resources.</p>
+            <h2>{t('teacher.portalTitle')}</h2>
+            <p>{t('teacher.portalSubtitle')}</p>
             <div className="welcome-message">
-              <p>Welcome to your teacher portal! Use the sidebar to navigate to different sections.</p>
+              <p>{t('teacher.welcomeMessage')}</p>
             </div>
           </div>
         );
@@ -478,23 +482,25 @@ export function TeacherDashboard() {
           <img 
             className="teacher-header__logo" 
             src={logoSrc} 
-            alt="Santa Isabel Escola" 
+            alt={t('common.schoolName')} 
             loading="eager" 
           />
           <div className="teacher-header__title">
-            <h1>Teacher Portal</h1>
-            <span className="teacher-header__subtitle">Santa Isabel Escola</span>
+            <h1>{t('teacher.portalTitle')}</h1>
+            <span className="teacher-header__subtitle">{t('common.schoolName')}</span>
           </div>
         </div>
         <div className="teacher-header__user">
+          <LanguageSelector />
+          <ThemeSelector />
           <span className="teacher-header__user-info">
-            Teacher: {user.email}
+            {t('common.teacher')}: {user.email}
           </span>
           <button className="btn btn--small" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
+            {t('common.backToDashboard')}
           </button>
           <button className="btn btn--small" onClick={handleSignOut}>
-            Sign Out
+            {t('common.signOut')}
           </button>
         </div>
       </header>
@@ -510,7 +516,7 @@ export function TeacherDashboard() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span className="teacher-nav__icon">{tab.icon}</span>
-                <span className="teacher-nav__label">{tab.label}</span>
+                <span className="teacher-nav__label">{t(tab.labelKey)}</span>
               </button>
             ))}
           </nav>

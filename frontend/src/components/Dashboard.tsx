@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { AdminDashboard } from './admin/AdminDashboard';
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const { isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
@@ -18,7 +20,7 @@ export function Dashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading...
+        {t('common.loading')}
       </div>
     );
   }
@@ -33,7 +35,7 @@ export function Dashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Please sign in to access the portal
+        {t('dashboard.pleaseSignIn')}
       </div>
     );
   }

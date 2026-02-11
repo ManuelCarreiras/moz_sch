@@ -12,8 +12,10 @@
   "dependencies": {
     "@types/react-router-dom": "^5.3.3",
     "aws-amplify": "^6.15.7",
+    "i18next": "^25.8.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-i18next": "^16.5.4",
     "react-router-dom": "^7.9.3"
   },
   "devDependencies": {

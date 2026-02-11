@@ -1,0 +1,135 @@
+{
+  "common": {
+    "signOut": "Sign Out",
+    "backToDashboard": "Back to Dashboard",
+    "backToHome": "Back to Home",
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "schoolName": "Santa Isabel Escola",
+    "selectYear": "Select Year",
+    "selectClass": "Select Class",
+    "selectStudent": "Select Student",
+    "selectTeacher": "Select Teacher",
+    "schoolYear": "School Year",
+    "class": "Class",
+    "student": "Student",
+    "teacher": "Teacher",
+    "students": "Students",
+    "teachers": "Teachers",
+    "language": "Language"
+  },
+  "landing": {
+    "title": "School Portal",
+    "subtitle": "For managing student, teacher, class and schedule data.",
+    "login": "Login",
+    "learnMore": "Learn More",
+    "features": "Features",
+    "docs": "Docs",
+    "contact": "Contact",
+    "feature1Title": "Students & Guardians",
+    "feature1Desc": "Track enrollment, progress, and family relationships.",
+    "feature2Title": "Teachers & Subjects",
+    "feature2Desc": "Manage teacher profiles, departments, and subjects.",
+    "feature3Title": "Classes & Scheduling",
+    "feature3Desc": "Organize timetables with periods, terms, and classrooms.",
+    "copyright": "© Santa Isabel Escola"
+  },
+  "login": {
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "email": "Email",
+    "password": "Password",
+    "enterEmail": "Enter your email",
+    "enterPassword": "Enter your password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "enterNewPassword": "Enter a new password",
+    "confirmNewPassword": "Confirm your new password",
+    "setNewPassword": "Set New Password",
+    "updating": "Updating...",
+    "copyright": "© Santa Isabel Escola"
+  },
+  "dashboard": {
+    "pleaseSignIn": "Please sign in to access the portal",
+    "accessDenied": "Access denied. Admin, Financial, or Secretary privileges required."
+  },
+  "admin": {
+    "adminPortal": "Admin Portal",
+    "financialPortal": "Financial Portal",
+    "secretaryPortal": "Secretary Portal",
+    "adminOverview": "Admin Overview",
+    "overview": "Overview",
+    "welcomeAdmin": "Welcome to the Santa Isabel Escola Admin Portal. Manage all aspects of the school system from here.",
+    "welcomeSecretary": "Welcome to the Santa Isabel Escola Secretary Portal. Manage all aspects of the school system from here.",
+    "welcomeShort": "Welcome to the Santa Isabel Escola {{role}} Portal. Use the sidebar to navigate.",
+    "roleAdmin": "Admin",
+    "roleSecretary": "Secretary",
+    "overviewStudents": "Students",
+    "overviewTeachers": "Teachers",
+    "tabs": {
+      "overview": "Overview",
+      "students": "Students",
+      "teachers": "Teachers",
+      "guardians": "Guardian Management",
+      "academicSetup": "Academic Setup",
+      "academicFoundation": "Academic Foundation",
+      "classes": "Classes",
+      "financial": "Financial Management",
+      "staff": "Staff Management"
+    }
+  },
+  "teacher": {
+    "portalTitle": "Teacher Portal",
+    "portalSubtitle": "Manage your classes, students, and teaching resources.",
+    "welcomeMessage": "Welcome to your teacher portal! Use the sidebar to navigate to different sections.",
+    "tabs": {
+      "overview": "Overview",
+      "classes": "My Classes",
+      "students": "Students",
+      "grades": "Grades",
+      "resources": "Resources",
+      "attendance": "Attendance",
+      "assignments": "Assignments",
+      "teachers": "Teachers"
+    }
+  },
+  "student": {
+    "portalTitle": "Student Portal",
+    "portalSubtitle": "Access your academic information, grades, and schedule.",
+    "welcomeMessage": "Welcome to your student portal! Use the sidebar to navigate to different sections.",
+    "profile": "Profile",
+    "profileDesc": "Update your personal information and contact details.",
+    "profileComingSoon": "Profile management coming soon...",
+    "tabs": {
+      "overview": "Overview",
+      "grades": "Grades",
+      "schedule": "Schedule",
+      "profile": "Profile",
+      "resources": "Resources",
+      "attendance": "Attendance",
+      "assignments": "Assignments",
+      "students": "Students"
+    }
+  },
+  "guardian": {
+    "portalTitle": "Guardian Portal",
+    "managementTitle": "Guardian Management",
+    "managementDesc": "Manage guardians and their relationships with students.",
+    "assignGuardian": "Assign Guardian to Student",
+    "createGuardian": "Create New Guardian",
+    "card1Title": "Guardian Management",
+    "card1Desc": "Create and manage guardian information including contact details and relationships.",
+    "card2Title": "Student Relationships",
+    "card2Desc": "Link guardians with students and manage their relationships and permissions.",
+    "card3Title": "Guardian Types",
+    "card3Desc": "Guardian types are automatically managed during the assignment workflow."
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "language": {
+    "en": "English",
+    "pt": "Português"
+  }
+}

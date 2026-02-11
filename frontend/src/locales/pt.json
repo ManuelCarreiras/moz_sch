@@ -1,0 +1,135 @@
+{
+  "common": {
+    "signOut": "Sair",
+    "backToDashboard": "Voltar ao Painel",
+    "backToHome": "Voltar ao Início",
+    "welcome": "Bem-vindo",
+    "loading": "A carregar...",
+    "schoolName": "Santa Isabel Escola",
+    "selectYear": "Selecionar Ano",
+    "selectClass": "Selecionar Turma",
+    "selectStudent": "Selecionar Aluno",
+    "selectTeacher": "Selecionar Professor",
+    "schoolYear": "Ano Letivo",
+    "class": "Turma",
+    "student": "Aluno",
+    "teacher": "Professor",
+    "students": "Alunos",
+    "teachers": "Professores",
+    "language": "Idioma"
+  },
+  "landing": {
+    "title": "Portal Escolar",
+    "subtitle": "Para gestão de dados de alunos, professores, turmas e horários.",
+    "login": "Entrar",
+    "learnMore": "Saiba Mais",
+    "features": "Funcionalidades",
+    "docs": "Documentação",
+    "contact": "Contacto",
+    "feature1Title": "Alunos e Encarregados",
+    "feature1Desc": "Acompanhe matrículas, progresso e relações familiares.",
+    "feature2Title": "Professores e Disciplinas",
+    "feature2Desc": "Gerir perfis de professores, departamentos e disciplinas.",
+    "feature3Title": "Turmas e Horários",
+    "feature3Desc": "Organize horários com períodos, trimestres e salas de aula.",
+    "copyright": "© Santa Isabel Escola"
+  },
+  "login": {
+    "signIn": "Entrar",
+    "signingIn": "A entrar...",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "enterEmail": "Introduza o seu email",
+    "enterPassword": "Introduza a sua palavra-passe",
+    "newPassword": "Nova Palavra-passe",
+    "confirmPassword": "Confirmar Palavra-passe",
+    "enterNewPassword": "Introduza uma nova palavra-passe",
+    "confirmNewPassword": "Confirme a sua nova palavra-passe",
+    "setNewPassword": "Definir Nova Palavra-passe",
+    "updating": "A atualizar...",
+    "copyright": "© Santa Isabel Escola"
+  },
+  "dashboard": {
+    "pleaseSignIn": "Por favor, entre para aceder ao portal",
+    "accessDenied": "Acesso negado. Privilégios de Administrador, Financeiro ou Secretário necessários."
+  },
+  "admin": {
+    "adminPortal": "Portal Admin",
+    "financialPortal": "Portal Financeiro",
+    "secretaryPortal": "Portal Secretariado",
+    "adminOverview": "Visão Geral Admin",
+    "overview": "Visão Geral",
+    "welcomeAdmin": "Bem-vindo ao Portal Admin da Santa Isabel Escola. Gerir todos os aspetos do sistema escolar daqui.",
+    "welcomeSecretary": "Bem-vindo ao Portal Secretariado da Santa Isabel Escola. Gerir todos os aspetos do sistema escolar daqui.",
+    "welcomeShort": "Bem-vindo ao Portal {{role}} da Santa Isabel Escola. Use a barra lateral para navegar.",
+    "roleAdmin": "Admin",
+    "roleSecretary": "Secretariado",
+    "overviewStudents": "Alunos",
+    "overviewTeachers": "Professores",
+    "tabs": {
+      "overview": "Visão Geral",
+      "students": "Alunos",
+      "teachers": "Professores",
+      "guardians": "Gestão de Encarregados",
+      "academicSetup": "Configuração Académica",
+      "academicFoundation": "Base Académica",
+      "classes": "Turmas",
+      "financial": "Gestão Financeira",
+      "staff": "Gestão de Pessoal"
+    }
+  },
+  "teacher": {
+    "portalTitle": "Portal do Professor",
+    "portalSubtitle": "Gerir as suas turmas, alunos e recursos de ensino.",
+    "welcomeMessage": "Bem-vindo ao seu portal de professor! Use a barra lateral para navegar pelas diferentes secções.",
+    "tabs": {
+      "overview": "Visão Geral",
+      "classes": "As Minhas Turmas",
+      "students": "Alunos",
+      "grades": "Notas",
+      "resources": "Recursos",
+      "attendance": "Presenças",
+      "assignments": "Tarefas",
+      "teachers": "Professores"
+    }
+  },
+  "student": {
+    "portalTitle": "Portal do Aluno",
+    "portalSubtitle": "Aceda às suas informações académicas, notas e horário.",
+    "welcomeMessage": "Bem-vindo ao seu portal de aluno! Use a barra lateral para navegar pelas diferentes secções.",
+    "profile": "Perfil",
+    "profileDesc": "Atualize as suas informações pessoais e dados de contacto.",
+    "profileComingSoon": "Gestão de perfil em breve...",
+    "tabs": {
+      "overview": "Visão Geral",
+      "grades": "Notas",
+      "schedule": "Horário",
+      "profile": "Perfil",
+      "resources": "Recursos",
+      "attendance": "Presenças",
+      "assignments": "Tarefas",
+      "students": "Alunos"
+    }
+  },
+  "guardian": {
+    "portalTitle": "Portal do Encarregado",
+    "managementTitle": "Gestão de Encarregados",
+    "managementDesc": "Gerir encarregados e as suas relações com os alunos.",
+    "assignGuardian": "Atribuir Encarregado ao Aluno",
+    "createGuardian": "Criar Novo Encarregado",
+    "card1Title": "Gestão de Encarregados",
+    "card1Desc": "Criar e gerir informações de encarregados incluindo contactos e relações.",
+    "card2Title": "Relações com Alunos",
+    "card2Desc": "Ligar encarregados aos alunos e gerir relações e permissões.",
+    "card3Title": "Tipos de Encarregado",
+    "card3Desc": "Os tipos de encarregado são geridos automaticamente durante o fluxo de atribuição."
+  },
+  "theme": {
+    "dark": "Escuro",
+    "light": "Claro"
+  },
+  "language": {
+    "en": "English",
+    "pt": "Português"
+  }
+}

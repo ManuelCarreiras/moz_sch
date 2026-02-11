@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import logoSrc from '../assets/Santa_Isabel.png';
 import watermarkSrc from '../assets/Escola_marca_de_água.png';
 
 export function Login() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -76,12 +78,12 @@ export function Login() {
       <div className="landing">
         <header className="landing__header">
           <div className="brand">
-            <img className="brand__logo" src={logoSrc} alt="Santa Isabel Escola" loading="eager" />
-            <span className="brand__name">Santa Isabel Escola</span>
+            <img className="brand__logo" src={logoSrc} alt={t('common.schoolName')} loading="eager" />
+            <span className="brand__name">{t('common.schoolName')}</span>
           </div>
           <nav className="nav">
             <button className="btn btn--small" onClick={handleBackToLanding}>
-              Back to Home
+              {t('common.backToHome')}
             </button>
           </nav>
         </header>
@@ -100,29 +102,29 @@ export function Login() {
               marginBottom: 'var(--space-md)',
               fontSize: 'var(--text-2xl)',
               fontWeight: '600'
-            }}>Sign In</h1>
+            }}>{t('login.signIn')}</h1>
             {!requiresNewPassword ? (
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{t('login.email')}</label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="Enter your email"
+                  placeholder={t('login.enterEmail')}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{t('login.password')}</label>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="Enter your password"
+                  placeholder={t('login.enterPassword')}
                 />
               </div>
               {error && (
@@ -145,32 +147,32 @@ export function Login() {
                     padding: 'var(--space-sm) var(--space-md)'
                   }}
                 >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
+                  {isLoading ? t('login.signingIn') : t('login.signIn')}
                 </button>
               </div>
             </form>
             ) : (
             <form onSubmit={handleCompleteNewPassword}>
               <div className="form-group">
-                <label htmlFor="new_password">New Password</label>
+                <label htmlFor="new_password">{t('login.newPassword')}</label>
                 <input
                   id="new_password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  placeholder="Enter a new password"
+                  placeholder={t('login.enterNewPassword')}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="confirm_password">Confirm Password</label>
+                <label htmlFor="confirm_password">{t('login.confirmPassword')}</label>
                 <input
                   id="confirm_password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  placeholder="Confirm your new password"
+                  placeholder={t('login.confirmNewPassword')}
                 />
               </div>
               <div className="form-actions">
@@ -184,7 +186,7 @@ export function Login() {
                     padding: 'var(--space-sm) var(--space-md)'
                   }}
                 >
-                  {pwSubmitting ? 'Updating...' : 'Set New Password'}
+                  {pwSubmitting ? t('login.updating') : t('login.setNewPassword')}
                 </button>
               </div>
             </form>
@@ -193,7 +195,7 @@ export function Login() {
         </main>
 
         <footer className="footer">
-          <span>© Santa Isabel Escola</span>
+          <span>{t('login.copyright')}</span>
         </footer>
       </div>
     </>

@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 import { AuthProvider, useAuth, useUser } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import { Landing } from './components/Landing'
 import { Login } from './components/Login'
 import { Dashboard } from './components/Dashboard'
@@ -10,6 +13,7 @@ import { GuardianDashboard } from './components/GuardianDashboard'
 import { AdminDashboard } from './components/admin/AdminDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   const { isAuthenticated, isLoading } = useAuth()
 
   // Always wait for auth initialization to complete before making routing decisions
@@ -24,7 +28,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading...
+        {t('common.loading')}
       </div>
     )
   }
@@ -135,7 +139,11 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ThemeProvider>
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
+      </ThemeProvider>
     </AuthProvider>
   )
 }

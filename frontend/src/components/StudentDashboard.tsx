@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUser } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import logoSrc from '../assets/Santa_Isabel.png';
@@ -9,10 +10,13 @@ import StudentAttendance from './student/StudentAttendance';
 import StudentOverview from './student/StudentOverview';
 import StudentResources from './student/StudentResources';
 import { StudentsTable } from './admin/StudentsTable';
+import { ThemeSelector } from './ThemeSelector';
+import { LanguageSelector } from './LanguageSelector';
 
 type StudentTab = 'overview' | 'grades' | 'schedule' | 'profile' | 'resources' | 'attendance' | 'assignments' | 'students';
 
 export function StudentDashboard() {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
@@ -40,21 +44,21 @@ export function StudentDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Please sign in to access the portal
+        {t('dashboard.pleaseSignIn')}
       </div>
     );
   }
 
   // Filter tabs based on user role
   const allTabs = [
-    { id: 'overview' as StudentTab, label: 'Overview', icon: '🏠', showForAdmin: true },
-    { id: 'grades' as StudentTab, label: 'Grades', icon: '📊', showForAdmin: true },
-    { id: 'schedule' as StudentTab, label: 'Schedule', icon: '📅', showForAdmin: false },
-    { id: 'profile' as StudentTab, label: 'Profile', icon: '👤', showForAdmin: false },
-    { id: 'resources' as StudentTab, label: 'Resources', icon: '📚', showForAdmin: true },
-    { id: 'attendance' as StudentTab, label: 'Attendance', icon: '✅', showForAdmin: true },
-    { id: 'assignments' as StudentTab, label: 'Assignments', icon: '📝', showForAdmin: true },
-    { id: 'students' as StudentTab, label: 'Students', icon: '👥', showForAdmin: true, adminOnly: true },
+    { id: 'overview' as StudentTab, labelKey: 'student.tabs.overview', icon: '🏠', showForAdmin: true },
+    { id: 'grades' as StudentTab, labelKey: 'student.tabs.grades', icon: '📊', showForAdmin: true },
+    { id: 'schedule' as StudentTab, labelKey: 'student.tabs.schedule', icon: '📅', showForAdmin: false },
+    { id: 'profile' as StudentTab, labelKey: 'student.tabs.profile', icon: '👤', showForAdmin: false },
+    { id: 'resources' as StudentTab, labelKey: 'student.tabs.resources', icon: '📚', showForAdmin: true },
+    { id: 'attendance' as StudentTab, labelKey: 'student.tabs.attendance', icon: '✅', showForAdmin: true },
+    { id: 'assignments' as StudentTab, labelKey: 'student.tabs.assignments', icon: '📝', showForAdmin: true },
+    { id: 'students' as StudentTab, labelKey: 'student.tabs.students', icon: '👥', showForAdmin: true, adminOnly: true },
   ];
 
   // Filter tabs based on user role
@@ -73,10 +77,10 @@ export function StudentDashboard() {
       case 'profile':
         return (
           <div className="student-content">
-            <h2>Profile</h2>
-            <p>Update your personal information and contact details.</p>
+            <h2>{t('student.profile')}</h2>
+            <p>{t('student.profileDesc')}</p>
             <div className="placeholder-content">
-              <p>Profile management coming soon...</p>
+              <p>{t('student.profileComingSoon')}</p>
             </div>
           </div>
         );
@@ -102,10 +106,10 @@ export function StudentDashboard() {
       default:
         return (
           <div className="student-content">
-            <h2>Student Portal</h2>
-            <p>Access your academic information, grades, and schedule.</p>
+            <h2>{t('student.portalTitle')}</h2>
+            <p>{t('student.portalSubtitle')}</p>
             <div className="welcome-message">
-              <p>Welcome to your student portal! Use the sidebar to navigate to different sections.</p>
+              <p>{t('student.welcomeMessage')}</p>
             </div>
           </div>
         );
@@ -120,23 +124,25 @@ export function StudentDashboard() {
           <img 
             className="student-header__logo" 
             src={logoSrc} 
-            alt="Santa Isabel Escola" 
+            alt={t('common.schoolName')} 
             loading="eager" 
           />
           <div className="student-header__title">
-            <h1>Student Portal</h1>
-            <span className="student-header__subtitle">Santa Isabel Escola</span>
+            <h1>{t('student.portalTitle')}</h1>
+            <span className="student-header__subtitle">{t('common.schoolName')}</span>
           </div>
         </div>
         <div className="student-header__user">
+          <LanguageSelector />
+          <ThemeSelector />
           <span className="student-header__user-info">
-            Student: {user.email}
+            {t('common.student')}: {user.email}
           </span>
           <button className="btn btn--small" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
+            {t('common.backToDashboard')}
           </button>
           <button className="btn btn--small" onClick={handleSignOut}>
-            Sign Out
+            {t('common.signOut')}
           </button>
         </div>
       </header>
@@ -152,7 +158,7 @@ export function StudentDashboard() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span className="student-nav__icon">{tab.icon}</span>
-                <span className="student-nav__label">{tab.label}</span>
+                <span className="student-nav__label">{t(tab.labelKey)}</span>
               </button>
             ))}
           </nav>

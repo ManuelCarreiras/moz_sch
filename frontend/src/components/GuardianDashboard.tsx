@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SimpleGuardianWizard } from './admin/SimpleGuardianWizard';
 import { StudentGuardianAssignment } from './admin/StudentGuardianAssignment';
+import { ThemeSelector } from './ThemeSelector';
+import { LanguageSelector } from './LanguageSelector';
 
 export function GuardianDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showCreateGuardian, setShowCreateGuardian] = useState(false);
   const [showAssignGuardian, setShowAssignGuardian] = useState(false);
@@ -31,59 +35,61 @@ export function GuardianDashboard() {
           <img 
             className="portal-header__logo" 
             src="/src/assets/Santa_Isabel.png" 
-            alt="Santa Isabel Escola" 
+            alt={t('common.schoolName')} 
             loading="eager" 
           />
           <div className="portal-header__title">
-            <h1>Guardian Portal</h1>
-            <span className="portal-header__subtitle">Santa Isabel Escola</span>
+            <h1>{t('guardian.portalTitle')}</h1>
+            <span className="portal-header__subtitle">{t('common.schoolName')}</span>
           </div>
         </div>
         <div className="portal-header__actions">
+          <LanguageSelector />
+          <ThemeSelector />
           <button className="btn btn--secondary" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
+            {t('common.backToDashboard')}
           </button>
           <button className="btn btn--small" onClick={() => navigate('/landing')}>
-            Sign Out
+            {t('common.signOut')}
           </button>
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
         <div>
-          <h2>Guardian Management</h2>
-          <p className="hero__subtitle">Manage guardians and their relationships with students.</p>
+          <h2>{t('guardian.managementTitle')}</h2>
+          <p className="hero__subtitle">{t('guardian.managementDesc')}</p>
         </div>
         <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
           <button 
             className="btn btn--secondary"
             onClick={() => setShowAssignGuardian(true)}
           >
-            Assign Guardian to Student
+            {t('guardian.assignGuardian')}
           </button>
           <button 
             className="btn btn--primary"
             onClick={() => setShowCreateGuardian(true)}
           >
-            Create New Guardian
+            {t('guardian.createGuardian')}
           </button>
         </div>
       </div>
 
       <div className="features-grid">
         <div className="feature-card">
-          <h3>Guardian Management</h3>
-          <p>Create and manage guardian information including contact details and relationships.</p>
+          <h3>{t('guardian.card1Title')}</h3>
+          <p>{t('guardian.card1Desc')}</p>
         </div>
 
         <div className="feature-card">
-          <h3>Student Relationships</h3>
-          <p>Link guardians with students and manage their relationships and permissions.</p>
+          <h3>{t('guardian.card2Title')}</h3>
+          <p>{t('guardian.card2Desc')}</p>
         </div>
 
         <div className="feature-card">
-          <h3>Guardian Types</h3>
-          <p>Guardian types are automatically managed during the assignment workflow.</p>
+          <h3>{t('guardian.card3Title')}</h3>
+          <p>{t('guardian.card3Desc')}</p>
         </div>
       </div>
 

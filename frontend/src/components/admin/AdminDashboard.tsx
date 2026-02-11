@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth, useUser } from '../../contexts/AuthContext';
 import { ClassesTable } from './ClassesTable';
 import { DepartmentTable } from './DepartmentTable';
@@ -16,6 +17,8 @@ import GradingCriteriaTable from './GradingCriteriaTable';
 import { FinancialManagement } from './FinancialManagement';
 import AssessmentTypeTable from './AssessmentTypeTable';
 import { StaffTable } from './StaffTable';
+import { ThemeSelector } from '../ThemeSelector';
+import { LanguageSelector } from '../LanguageSelector';
 import apiService from '../../services/apiService';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
@@ -25,6 +28,7 @@ type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignm
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
 
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
@@ -274,7 +278,7 @@ export function AdminDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading...
+        {t('common.loading')}
       </div>
     );
   }
@@ -291,7 +295,7 @@ export function AdminDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Access denied. Admin, Financial, or Secretary privileges required.
+        {t('dashboard.accessDenied')}
       </div>
     );
   }
@@ -301,15 +305,15 @@ export function AdminDashboard() {
 
   // Define all tabs with role-based visibility
   const allTabs = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'secretary'] },
-    { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'secretary'] },
-    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin', 'secretary'] },
-    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
-    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin', 'secretary'] },
-    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin', 'secretary'] },
-    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'secretary'] },
-    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰', roles: ['admin', 'financial'] },
-    { id: 'staff' as AdminTab, label: 'Staff Management', icon: '👔', roles: ['admin'] },
+    { id: 'overview' as AdminTab, labelKey: 'admin.tabs.overview', icon: '🏠', roles: ['admin', 'secretary'] },
+    { id: 'students' as AdminTab, labelKey: 'admin.tabs.students', icon: '👥', roles: ['admin', 'secretary'] },
+    { id: 'teachers' as AdminTab, labelKey: 'admin.tabs.teachers', icon: '👨‍🏫', roles: ['admin', 'secretary'] },
+    { id: 'guardians' as AdminTab, labelKey: 'admin.tabs.guardians', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
+    { id: 'academic-setup' as AdminTab, labelKey: 'admin.tabs.academicSetup', icon: '🏗️', roles: ['admin', 'secretary'] },
+    { id: 'academic-foundation' as AdminTab, labelKey: 'admin.tabs.academicFoundation', icon: '📋', roles: ['admin', 'secretary'] },
+    { id: 'classes' as AdminTab, labelKey: 'admin.tabs.classes', icon: '📚', roles: ['admin', 'secretary'] },
+    { id: 'financial' as AdminTab, labelKey: 'admin.tabs.financial', icon: '💰', roles: ['admin', 'financial'] },
+    { id: 'staff' as AdminTab, labelKey: 'admin.tabs.staff', icon: '👔', roles: ['admin'] },
   ];
 
   // Filter tabs based on user role
@@ -326,8 +330,8 @@ export function AdminDashboard() {
       case 'overview':
         return (
           <div className="admin-content">
-            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
-            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Manage all aspects of the school system from here.</p>
+            <h2>{isAdmin ? t('admin.adminOverview') : t('admin.overview')}</h2>
+            <p>{isAdmin ? t('admin.welcomeAdmin') : t('admin.welcomeSecretary')}</p>
             
             <div style={{ 
               display: 'grid', 
@@ -342,11 +346,11 @@ export function AdminDashboard() {
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border)'
               }}>
-                <h3 style={{ marginBottom: 'var(--space-md)' }}>👥 Students</h3>
+                <h3 style={{ marginBottom: 'var(--space-md)' }}>👥 {t('admin.overviewStudents')}</h3>
                 
                 <div style={{ marginBottom: 'var(--space-md)' }}>
-                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    School Year
+                    <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    {t('common.schoolYear')}
                   </label>
                   <select
                     value={selectedYearId}
@@ -365,7 +369,7 @@ export function AdminDashboard() {
                       fontSize: 'var(--text-base)'
                     }}
                   >
-                    <option value="">Select Year</option>
+                    <option value="">{t('common.selectYear')}</option>
                     {schoolYears.map((year) => (
                       <option key={year._id} value={year._id}>
                         {year.year_name}
@@ -375,8 +379,8 @@ export function AdminDashboard() {
                 </div>
 
                 <div style={{ marginBottom: 'var(--space-md)' }}>
-                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    Class
+                    <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    {t('common.class')}
                   </label>
                   <select
                     value={selectedClassId}
@@ -396,7 +400,7 @@ export function AdminDashboard() {
                       opacity: selectedYearId ? 1 : 0.6
                     }}
                   >
-                    <option value="">Select Class</option>
+                    <option value="">{t('common.selectClass')}</option>
                     {classes.map((cls) => (
                       <option key={cls._id} value={cls._id}>
                         {cls.class_name}
@@ -407,7 +411,7 @@ export function AdminDashboard() {
 
                 <div>
                   <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    Student
+                    {t('common.student')}
                   </label>
                   <select
                     value={selectedStudentId}
@@ -424,7 +428,7 @@ export function AdminDashboard() {
                       opacity: selectedClassId ? 1 : 0.6
                     }}
                   >
-                    <option value="">Select Student</option>
+                    <option value="">{t('common.selectStudent')}</option>
                     {students.map((student) => (
                       <option key={student._id} value={student._id}>
                         {student.given_name} {student.middle_name || ''} {student.surname}
@@ -441,11 +445,11 @@ export function AdminDashboard() {
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border)'
               }}>
-                <h3 style={{ marginBottom: 'var(--space-md)' }}>👨‍🏫 Teachers</h3>
+                <h3 style={{ marginBottom: 'var(--space-md)' }}>👨‍🏫 {t('admin.overviewTeachers')}</h3>
                 
                 <div style={{ marginBottom: 'var(--space-md)' }}>
-                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    School Year
+                    <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    {t('common.schoolYear')}
                   </label>
                   <select
                     value={selectedYearId}
@@ -464,7 +468,7 @@ export function AdminDashboard() {
                       fontSize: 'var(--text-base)'
                     }}
                   >
-                    <option value="">Select Year</option>
+                    <option value="">{t('common.selectYear')}</option>
                     {schoolYears.map((year) => (
                       <option key={year._id} value={year._id}>
                         {year.year_name}
@@ -474,8 +478,8 @@ export function AdminDashboard() {
                 </div>
 
                 <div style={{ marginBottom: 'var(--space-md)' }}>
-                  <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    Class
+                    <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
+                    {t('common.class')}
                   </label>
                   <select
                     value={selectedClassId}
@@ -495,7 +499,7 @@ export function AdminDashboard() {
                       opacity: selectedYearId ? 1 : 0.6
                     }}
                   >
-                    <option value="">Select Class</option>
+                    <option value="">{t('common.selectClass')}</option>
                     {classes.map((cls) => (
                       <option key={cls._id} value={cls._id}>
                         {cls.class_name}
@@ -506,7 +510,7 @@ export function AdminDashboard() {
 
                 <div>
                   <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>
-                    Teacher
+                    {t('common.teacher')}
                   </label>
                   <select
                     value={selectedTeacherId}
@@ -523,7 +527,7 @@ export function AdminDashboard() {
                       opacity: selectedClassId ? 1 : 0.6
                     }}
                   >
-                    <option value="">Select Teacher</option>
+                    <option value="">{t('common.selectTeacher')}</option>
                     {teachers.map((teacher) => (
                       <option key={teacher._id} value={teacher._id}>
                         {teacher.given_name} {teacher.surname}
@@ -780,8 +784,8 @@ export function AdminDashboard() {
       default:
         return (
           <div className="admin-content">
-            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
-            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Use the sidebar to navigate.</p>
+            <h2>{isAdmin ? t('admin.adminOverview') : t('admin.overview')}</h2>
+            <p>{t('admin.welcomeShort', { role: isAdmin ? t('admin.roleAdmin') : t('admin.roleSecretary') })}</p>
           </div>
         );
     }
@@ -795,20 +799,22 @@ export function AdminDashboard() {
           <img 
             className="admin-header__logo" 
             src={logoSrc} 
-            alt="Santa Isabel Escola" 
+            alt={t('common.schoolName')} 
             loading="eager" 
           />
           <div className="admin-header__title">
-            <h1>{isAdmin ? 'Admin Portal' : isFinancial ? 'Financial Portal' : 'Secretary Portal'}</h1>
-            <span className="admin-header__subtitle">Santa Isabel Escola</span>
+            <h1>{isAdmin ? t('admin.adminPortal') : isFinancial ? t('admin.financialPortal') : t('admin.secretaryPortal')}</h1>
+            <span className="admin-header__subtitle">{t('common.schoolName')}</span>
           </div>
         </div>
         <div className="admin-header__user">
+          <LanguageSelector />
+          <ThemeSelector />
           <span className="admin-header__user-info">
-            Welcome, {user.email}
+            {t('common.welcome')}, {user.email}
           </span>
           <button className="btn btn--small" onClick={handleSignOut}>
-            Sign Out
+            {t('common.signOut')}
           </button>
         </div>
       </header>
@@ -825,7 +831,7 @@ export function AdminDashboard() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <span className="admin-nav__icon">{tab.icon}</span>
-                <span className="admin-nav__label">{tab.label}</span>
+                <span className="admin-nav__label">{t(tab.labelKey)}</span>
               </button>
             ))}
           </div>
