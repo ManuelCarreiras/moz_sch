@@ -30,7 +30,6 @@ A Santa Isabel Escola é uma plataforma de gestão escolar que permite a alunos,
 2. Aceda ao endereço da plataforma fornecido pela escola (por exemplo: `http://sua-escola-url` ou `https://santa-isabel.exemplo.com`).
 3. Verá a página inicial com o logótipo da escola e um botão **Entrar** ou **Iniciar Sessão**.
 
-[Screenshot: Página inicial com botão Entrar]
 
 ### Primeiro Acesso
 
@@ -41,7 +40,6 @@ Se recebeu uma palavra-passe temporária por email:
 3. Introduza a nova palavra-passe duas vezes e confirme.
 4. Depois disso, utilize o seu email e a nova palavra-passe para entrar.
 
-[Screenshot: Ecrã de alteração de palavra-passe]
 
 ### Funções e O Que Cada Um Vê
 
@@ -67,7 +65,6 @@ Conforme a sua função, verá partes diferentes da plataforma:
 4. Introduza a sua **palavra-passe**.
 5. Clique em **Entrar** ou **Submeter**.
 
-[Screenshot: Formulário de login]
 
 ### Como Sair
 
@@ -75,7 +72,6 @@ Conforme a sua função, verá partes diferentes da plataforma:
 2. Clique em **Sair**.
 3. Será redireccionado para a página inicial.
 
-[Screenshot: Localização do botão Sair]
 
 ---
 
@@ -88,8 +84,6 @@ Quando entra como aluno, vê o **Portal do Aluno** com uma barra lateral. Use os
 - Resumo do seu desempenho.
 - Distribuição de notas por disciplina e turma.
 
-[Screenshot: Separador Visão Geral do Aluno]
-
 ### Notas
 
 1. Clique em **Notas** na barra lateral.
@@ -99,15 +93,11 @@ Quando entra como aluno, vê o **Portal do Aluno** com uma barra lateral. Use os
    - Notas de trabalhos individuais
    - Métricas de desempenho
 
-[Screenshot: Separador Notas com filtros]
-
 ### Horário
 
 1. Clique em **Horário** na barra lateral.
 2. Selecione o **Ano Lectivo** e o **Período** nos menus.
 3. O seu horário semanal de aulas aparecerá com disciplinas, professores, horários e salas.
-
-[Screenshot: Horário do Aluno]
 
 ### Perfil
 
@@ -119,7 +109,6 @@ Quando entra como aluno, vê o **Portal do Aluno** com uma barra lateral. Use os
 2. Use os filtros para encontrar materiais por ano, período ou disciplina.
 3. Clique num recurso para o descarregar.
 
-[Screenshot: Lista de recursos]
 
 ### Presenças
 
@@ -127,7 +116,6 @@ Quando entra como aluno, vê o **Portal do Aluno** com uma barra lateral. Use os
 2. Use os filtros para ver os seus registos de presença.
 3. Pode ver estatísticas e estado de cada aula.
 
-[Screenshot: Registos de presença do aluno]
 
 ### Trabalhos
 
@@ -138,7 +126,6 @@ Quando entra como aluno, vê o **Portal do Aluno** com uma barra lateral. Use os
    - Estado (pendente, entregue, classificado)
 3. Use os filtros (Ano, Período, Disciplina, Turma) para encontrar trabalhos específicos.
 
-[Screenshot: Lista de trabalhos do aluno]
 
 ---
 
@@ -150,7 +137,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 
 - Resumo do painel com as suas turmas e actividades.
 
-[Screenshot: Visão Geral do Professor]
 
 ### As Minhas Turmas
 
@@ -158,7 +144,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 2. Veja todas as turmas que lhe estão atribuídas.
 3. Selecione uma turma para ver o horário e detalhes.
 
-[Screenshot: Lista de turmas do professor]
 
 ### Alunos
 
@@ -166,7 +151,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 2. Use os filtros (Ano, Período, Disciplina) para encontrar os seus alunos.
 3. Veja as métricas de desempenho e notas dos alunos.
 
-[Screenshot: Vista de alunos do professor]
 
 ### Notas (Livro de Notas)
 
@@ -175,7 +159,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 3. Introduza ou actualize as notas de cada aluno.
 4. O sistema calcula automaticamente as médias ponderadas e as notas anuais.
 
-[Screenshot: Livro de notas com introdução de notas]
 
 ### Recursos
 
@@ -183,7 +166,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 2. Carregue novos recursos (ficheiros, links).
 3. Gerir recursos existentes.
 
-[Screenshot: Recursos do professor]
 
 ### Presenças
 
@@ -193,7 +175,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 4. Use acções em lote para marcar toda a turma de uma vez.
 5. Clique em **Guardar** quando terminar.
 
-[Screenshot: Interface de registo de presenças]
 
 ### Trabalhos
 
@@ -203,7 +184,6 @@ Quando entra como professor, vê o **Portal do Professor** com uma barra lateral
 4. **Publique** o trabalho quando estiver pronto para os alunos verem.
 5. Use os filtros para gerir os trabalhos existentes.
 
-[Screenshot: Formulário de criar trabalho]
 
 ---
 
@@ -216,7 +196,6 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
 - Acesso rápido a informações de alunos e professores.
 - Use os menus para seleccionar Ano Lectivo, Turma e depois um Aluno ou Professor.
 
-[Screenshot: Visão Geral da secretária com menus]
 
 ### Alunos
 
@@ -226,7 +205,6 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
 4. Preencha os campos obrigatórios (nome, email, data de nascimento, etc.).
 5. O sistema cria automaticamente uma conta de acesso para o aluno.
 
-[Screenshot: Formulário de criar aluno]
 
 ### Professores
 
@@ -236,7 +214,6 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
 4. Preencha os campos obrigatórios (nome, email, telefone, etc.).
 5. O sistema cria automaticamente uma conta de acesso para o professor.
 
-[Screenshot: Formulário de criar professor]
 
 ### Gestão de Encarregados
 
@@ -245,7 +222,6 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
    - **Criar Novo Encarregado**: Adicionar um encarregado com dados de contacto.
    - **Atribuir Encarregado ao Aluno**: Ligar encarregados aos alunos e escolher o tipo de relação (Pai, Avô, etc.).
 
-[Screenshot: Opções de Gestão de Encarregados]
 
 ### Configuração Académica
 
@@ -259,13 +235,11 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
    - **Tipos de Avaliação**: Definir tipos de trabalho (Trabalho de Casa, Ficha, Teste, Projecto).
    - **Gestão do Ano Lectivo**: Gerir anos lectivos e estrutura.
 
-[Screenshot: Menu de Configuração Académica]
 
 ### Fundação Académica
 
 - Gerir níveis de ano, períodos, anos lectivos e atribuições de alunos a níveis.
 
-[Screenshot: Fundação Académica]
 
 ### Turmas
 
@@ -274,7 +248,6 @@ Quando entra como secretária, vê o **Painel** (ou Portal da Secretária) com o
 3. **Inscrições**: Atribuir alunos às turmas.
 4. **Horário**: Definir ou ver o horário da turma.
 
-[Screenshot: Turmas e Inscrições]
 
 ---
 
@@ -294,7 +267,6 @@ Quando entra como utilizador financeiro, vê o **Portal Financeiro** com um sepa
 5. Para gerar pagamentos para todos os alunos: Clique em **Gerar**, seleccione mês, ano e data de vencimento.
 6. Para marcar como pago: Encontre o registo e altere o estado para **Pago**, podendo adicionar a data do pagamento.
 
-[Screenshot: Separador Mensalidades com filtros]
 
 ### Salários de Professores
 
@@ -304,7 +276,6 @@ Quando entra como utilizador financeiro, vê o **Portal Financeiro** com um sepa
 4. Para gerar salários mensais: Clique em **Gerar**, seleccione mês, ano e data de vencimento.
 5. Para marcar como pago: Actualize o registo e defina **Pago** como Sim.
 
-[Screenshot: Separador Salários de Professores]
 
 ### Salários de Funcionários
 
@@ -314,7 +285,6 @@ Quando entra como utilizador financeiro, vê o **Portal Financeiro** com um sepa
 4. Para gerar salários mensais: Clique em **Gerar**, seleccione mês, ano e data de vencimento.
 5. Para marcar como pago: Actualize o registo e defina **Pago** como Sim.
 
-[Screenshot: Separador Salários de Funcionários]
 
 ---
 
@@ -330,7 +300,6 @@ Como administrador, tem acesso a tudo o que a secretária tem, mais:
 4. O sistema cria uma conta de acesso para o funcionário.
 5. Pode editar salários base e gerir registos de funcionários.
 
-[Screenshot: Tabela de Gestão de Funcionários e formulário Criar Funcionário]
 
 ### Gestão Financeira
 
@@ -339,8 +308,6 @@ Como administrador, tem acesso a tudo o que a secretária tem, mais:
 ### Visão Geral
 
 - Visão Geral do Admin com menus para explorar Alunos e Professores por Ano e Turma.
-
-[Screenshot: Visão Geral do Admin]
 
 ---
 

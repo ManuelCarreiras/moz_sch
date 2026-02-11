@@ -30,7 +30,6 @@ Santa Isabel Escola is a school management platform that helps students, teacher
 2. Go to the platform URL provided by your school (for example: `http://your-school-url` or `https://santa-isabel.example.com`).
 3. You will see the landing page with the school logo and a **Sign In** or **Login** button.
 
-[Screenshot: Landing page with Sign In button]
 
 ### First-Time Login
 
@@ -41,7 +40,6 @@ If you received a temporary password by email:
 3. Enter your new password twice and confirm.
 4. After that, use your email and your new password to log in.
 
-[Screenshot: Password change screen]
 
 ### Roles and What You See
 
@@ -67,7 +65,6 @@ Depending on your role, you will see different parts of the platform:
 4. Enter your **password**.
 5. Click **Sign In** or **Submit**.
 
-[Screenshot: Login form]
 
 ### How to Log Out
 
@@ -75,7 +72,6 @@ Depending on your role, you will see different parts of the platform:
 2. Click **Sign Out**.
 3. You will be returned to the landing page.
 
-[Screenshot: Sign Out button location]
 
 ---
 
@@ -88,7 +84,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
 - Summary of your performance.
 - Class test score distribution.
 
-[Screenshot: Student Overview tab]
 
 ### Grades
 
@@ -99,7 +94,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
    - Individual assignment grades
    - Performance metrics
 
-[Screenshot: Student Grades tab with filters]
 
 ### Schedule
 
@@ -107,7 +101,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
 2. Select the **School Year** and **Term** from the dropdowns.
 3. Your weekly class timetable will appear with subjects, teachers, times, and rooms.
 
-[Screenshot: Student Schedule]
 
 ### Profile
 
@@ -119,7 +112,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
 2. Use the filters to find materials by year, term, or subject.
 3. Click on a resource to download it.
 
-[Screenshot: Resources list]
 
 ### Attendance
 
@@ -127,7 +119,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
 2. Use the filters to see your attendance records.
 3. You can see statistics and status for each class.
 
-[Screenshot: Student Attendance records]
 
 ### Assignments
 
@@ -138,7 +129,6 @@ When you log in as a student, you see the **Student Portal** with a sidebar. Use
    - Status (pending, submitted, graded)
 3. Use filters (Year, Term, Subject, Class) to find specific assignments.
 
-[Screenshot: Student Assignments list]
 
 ---
 
@@ -150,7 +140,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 
 - Dashboard summary of your classes and activities.
 
-[Screenshot: Teacher Overview]
 
 ### My Classes
 
@@ -158,7 +147,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 2. View all classes assigned to you.
 3. Select a class to see its schedule and details.
 
-[Screenshot: Teacher classes list]
 
 ### Students
 
@@ -166,7 +154,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 2. Use filters (Year, Term, Subject) to find your students.
 3. View student performance metrics and grades.
 
-[Screenshot: Teacher Students view]
 
 ### Grades (Gradebook)
 
@@ -175,7 +162,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 3. Enter or update grades for each student.
 4. The system calculates weighted averages and year grades automatically.
 
-[Screenshot: Gradebook with grade entry]
 
 ### Resources
 
@@ -183,7 +169,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 2. Upload new resources (files, links).
 3. Manage existing resources.
 
-[Screenshot: Teacher Resources]
 
 ### Attendance
 
@@ -193,7 +178,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 4. Use bulk actions to mark the whole class at once.
 5. Click **Save** when done.
 
-[Screenshot: Attendance taking interface]
 
 ### Assignments
 
@@ -203,7 +187,6 @@ When you log in as a teacher, you see the **Teacher Portal** with a sidebar.
 4. **Publish** the assignment when it is ready for students to see.
 5. Use filters to manage existing assignments.
 
-[Screenshot: Create Assignment form]
 
 ---
 
@@ -216,7 +199,6 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
 - Quick access to student and teacher information.
 - Use the dropdowns to select School Year, Class, and then a Student or Teacher.
 
-[Screenshot: Secretary Overview with dropdowns]
 
 ### Students
 
@@ -226,7 +208,6 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
 4. Fill in the required fields (name, email, date of birth, etc.).
 5. The system creates a login account for the student automatically.
 
-[Screenshot: Create Student form]
 
 ### Teachers
 
@@ -236,7 +217,6 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
 4. Fill in the required fields (name, email, phone, etc.).
 5. The system creates a login account for the teacher automatically.
 
-[Screenshot: Create Teacher form]
 
 ### Guardian Management
 
@@ -245,7 +225,6 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
    - **Create New Guardian**: Add a guardian with contact details.
    - **Assign Guardian to Student**: Link guardians to students and choose the relationship type (Parent, Grandparent, etc.).
 
-[Screenshot: Guardian Management options]
 
 ### Academic Setup
 
@@ -259,13 +238,11 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
    - **Assessment Types**: Define assignment types (Homework, Quiz, Test, Project).
    - **School Year Management**: Manage school years and structure.
 
-[Screenshot: Academic Setup menu]
 
 ### Academic Foundation
 
 - Manage year levels, terms, school years, and student assignments to year levels.
 
-[Screenshot: Academic Foundation]
 
 ### Classes
 
@@ -274,7 +251,6 @@ When you log in as a secretary, you see the **Dashboard** (or Secretary Portal) 
 3. **Enrollments**: Assign students to classes.
 4. **Timetable**: Set or view the class schedule.
 
-[Screenshot: Classes and Enrollments]
 
 ---
 
@@ -294,7 +270,6 @@ When you log in as a financial user, you see the **Financial Portal** with one m
 5. To generate payments for all students: Click **Generate**, select month, year, and due date.
 6. To mark as paid: Find the record and change the status to **Paid**, optionally adding the payment date.
 
-[Screenshot: Mensality tab with filters]
 
 ### Teacher Salary
 
@@ -304,7 +279,6 @@ When you log in as a financial user, you see the **Financial Portal** with one m
 4. To generate monthly salaries: Click **Generate**, select month, year, and due date.
 5. To mark as paid: Update the record and set **Paid** to Yes.
 
-[Screenshot: Teacher Salary tab]
 
 ### Staff Salary
 
@@ -314,7 +288,6 @@ When you log in as a financial user, you see the **Financial Portal** with one m
 4. To generate monthly salaries: Click **Generate**, select month, year, and due date.
 5. To mark as paid: Update the record and set **Paid** to Yes.
 
-[Screenshot: Staff Salary tab]
 
 ---
 
@@ -330,7 +303,6 @@ As an administrator, you have access to everything a secretary has, plus:
 4. The system creates a login account for the staff member.
 5. You can edit base salaries and manage staff records.
 
-[Screenshot: Staff Management table and Create Staff form]
 
 ### Financial Management
 
@@ -340,7 +312,6 @@ As an administrator, you have access to everything a secretary has, plus:
 
 - Admin Overview with dropdowns to browse Students and Teachers by Year and Class.
 
-[Screenshot: Admin Overview]
 
 ---
 
