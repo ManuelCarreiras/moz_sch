@@ -38,16 +38,19 @@ export function Dashboard() {
     );
   }
 
-  // Redirect non-admin users to their respective portals
+  // Admin-like roles (admin, financial, secretary) see the admin dashboard
+  const adminLikeRoles = ['admin', 'financial', 'secretary'];
+  
+  // Redirect non-admin-like users to their respective portals
   useEffect(() => {
-    if (user && user.role !== 'admin') {
+    if (user && !adminLikeRoles.includes(user.role)) {
       const target = `/${user.role}`;
       navigate(target, { replace: true });
     }
   }, [user, navigate]);
 
-  // Only admins see the admin dashboard
-  if (user.role === 'admin') {
+  // Admin, financial, and secretary see the admin dashboard (with role-based tabs)
+  if (adminLikeRoles.includes(user.role)) {
     return <AdminDashboard />;
   }
 

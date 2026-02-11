@@ -12,12 +12,13 @@ from models.classroom import ClassroomModel
 from models.year_level import YearLevelModel
 import json
 import logging
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_role, require_any_role
 
 
 class StudentScheduleResource(Resource):
     """Get student schedule filtered by term and year"""
 
+    @require_any_role(['admin', 'student', 'secretary'])
     def get(self, student_id=None):
         # Get query parameters for filtering
         term_id = request.args.get('term_id')

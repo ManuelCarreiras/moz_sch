@@ -1,0 +1,396 @@
+import unittest
+import json
+from db import db
+import os
+from flask import Flask
+from webPlatform_api import Webapi
+import uuid
+from models.staff_salary import StaffSalaryModel
+
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+API_KEY = os.getenv("API_KEY")
+
+
+class TestStaffSalary(unittest.TestCase):
+
+    def setUp(self):
+        """
+        Creates a new flask instance for the unit test
+        """
+        self.app = Flask(__name__)
+        self.app.config['TESTING'] = True
+        self.app.config['CORS_HEADERS'] = 'Content-Type'
+        self.app.config["SQLALCHEMY_DATABASE_URI"] = \
+            "postgresql://{}:{}@{}:{}/{}".format(POSTGRES_USER,
+                                                 POSTGRES_PASSWORD,
+                                                 POSTGRES_HOST,
+                                                 POSTGRES_PORT,
+                                                 POSTGRES_DB)
+        db.init_app(self.app)
+
+        self.api = Webapi()
+        self.client = self.api.app.test_client()
+
+        # Create a staff member first (required for salary)
+        with open("tests/configs/staff_config.json", "r") as fr:
+            staff_data = json.load(fr)
+
+        response = self.client.post('/staff',
+                                    headers={"Authorization": API_KEY},
+                                    json=staff_data)
+        if response.status_code == 201:
+            res_answer = json.loads(response.get_data())
+            self.staff_id = res_answer["message"]["_id"]
+        else:
+            self.staff_id = None
+
+        with open("tests/configs/staff_salary_config.json", "r") as fr:
+            self.salary = json.load(fr)
+            if self.staff_id:
+                self.salary["staff_id"] = self.staff_id
+
+        with open("tests/configs/staff_salary_config_missing.json", "r") as fr:
+            self.salary_missing = json.load(fr)
+
+        with open("tests/configs/staff_salary_config_update.json", "r") as fr:
+            self.salary_update = json.load(fr)
+
+        self.salary_id = None
+
+    def tearDown(self) -> None:
+        """
+        Ensures that the database is emptied for next unit test
+        """
+        # Delete all salary records for the staff first
+        # (to avoid foreign key constraint violations)
+        if self.staff_id is not None:
+            with self.app.app_context():
+                salary_records = StaffSalaryModel.find_by_staff_id(
+                    self.staff_id
+                )
+                for salary_record in salary_records:
+                    db.session.delete(salary_record)
+                db.session.commit()
+
+        # Delete specific salary entry if tracked
+        if self.salary_id is not None:
+            self.client.delete("/staff_salary/{}".format(self.salary_id),
+                               headers={"Authorization": API_KEY})
+
+        # Delete staff entry
+        if self.staff_id is not None:
+            self.client.delete("/staff/{}".format(self.staff_id),
+                               headers={"Authorization": API_KEY})
+
+    def test_create_salary(self):
+        """Test creating a salary record"""
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("_id", res_answer["salary"])
+        self.assertEqual(res_answer["salary"]["value"], 1200.00)
+        self.salary_id = res_answer["salary"]["_id"]
+
+    def test_create_salary_missing(self):
+        """Test creating salary with missing required fields"""
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary_missing)
+
+        self.assertEqual(response.status_code, 400)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("required", res_answer["message"].lower())
+        self.salary_id = None
+
+    def test_create_salary_invalid_staff(self):
+        """Test creating salary with invalid staff_id"""
+        invalid_salary = self.salary.copy()
+        invalid_salary["staff_id"] = str(uuid.uuid4())
+
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=invalid_salary)
+
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"], "Staff member not found")
+        self.salary_id = None
+
+    def test_get_salary(self):
+        """Test getting a specific salary record"""
+        # Create salary first
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Get the salary
+        response = self.client.get("/staff_salary/{}".format(self.salary_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["salary"]["value"], 1200.00)
+        self.assertEqual(res_answer["salary"]["month"], 2)
+        self.assertEqual(res_answer["salary"]["year"], 2026)
+
+    def test_get_salary_missing(self):
+        """Test getting a non-existent salary record"""
+        wrong_id = str(uuid.uuid4())
+        response = self.client.get("/staff_salary/{}".format(wrong_id),
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"], "Salary record not found")
+        self.salary_id = None
+
+    def test_get_salary_with_filters(self):
+        """Test getting salary records with filters"""
+        # Create salary first
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Get with staff_id filter
+        response = self.client.get(
+            "/staff_salary?staff_id={}".format(self.staff_id),
+            headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("salary_records", res_answer)
+        self.assertGreaterEqual(len(res_answer["salary_records"]), 1)
+
+        # Get with month and year filter
+        response = self.client.get("/staff_salary?month=2&year=2026",
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("salary_records", res_answer)
+
+    def test_get_salary_by_staff(self):
+        """Test getting salary records for a specific staff member"""
+        # Create salary first
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Get salaries for staff
+        response = self.client.get(
+            "/staff_salary/staff/{}".format(self.staff_id),
+            headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("salary_records", res_answer)
+        self.assertIn("staff", res_answer)
+        self.assertGreaterEqual(len(res_answer["salary_records"]), 1)
+
+    def test_put_salary(self):
+        """Test updating a salary record"""
+        # Create salary first
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Update salary
+        update_data = {
+            "_id": self.salary_id,
+            **self.salary_update
+        }
+        response = self.client.put("/staff_salary",
+                                   headers={"Authorization": API_KEY},
+                                   json=update_data)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["salary"]["paid"], True)
+
+    def test_put_salary_wrong(self):
+        """Test updating a non-existent salary record"""
+        wrong_id = str(uuid.uuid4())
+        update_data = {
+            "_id": wrong_id,
+            **self.salary_update
+        }
+        response = self.client.put("/staff_salary",
+                                   headers={"Authorization": API_KEY},
+                                   json=update_data)
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"], "Salary record not found")
+        self.salary_id = None
+
+    def test_delete_salary(self):
+        """Test deleting a salary record"""
+        # Create salary first
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Delete salary
+        response = self.client.delete(
+            "/staff_salary/{}".format(self.salary_id),
+            headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(
+            res_answer["message"], "Salary record deleted successfully")
+        self.salary_id = None  # Already deleted
+
+    def test_delete_salary_wrong(self):
+        """Test deleting a non-existent salary record"""
+        wrong_id = str(uuid.uuid4())
+        response = self.client.delete("/staff_salary/{}".format(wrong_id),
+                                      headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 404)
+        res_answer = json.loads(response.get_data())
+        self.assertEqual(res_answer["message"], "Salary record not found")
+        self.salary_id = None
+
+    def test_duplicate_salary(self):
+        """Test creating duplicate salary for same staff/month/year"""
+        # Create first salary
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 201)
+        res_answer = json.loads(response.get_data())
+        self.salary_id = res_answer["salary"]["_id"]
+
+        # Try to create duplicate
+        response = self.client.post('/staff_salary',
+                                    headers={"Authorization": API_KEY},
+                                    json=self.salary)
+
+        self.assertEqual(response.status_code, 400)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("already exists", res_answer["message"].lower())
+
+    def test_get_salary_grid(self):
+        """Test getting staff salary grid"""
+        response = self.client.get("/staff_salary/grid",
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("salary_grid", res_answer)
+        self.assertIn("count", res_answer)
+
+    def test_get_salary_grid_with_role(self):
+        """Test getting staff salary grid filtered by role"""
+        response = self.client.get("/staff_salary/grid?role=financial",
+                                   headers={"Authorization": API_KEY})
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("salary_grid", res_answer)
+        # All returned staff should be financial role
+        for staff in res_answer["salary_grid"]:
+            self.assertEqual(staff["role"], "financial")
+
+    def test_update_salary_grid(self):
+        """Test updating staff salary grid"""
+        # First ensure staff exists and get its ID
+        if not self.staff_id:
+            return  # Skip if staff creation failed
+
+        with open("tests/configs/staff_salary_grid_config.json", "r") as fr:
+            grid_data = json.load(fr)
+            grid_data["salaries"][0]["staff_id"] = self.staff_id
+
+        response = self.client.put("/staff_salary/grid",
+                                   headers={"Authorization": API_KEY},
+                                   json=grid_data)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("success", res_answer)
+        self.assertEqual(res_answer["success"], True)
+        self.assertGreaterEqual(res_answer["updated"], 0)
+
+    def test_generate_salary(self):
+        """Test generating salaries for a month"""
+        # First set base_salary for staff
+        if not self.staff_id:
+            return  # Skip if staff creation failed
+
+        # Set base_salary
+        update_data = {
+            "_id": self.staff_id,
+            "base_salary": 1500.00
+        }
+        response = self.client.put("/staff",
+                                   headers={"Authorization": API_KEY},
+                                   json=update_data)
+        self.assertEqual(response.status_code, 200)
+
+        # Generate salaries
+        with open("tests/configs/staff_salary_generate_config.json", "r") as fr:
+            generate_data = json.load(fr)
+
+        response = self.client.post("/staff_salary/generate",
+                                    headers={"Authorization": API_KEY},
+                                    json=generate_data)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("success", res_answer)
+        self.assertEqual(res_answer["success"], True)
+        self.assertGreaterEqual(res_answer["created"], 0)
+
+    def test_generate_salary_by_role(self):
+        """Test generating salaries filtered by role"""
+        # First set base_salary for staff
+        if not self.staff_id:
+            return  # Skip if staff creation failed
+
+        # Set base_salary
+        update_data = {
+            "_id": self.staff_id,
+            "base_salary": 1500.00
+        }
+        response = self.client.put("/staff",
+                                   headers={"Authorization": API_KEY},
+                                   json=update_data)
+        self.assertEqual(response.status_code, 200)
+
+        # Generate salaries for financial role only
+        generate_data = {
+            "month": 4,
+            "year": 2026,
+            "due_date": "2026-04-01",
+            "role": "financial",
+            "notes": "Generated for financial role"
+        }
+
+        response = self.client.post("/staff_salary/generate",
+                                    headers={"Authorization": API_KEY},
+                                    json=generate_data)
+        self.assertEqual(response.status_code, 200)
+        res_answer = json.loads(response.get_data())
+        self.assertIn("success", res_answer)
+        self.assertEqual(res_answer["success"], True)
+
+
+if __name__ == '__main__':
+    unittest.main()

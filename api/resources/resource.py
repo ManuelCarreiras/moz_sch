@@ -18,7 +18,7 @@ class ResourceResource(Resource):
     Teachers can upload resources, students can download them
     """
 
-    @require_any_role(['admin', 'teacher', 'student'])
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, resource_id=None):
         """
         GET /resource - Get all resources (with filters by year and subject)
@@ -287,7 +287,7 @@ class ResourceDownloadResource(Resource):
     Students and teachers can download resources
     """
 
-    @require_any_role(['admin', 'teacher', 'student'])
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, resource_id):
         """
         GET /resource/<resource_id>/download - Download a resource file

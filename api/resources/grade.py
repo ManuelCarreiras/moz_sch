@@ -21,7 +21,7 @@ class GradeResource(Resource):
     Grade Resource - Manage student grades for assignments
     """
 
-    @require_any_role(['admin', 'teacher', 'student'])
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, grade_id=None):
         """
         GET /grade/<grade_id> - Get specific grade

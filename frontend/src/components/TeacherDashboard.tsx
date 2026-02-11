@@ -48,7 +48,8 @@ export function TeacherDashboard() {
   const user = useUser();
   const navigate = useNavigate();
   const isAdmin = user?.role === 'admin';
-  const [activeTab, setActiveTab] = useState<TeacherTab>(isAdmin ? 'classes' : 'overview');
+  const isSecretary = user?.role === 'secretary';
+  const [activeTab, setActiveTab] = useState<TeacherTab>(isAdmin ? 'classes' : isSecretary ? 'teachers' : 'overview');
   const [showCreateTeacher, setShowCreateTeacher] = useState(false);
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
@@ -77,12 +78,12 @@ export function TeacherDashboard() {
   }, [user]);
 
 
-  // Redirect admin away from assignments and attendance tabs
+  // Redirect admin/secretary away from assignments and attendance tabs
   useEffect(() => {
-    if (isAdmin && (activeTab === 'assignments' || activeTab === 'attendance')) {
-      setActiveTab('classes');
+    if ((isAdmin || isSecretary) && (activeTab === 'assignments' || activeTab === 'attendance')) {
+      setActiveTab(isSecretary ? 'teachers' : 'classes');
     }
-  }, [isAdmin, activeTab]);
+  }, [isAdmin, isSecretary, activeTab]);
 
   // Reload data when Grades tab becomes active
   useEffect(() => {
@@ -176,24 +177,27 @@ export function TeacherDashboard() {
     );
   }
 
-  const tabs = [
+  // Filter tabs by role: admin sees Teachers; secretary sees Overview+Teachers; teacher sees full set
+  const allTeacherTabs = [
     { id: 'overview' as TeacherTab, label: 'Overview', icon: '🏠' },
     { id: 'classes' as TeacherTab, label: 'My Classes', icon: '📚' },
     { id: 'students' as TeacherTab, label: 'Students', icon: '👥' },
     { id: 'grades' as TeacherTab, label: 'Grades', icon: '📊' },
     { id: 'resources' as TeacherTab, label: 'Resources', icon: '📖' },
-    ...(isAdmin ? [
-      { id: 'teachers' as TeacherTab, label: 'Teachers', icon: '👨‍🏫' }
-    ] : [
-      { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
-      { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' }
-    ]),
+    { id: 'teachers' as TeacherTab, label: 'Teachers', icon: '👨‍🏫' },
+    { id: 'attendance' as TeacherTab, label: 'Attendance', icon: '✅' },
+    { id: 'assignments' as TeacherTab, label: 'Assignments', icon: '📝' },
   ];
+  const tabs = isAdmin
+    ? allTeacherTabs.filter(t => ['overview', 'classes', 'students', 'grades', 'resources', 'teachers'].includes(t.id))
+    : isSecretary
+      ? allTeacherTabs.filter(t => ['overview', 'teachers'].includes(t.id))
+      : allTeacherTabs.filter(t => ['overview', 'classes', 'students', 'grades', 'resources', 'attendance', 'assignments'].includes(t.id));
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <TeacherOverview isAdmin={isAdmin} />;
+        return <TeacherOverview isAdmin={isAdmin} isSecretary={isSecretary} />;
       case 'classes':
         return <TeacherSchedule />;
       case 'students':
@@ -445,7 +449,7 @@ export function TeacherDashboard() {
       case 'resources':
         return <TeacherResources />;
       case 'teachers':
-        if (isAdmin) {
+        if (isAdmin || isSecretary) {
           return <TeachersTable />;
         }
         return null;

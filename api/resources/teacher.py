@@ -2,7 +2,8 @@ from flask import request, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
 from models.department import DepartmentModel
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_role, require_any_role
+from db import db
 import json
 import os
 import logging
@@ -17,7 +18,7 @@ except Exception:
 
 
 class TeacherResource(Resource):
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         data = request.get_json()
 
@@ -36,11 +37,6 @@ class TeacherResource(Resource):
             }
             return Response(json.dumps(response), 400)
 
-        # Remove department_id from teacher creation - will be handled separately
-        teacher_data = {k: v for k, v in data.items() if k != 'department_id'}
-        new_professor: TeacherModel = TeacherModel(**teacher_data)
-        new_professor.save_to_db()
-
         # Generate username FIRST (before Cognito operations) so it's always saved
         given_name = (data.get('given_name') or '').strip()
         surname = (data.get('surname') or '').strip()
@@ -53,9 +49,14 @@ class TeacherResource(Resource):
         
         unique_username = ''.join(username_parts) if username_parts else f"teacher_{uuid.uuid4().hex[:12]}"
         
-        # Save username to database IMMEDIATELY (before Cognito operations)
-        new_professor.username = unique_username
-        new_professor.save_to_db()
+        # Set username before creating the model
+        data['username'] = unique_username
+        
+        # Remove department_id from teacher creation - will be handled separately
+        teacher_data = {k: v for k, v in data.items() if k != 'department_id'}
+        new_professor: TeacherModel = TeacherModel(**teacher_data)
+        # Add to session but don't commit yet - wait for Cognito success
+        db.session.add(new_professor)
 
         # Optionally create a Cognito user if email is provided and AWS is configured
         cognito_result = None
@@ -121,6 +122,8 @@ class TeacherResource(Resource):
                     except ClientError as email_e:
                         logging.error(f"CRITICAL: Failed to add user to group '{group_name}' (tried both username and email): {group_e}, {email_e}")
                 cognito_result = 'created'
+                # Cognito succeeded, commit the database transaction
+                db.session.commit()
             except ClientError as e:
                 error_code = getattr(e, 'response', {}).get('Error', {}).get('Code')
                 error_message = getattr(e, 'response', {}).get('Error', {}).get('Message', str(e))
@@ -153,20 +156,37 @@ class TeacherResource(Resource):
                     except Exception as inner:
                         logging.error(f"CRITICAL: Failed to add existing user to group: {inner}")
                     cognito_result = 'exists'
+                    # Username exists is acceptable, commit the database transaction
+                    db.session.commit()
                 else:
                     logging.error(f"CRITICAL: Cognito user creation FAILED - Code: {error_code}, Message: {error_message}")
                     logging.error(f"Failed to create user: username={unique_username}, email={email}, pool={user_pool_id}")
-                    # Re-raise the exception so we know it failed
-                    raise Exception(f"Cognito user creation failed: {error_code} - {error_message}")
+                    # Rollback database transaction on Cognito failure
+                    db.session.rollback()
+                    response = {
+                        'success': False,
+                        'message': f'Failed to create Cognito user: {error_message}'
+                    }
+                    return Response(json.dumps(response), 500)
             except Exception as e:
                 # Catch all other exceptions (like NoCredentialsError, network errors, etc.)
                 error_msg = str(e)
                 logging.error(f"CRITICAL: Cognito setup issue - {error_msg}")
                 logging.error(f"Error type: {type(e).__name__}")
-                # Re-raise so we know Cognito failed
-                raise Exception(f"Cognito user creation failed: {error_msg}")
+                # Rollback database transaction on Cognito failure
+                db.session.rollback()
+                response = {
+                    'success': False,
+                    'message': f'Failed to create Cognito user: {error_msg}'
+                }
+                return Response(json.dumps(response), 500)
         elif email and boto3 is None:
             logging.warning("boto3 not available; skipping Cognito user creation")
+            # No Cognito needed, commit the database transaction
+            db.session.commit()
+        else:
+            # No email or Cognito not configured, commit the database transaction
+            db.session.commit()
 
         response = {
             'success': True,

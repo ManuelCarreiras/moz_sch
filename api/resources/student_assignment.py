@@ -18,17 +18,17 @@ class StudentAssignmentResource(Resource):
     Student Assignment Resource - View assignments for authenticated student
     """
 
-    @require_any_role(['admin', 'student'])
+    @require_any_role(['admin', 'student', 'secretary'])
     def get(self, student_id=None):
         """
         GET /student/assignments - Get all assignments for authenticated student
-        GET /student_assignment (admin) - Get all student assignments
+        GET /student_assignment (admin/secretary) - Get all student assignments
         Optional filters: term_id, subject_id, status, year_id, class_name
         """
-        # Check if admin is requesting all student assignments
+        # Check if admin/secretary is requesting all student assignments
         role = g.role if hasattr(g, 'role') else None
         
-        if role == 'admin' and not student_id:
+        if role in ['admin', 'secretary'] and not student_id:
             # Admin viewing all student assignments
             class_name_filter = request.args.get('class_name')
             term_id = request.args.get('term_id')

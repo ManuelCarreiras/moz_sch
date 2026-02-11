@@ -1000,6 +1000,99 @@ class ApiService {
     return this.post('/teacher_salary/generate', data);
   }
 
+  // ========== Staff Management ==========
+  async getStaff(role?: string) {
+    const params = new URLSearchParams();
+    if (role) params.append('role', role);
+    const queryString = params.toString();
+    return this.get(queryString ? `/staff?${queryString}` : '/staff');
+  }
+
+  async getStaffById(id: string) {
+    return this.get(`/staff/${id}`);
+  }
+
+  async createStaff(staffData: any) {
+    return this.post('/staff', staffData);
+  }
+
+  async updateStaff(id: string, staffData: any) {
+    const data = { ...staffData, _id: id };
+    return this.put('/staff', data);
+  }
+
+  async deleteStaff(id: string) {
+    return this.delete(`/staff/${id}`);
+  }
+
+  // ========== Staff Salary Management ==========
+  async getStaffSalary(filters?: { staff_id?: string; month?: number; year?: number; paid?: boolean }) {
+    const params = new URLSearchParams();
+    if (filters?.staff_id) params.append('staff_id', filters.staff_id);
+    if (filters?.month) params.append('month', filters.month.toString());
+    if (filters?.year) params.append('year', filters.year.toString());
+    if (filters?.paid !== undefined) params.append('paid', filters.paid.toString());
+    const queryString = params.toString();
+    return this.get(queryString ? `/staff_salary?${queryString}` : '/staff_salary');
+  }
+
+  async getStaffSalaryById(id: string) {
+    return this.get(`/staff_salary/${id}`);
+  }
+
+  async getStaffSalaryByStaff(staffId: string) {
+    return this.get(`/staff_salary/staff/${staffId}`);
+  }
+
+  async createStaffSalary(data: {
+    staff_id: string;
+    value: number;
+    due_date: string;
+    month: number;
+    year: number;
+    paid?: boolean;
+    payment_date?: string;
+    notes?: string;
+  }) {
+    return this.post('/staff_salary', data);
+  }
+
+  async updateStaffSalary(data: {
+    _id: string;
+    paid?: boolean;
+    payment_date?: string | null;
+    value?: number;
+    due_date?: string;
+    notes?: string;
+  }) {
+    return this.put('/staff_salary', data);
+  }
+
+  async deleteStaffSalary(id: string) {
+    return this.delete(`/staff_salary/${id}`);
+  }
+
+  async getStaffSalaryGrid(role?: string) {
+    const params = new URLSearchParams();
+    if (role) params.append('role', role);
+    const queryString = params.toString();
+    return this.get(queryString ? `/staff_salary/grid?${queryString}` : '/staff_salary/grid');
+  }
+
+  async updateStaffSalaryGrid(salaries: Array<{ staff_id: string; base_salary: number | null }>) {
+    return this.put('/staff_salary/grid', { salaries });
+  }
+
+  async generateStaffSalary(data: {
+    month: number;
+    year: number;
+    due_date: string;
+    notes?: string;
+    role?: string;
+  }) {
+    return this.post('/staff_salary/generate', data);
+  }
+
 }
 
 // Export singleton instance

@@ -102,6 +102,10 @@ def valid_auth():
                 role = 'teacher'
             elif 'student' in groups_norm or 'students' in groups_norm:
                 role = 'student'
+            elif 'financial' in groups_norm:
+                role = 'financial'
+            elif 'secretary' in groups_norm:
+                role = 'secretary'
             else:
                 role = None
 

@@ -4,13 +4,13 @@ from models.grading_criteria import GradingCriteriaModel
 from models.subject import SubjectModel
 from models.year_level import YearLevelModel
 from models.school_year import SchoolYearModel
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_role, require_any_role
 import logging
 
 class GradingCriteriaResource(Resource):
     """Admin-only: Manage grading criteria for subjects (simplified: one row per subject+year)"""
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def get(self, criteria_id=None):
         """Get grading criteria"""
         if criteria_id:
@@ -86,7 +86,7 @@ class GradingCriteriaResource(Resource):
                 'count': len(enhanced_criteria)
             }, 200
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         """Create grading criteria"""
         data = request.get_json()
@@ -134,7 +134,7 @@ class GradingCriteriaResource(Resource):
             logging.error(f"Error creating grading criteria: {str(e)}")
             return {'message': f'Error: {str(e)}'}, 500
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def put(self, criteria_id):
         """Update grading criteria"""
         criteria = GradingCriteriaModel.find_by_id(criteria_id)
@@ -174,7 +174,7 @@ class GradingCriteriaResource(Resource):
             logging.error(f"Error updating grading criteria: {str(e)}")
             return {'message': f'Error: {str(e)}'}, 500
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def delete(self, criteria_id):
         """Delete grading criteria"""
         criteria = GradingCriteriaModel.find_by_id(criteria_id)

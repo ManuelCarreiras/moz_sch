@@ -22,7 +22,7 @@ class StudentOverviewResource(Resource):
     Get student's own performance metrics and class test score distribution
     """
 
-    @require_any_role(['admin', 'student'])
+    @require_any_role(['admin', 'student', 'secretary'])
     def get(self):
         """
         GET /student/overview?year_id=&term_id=&subject_id=&class_name=
@@ -38,11 +38,11 @@ class StudentOverviewResource(Resource):
             if not username:
                 return {'message': 'Authentication required'}, 401
             
-            # Get student_id - either from request param (for admin) or from authenticated user (for student)
+            # Get student_id - either from request param (for admin/secretary) or from authenticated user (for student)
             requested_student_id = request.args.get('student_id')
             
-            if user_role == 'admin' and requested_student_id:
-                # Admin viewing a specific student
+            if user_role in ['admin', 'secretary'] and requested_student_id:
+                # Admin/Secretary viewing a specific student
                 student = StudentModel.find_by_id(requested_student_id)
                 if not student:
                     return {'message': 'Student not found'}, 404
@@ -54,7 +54,7 @@ class StudentOverviewResource(Resource):
                     return {'message': 'Student not found'}, 404
                 student_id = str(student._id)
             else:
-                return {'message': 'Invalid access. Student role required or student_id parameter needed for admin.'}, 403
+                return {'message': 'Invalid access. Student role required or student_id parameter needed for admin/secretary.'}, 403
             
             # Get filters
             year_id = request.args.get('year_id')

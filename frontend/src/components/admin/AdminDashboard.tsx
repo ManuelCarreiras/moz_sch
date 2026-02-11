@@ -15,10 +15,11 @@ import { YearLevelTimetable } from './YearLevelTimetable';
 import GradingCriteriaTable from './GradingCriteriaTable';
 import { FinancialManagement } from './FinancialManagement';
 import AssessmentTypeTable from './AssessmentTypeTable';
+import { StaffTable } from './StaffTable';
 import apiService from '../../services/apiService';
 import logoSrc from '../../assets/Santa_Isabel.png';
 
-type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial';
+type AdminTab = 'overview' | 'students' | 'teachers' | 'guardians' | 'academic-setup' | 'academic-foundation' | 'classes' | 'financial' | 'staff';
 type AcademicSetupTab = 'overview' | 'departments' | 'subjects' | 'classrooms' | 'teacher-departments' | 'school-year-management' | 'grading-criteria' | 'assessment-types';
 type GuardianManagementTab = 'overview' | 'guardian-creation' | 'student-assignment';
 type ClassManagementTab = 'classes' | 'enrollments' | 'timetable';
@@ -27,6 +28,7 @@ export function AdminDashboard() {
   const { signOut, isLoading } = useAuth();
   const user = useUser();
   const navigate = useNavigate();
+  
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [activeAcademicTab, setActiveAcademicTab] = useState<AcademicSetupTab>('overview');
   const [activeGuardianTab, setActiveGuardianTab] = useState<GuardianManagementTab>('overview');
@@ -44,6 +46,13 @@ export function AdminDashboard() {
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
   
   const [loadingOverview, setLoadingOverview] = useState(false);
+
+  // Set initial tab based on user role - financial users should see Financial Management by default
+  useEffect(() => {
+    if (user?.role === 'financial' && activeTab === 'overview') {
+      setActiveTab('financial');
+    }
+  }, [user, activeTab]);
 
   const handleSignOut = async () => {
     try {
@@ -270,7 +279,9 @@ export function AdminDashboard() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  // Allow admin, financial, and secretary roles to access this dashboard
+  const allowedRoles = ['admin', 'financial', 'secretary'];
+  if (!user || !allowedRoles.includes(user.role)) {
     return (
       <div style={{ 
         display: 'flex', 
@@ -280,29 +291,43 @@ export function AdminDashboard() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Access denied. Admin privileges required.
+        Access denied. Admin, Financial, or Secretary privileges required.
       </div>
     );
   }
 
-  const tabs = [
-    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠' },
-    { id: 'students' as AdminTab, label: 'Students', icon: '👥' },
-    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫' },
-    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦' },
-    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️' },
-    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋' },
-    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚' },
-    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰' },
+  const isAdmin = user.role === 'admin';
+  const isFinancial = user.role === 'financial';
+
+  // Define all tabs with role-based visibility
+  const allTabs = [
+    { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'secretary'] },
+    { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'secretary'] },
+    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin', 'secretary'] },
+    { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
+    { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin', 'secretary'] },
+    { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin', 'secretary'] },
+    { id: 'classes' as AdminTab, label: 'Classes', icon: '📚', roles: ['admin', 'secretary'] },
+    { id: 'financial' as AdminTab, label: 'Financial Management', icon: '💰', roles: ['admin', 'financial'] },
+    { id: 'staff' as AdminTab, label: 'Staff Management', icon: '👔', roles: ['admin'] },
   ];
 
+  // Filter tabs based on user role
+  const tabs = allTabs.filter(tab => tab.roles.includes(user.role));
+
   const renderTabContent = () => {
+    // Financial users should not see the overview - redirect to financial management
+    if (activeTab === 'overview' && user?.role === 'financial') {
+      // This should be handled by useEffect, but as a safeguard, return financial content
+      return <FinancialManagement />;
+    }
+    
     switch (activeTab) {
       case 'overview':
         return (
           <div className="admin-content">
-            <h2>Admin Overview</h2>
-            <p>Welcome to the Santa Isabel Escola Admin Portal. Manage all aspects of the school system from here.</p>
+            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
+            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Manage all aspects of the school system from here.</p>
             
             <div style={{ 
               display: 'grid', 
@@ -750,11 +775,13 @@ export function AdminDashboard() {
         );
       case 'financial':
         return <FinancialManagement />;
+      case 'staff':
+        return <StaffTable />;
       default:
         return (
           <div className="admin-content">
-            <h2>Admin Overview</h2>
-            <p>Welcome to the Santa Isabel Escola Admin Portal. Use the sidebar to navigate.</p>
+            <h2>{isAdmin ? 'Admin Overview' : 'Overview'}</h2>
+            <p>Welcome to the Santa Isabel Escola {isAdmin ? 'Admin' : 'Secretary'} Portal. Use the sidebar to navigate.</p>
           </div>
         );
     }
@@ -772,7 +799,7 @@ export function AdminDashboard() {
             loading="eager" 
           />
           <div className="admin-header__title">
-            <h1>Admin Portal</h1>
+            <h1>{isAdmin ? 'Admin Portal' : isFinancial ? 'Financial Portal' : 'Secretary Portal'}</h1>
             <span className="admin-header__subtitle">Santa Isabel Escola</span>
           </div>
         </div>

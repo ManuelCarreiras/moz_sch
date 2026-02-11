@@ -29,13 +29,29 @@ interface Salary {
   notes?: string;
 }
 
-type FinancialTab = 'mensality' | 'salary';
+interface StaffSalary {
+  _id: string;
+  staff_id: string;
+  staff_name?: string;
+  staff_email?: string;
+  staff_role?: string;
+  value: number;
+  paid: boolean;
+  due_date: string;
+  month: number;
+  year: number;
+  payment_date?: string | null;
+  notes?: string;
+}
+
+type FinancialTab = 'mensality' | 'salary' | 'staff-salary';
 
 export function FinancialManagement() {
   const [activeTab, setActiveTab] = useState<FinancialTab>('mensality');
   const [loading, setLoading] = useState(false);
   const [mensalityRecords, setMensalityRecords] = useState<Mensality[]>([]);
   const [salaryRecords, setSalaryRecords] = useState<Salary[]>([]);
+  const [staffSalaryRecords, setStaffSalaryRecords] = useState<StaffSalary[]>([]);
   
   // Filters
   const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth() + 1);
@@ -43,6 +59,7 @@ export function FinancialManagement() {
   const [filterPaid, setFilterPaid] = useState<string>('all'); // 'all', 'paid', 'unpaid'
   const [filterStudentId, setFilterStudentId] = useState<string>('');
   const [filterTeacherId, setFilterTeacherId] = useState<string>('');
+  const [filterStaffId, setFilterStaffId] = useState<string>('');
 
   // Generation modal
   const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -58,14 +75,21 @@ export function FinancialManagement() {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
   const [departments, setDepartments] = useState<Array<{ _id: string; department_name: string }>>([]);
 
-  // Students and Teachers for filters/dropdowns
+  // Staff salary grid modal
+  const [showStaffSalaryGridModal, setShowStaffSalaryGridModal] = useState(false);
+  const [staffSalaryGrid, setStaffSalaryGrid] = useState<Array<{ staff_id: string; staff_name: string; email: string; role: string; base_salary: number | null }>>([]);
+  const [editingStaffSalaries, setEditingStaffSalaries] = useState<Record<string, string>>({});
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('');
+
+  // Students, Teachers, and Staff for filters/dropdowns
   const [students, setStudents] = useState<Array<{ _id: string; given_name: string; surname: string; email?: string }>>([]);
   const [teachers, setTeachers] = useState<Array<{ _id: string; given_name: string; surname: string; email_address?: string }>>([]);
+  const [staff, setStaff] = useState<Array<{ _id: string; given_name: string; surname: string; email_address?: string; role: string }>>([]);
 
   useEffect(() => {
     loadData();
     loadStudentsAndTeachers();
-  }, [activeTab, filterMonth, filterYear, filterPaid, filterStudentId, filterTeacherId]);
+  }, [activeTab, filterMonth, filterYear, filterPaid, filterStudentId, filterTeacherId, filterStaffId]);
 
   // Reload salary grid when department filter changes or modal opens
   useEffect(() => {
@@ -74,6 +98,14 @@ export function FinancialManagement() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDepartmentId, showSalaryGridModal]);
+
+  // Reload staff salary grid when role filter changes or modal opens
+  useEffect(() => {
+    if (showStaffSalaryGridModal) {
+      loadStaffSalaryGrid();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoleFilter, showStaffSalaryGridModal]);
 
   // Debug: Log when salaryGrid state changes
   useEffect(() => {
@@ -97,7 +129,7 @@ export function FinancialManagement() {
           const records = (response.data as any).mensality_records || [];
           setMensalityRecords(records);
         }
-      } else {
+      } else if (activeTab === 'salary') {
         const filters: any = {
           month: filterMonth,
           year: filterYear,
@@ -110,6 +142,19 @@ export function FinancialManagement() {
           const records = (response.data as any).salary_records || [];
           setSalaryRecords(records);
         }
+      } else if (activeTab === 'staff-salary') {
+        const filters: any = {
+          month: filterMonth,
+          year: filterYear,
+        };
+        if (filterStaffId) filters.staff_id = filterStaffId;
+        if (filterPaid !== 'all') filters.paid = filterPaid === 'paid';
+        
+        const response = await apiService.getStaffSalary(filters);
+        if (response.success && response.data) {
+          const records = (response.data as any).salary_records || [];
+          setStaffSalaryRecords(records);
+        }
       }
     } catch (error) {
       console.error('Error loading financial data:', error);
@@ -120,9 +165,10 @@ export function FinancialManagement() {
 
   const loadStudentsAndTeachers = async () => {
     try {
-      const [studentsRes, teachersRes] = await Promise.all([
+      const [studentsRes, teachersRes, staffRes] = await Promise.all([
         apiService.getStudents(),
         apiService.getTeachers(),
+        apiService.getStaff(),
       ]);
       if (studentsRes.success && studentsRes.data) {
         const studentsData = Array.isArray(studentsRes.data) ? studentsRes.data : [];
@@ -132,12 +178,16 @@ export function FinancialManagement() {
         const teachersData = Array.isArray(teachersRes.data) ? teachersRes.data : [];
         setTeachers(teachersData);
       }
+      if (staffRes.success && staffRes.data) {
+        const staffData = (staffRes.data as any).message || staffRes.data;
+        setStaff(Array.isArray(staffData) ? staffData : []);
+      }
     } catch (error) {
-      console.error('Error loading students/teachers:', error);
+      console.error('Error loading students/teachers/staff:', error);
     }
   };
 
-  const handleMarkAsPaid = async (id: string, type: 'mensality' | 'salary') => {
+  const handleMarkAsPaid = async (id: string, type: 'mensality' | 'salary' | 'staff-salary') => {
     try {
       const updateData = {
         _id: id,
@@ -145,9 +195,14 @@ export function FinancialManagement() {
         payment_date: new Date().toISOString().split('T')[0],
       };
       
-      const response = type === 'mensality'
-        ? await apiService.updateMensality(updateData)
-        : await apiService.updateTeacherSalary(updateData);
+      let response;
+      if (type === 'mensality') {
+        response = await apiService.updateMensality(updateData);
+      } else if (type === 'salary') {
+        response = await apiService.updateTeacherSalary(updateData);
+      } else {
+        response = await apiService.updateStaffSalary(updateData);
+      }
       
       if (response.success) {
         loadData();
@@ -160,7 +215,7 @@ export function FinancialManagement() {
     }
   };
 
-  const handleMarkAsUnpaid = async (id: string, type: 'mensality' | 'salary') => {
+  const handleMarkAsUnpaid = async (id: string, type: 'mensality' | 'salary' | 'staff-salary') => {
     try {
       const updateData = {
         _id: id,
@@ -168,9 +223,14 @@ export function FinancialManagement() {
         payment_date: null,
       };
       
-      const response = type === 'mensality'
-        ? await apiService.updateMensality(updateData)
-        : await apiService.updateTeacherSalary(updateData);
+      let response;
+      if (type === 'mensality') {
+        response = await apiService.updateMensality(updateData);
+      } else if (type === 'salary') {
+        response = await apiService.updateTeacherSalary(updateData);
+      } else {
+        response = await apiService.updateStaffSalary(updateData);
+      }
       
       if (response.success) {
         loadData();
@@ -206,9 +266,14 @@ export function FinancialManagement() {
         generateData.value = parseFloat(generateValue);
       }
 
-      const response = activeTab === 'mensality'
-        ? await apiService.generateMensality(generateData)
-        : await apiService.generateTeacherSalary(generateData);
+      let response;
+      if (activeTab === 'mensality') {
+        response = await apiService.generateMensality(generateData);
+      } else if (activeTab === 'salary') {
+        response = await apiService.generateTeacherSalary(generateData);
+      } else {
+        response = await apiService.generateStaffSalary(generateData);
+      }
 
       if (response.success) {
         const data = response.data as any;
@@ -270,6 +335,48 @@ export function FinancialManagement() {
     }
   };
 
+  const loadStaffSalaryGrid = async () => {
+    try {
+      const response = await apiService.getStaffSalaryGrid(selectedRoleFilter || undefined);
+      if (response.success && response.data) {
+        const grid = (response.data as any).salary_grid || [];
+        setStaffSalaryGrid(grid);
+        // Initialize editing state
+        const editing: Record<string, string> = {};
+        grid.forEach((item: any) => {
+          editing[item.staff_id] = item.base_salary?.toString() || '';
+        });
+        setEditingStaffSalaries(editing);
+      }
+    } catch (error) {
+      console.error('Error loading staff salary grid:', error);
+    }
+  };
+
+  const handleSaveStaffSalaryGrid = async () => {
+    try {
+      setLoading(true);
+      const salaries = staffSalaryGrid.map(item => ({
+        staff_id: item.staff_id,
+        base_salary: editingStaffSalaries[item.staff_id] ? parseFloat(editingStaffSalaries[item.staff_id]) : null
+      }));
+
+      const response = await apiService.updateStaffSalaryGrid(salaries);
+      if (response.success) {
+        alert(`Successfully updated ${(response.data as any).updated || 0} staff salaries`);
+        setShowStaffSalaryGridModal(false);
+        loadStaffSalaryGrid();
+      } else {
+        alert(response.error || 'Failed to update salaries');
+      }
+    } catch (error) {
+      console.error('Error saving staff salary grid:', error);
+      alert('Error saving staff salary grid');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveSalaryGrid = async () => {
     try {
       setLoading(true);
@@ -307,29 +414,36 @@ export function FinancialManagement() {
     return months[month] || month.toString();
   };
 
-  const totalPaid = activeTab === 'mensality'
-    ? mensalityRecords.filter(r => r.paid).reduce((sum, r) => sum + r.value, 0)
-    : salaryRecords.filter(r => r.paid).reduce((sum, r) => sum + r.value, 0);
+  const getCurrentRecords = () => {
+    if (activeTab === 'mensality') return mensalityRecords;
+    if (activeTab === 'salary') return salaryRecords;
+    return staffSalaryRecords;
+  };
 
-  const totalUnpaid = activeTab === 'mensality'
-    ? mensalityRecords.filter(r => !r.paid).reduce((sum, r) => sum + r.value, 0)
-    : salaryRecords.filter(r => !r.paid).reduce((sum, r) => sum + r.value, 0);
-
-  const totalRecords = activeTab === 'mensality' ? mensalityRecords.length : salaryRecords.length;
+  const currentRecords = getCurrentRecords();
+  const totalPaid = currentRecords.filter((r: any) => r.paid).reduce((sum: number, r: any) => sum + r.value, 0);
+  const totalUnpaid = currentRecords.filter((r: any) => !r.paid).reduce((sum: number, r: any) => sum + r.value, 0);
+  const totalRecords = currentRecords.length;
 
   return (
     <div className="admin-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
         <h2>Financial Management</h2>
         <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-          {activeTab === 'salary' && (
+          {(activeTab === 'salary' || activeTab === 'staff-salary') && (
             <button
               className="btn btn--secondary"
               onClick={() => {
-                setShowSalaryGridModal(true);
-                setSelectedDepartmentId('');
-                loadDepartments();
-                loadSalaryGrid();
+                if (activeTab === 'salary') {
+                  setShowSalaryGridModal(true);
+                  setSelectedDepartmentId('');
+                  loadDepartments();
+                  loadSalaryGrid();
+                } else {
+                  setShowStaffSalaryGridModal(true);
+                  setSelectedRoleFilter('');
+                  loadStaffSalaryGrid();
+                }
               }}
             >
               Manage Salary Grid
@@ -357,6 +471,12 @@ export function FinancialManagement() {
           onClick={() => setActiveTab('salary')}
         >
           💰 Teacher Salaries
+        </button>
+        <button
+          className={`btn ${activeTab === 'staff-salary' ? 'btn--primary' : 'btn--secondary'}`}
+          onClick={() => setActiveTab('staff-salary')}
+        >
+          👔 Staff Salaries
         </button>
       </div>
 
@@ -446,7 +566,7 @@ export function FinancialManagement() {
               ))}
             </select>
           </div>
-        ) : (
+        ) : activeTab === 'salary' ? (
           <div>
             <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Teacher</label>
             <select
@@ -458,6 +578,22 @@ export function FinancialManagement() {
               {teachers.map(t => (
                 <option key={t._id} value={t._id}>
                   {t.given_name} {t.surname}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Staff</label>
+            <select
+              value={filterStaffId}
+              onChange={(e) => setFilterStaffId(e.target.value)}
+              style={{ width: '100%', padding: 'var(--space-sm)' }}
+            >
+              <option value="">All Staff</option>
+              {staff.map(s => (
+                <option key={s._id} value={s._id}>
+                  {s.given_name} {s.surname} ({s.role})
                 </option>
               ))}
             </select>
@@ -474,7 +610,7 @@ export function FinancialManagement() {
             <thead>
               <tr style={{ background: 'var(--card)', borderBottom: '1px solid var(--border)' }}>
                 <th style={{ padding: 'var(--space-md)', textAlign: 'left' }}>
-                  {activeTab === 'mensality' ? 'Student' : 'Teacher'}
+                  {activeTab === 'mensality' ? 'Student' : activeTab === 'salary' ? 'Teacher' : 'Staff'}
                 </th>
                 <th style={{ padding: 'var(--space-md)', textAlign: 'right' }}>Amount</th>
                 <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>Due Date</th>
@@ -484,12 +620,14 @@ export function FinancialManagement() {
               </tr>
             </thead>
             <tbody>
-              {(activeTab === 'mensality' ? mensalityRecords : salaryRecords).map((record) => (
+              {currentRecords.map((record: any) => (
                 <tr key={record._id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: 'var(--space-md)' }}>
                     {activeTab === 'mensality'
                       ? (record as Mensality).student_name || 'N/A'
-                      : (record as Salary).teacher_name || 'N/A'}
+                      : activeTab === 'salary'
+                      ? (record as Salary).teacher_name || 'N/A'
+                      : (record as StaffSalary).staff_name || 'N/A'}
                   </td>
                   <td style={{ padding: 'var(--space-md)', textAlign: 'right', fontWeight: 'bold' }}>
                     {formatCurrency(record.value)}
@@ -515,14 +653,14 @@ export function FinancialManagement() {
                     {record.paid ? (
                       <button
                         className="btn btn--small btn--secondary"
-                        onClick={() => handleMarkAsUnpaid(record._id, activeTab as 'mensality' | 'salary')}
+                        onClick={() => handleMarkAsUnpaid(record._id, activeTab as 'mensality' | 'salary' | 'staff-salary')}
                       >
                         Mark Unpaid
                       </button>
                     ) : (
                       <button
                         className="btn btn--small btn--primary"
-                        onClick={() => handleMarkAsPaid(record._id, activeTab as 'mensality' | 'salary')}
+                        onClick={() => handleMarkAsPaid(record._id, activeTab as 'mensality' | 'salary' | 'staff-salary')}
                       >
                         Mark Paid
                       </button>
@@ -532,7 +670,7 @@ export function FinancialManagement() {
               ))}
             </tbody>
           </table>
-          {(activeTab === 'mensality' ? mensalityRecords : salaryRecords).length === 0 && (
+          {currentRecords.length === 0 && (
             <div style={{ padding: 'var(--space-xl)', textAlign: 'center', color: 'var(--muted)' }}>
               No records found for the selected filters.
             </div>
@@ -780,6 +918,156 @@ export function FinancialManagement() {
               <button
                 className="btn btn--primary"
                 onClick={handleSaveSalaryGrid}
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+        </>
+      )}
+
+      {/* Staff Salary Grid Modal */}
+      {showStaffSalaryGridModal && (
+        <>
+          <style>{`
+            .staff-salary-grid-scrollable::-webkit-scrollbar {
+              width: 12px;
+            }
+            .staff-salary-grid-scrollable::-webkit-scrollbar-track {
+              background: var(--surface);
+              border-radius: 6px;
+            }
+            .staff-salary-grid-scrollable::-webkit-scrollbar-thumb {
+              background: var(--muted);
+              border-radius: 6px;
+              border: 2px solid var(--surface);
+            }
+            .staff-salary-grid-scrollable::-webkit-scrollbar-thumb:hover {
+              background: var(--text);
+            }
+          `}</style>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+          <div 
+            className="staff-salary-grid-scrollable"
+            style={{
+              background: 'var(--card)',
+              borderRadius: 'var(--radius-lg)',
+              maxWidth: '900px',
+              width: '90%',
+              maxHeight: '85vh',
+              overflowY: 'scroll',
+              overflowX: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Header section */}
+            <div style={{ padding: 'var(--space-xl)', paddingBottom: 'var(--space-md)' }}>
+              <h3 style={{ marginBottom: 'var(--space-md)' }}>
+                Manage Staff Salary Grid
+              </h3>
+              <p style={{ marginBottom: 'var(--space-md)', color: 'var(--muted)' }}>
+                Set the base monthly salary for each staff member. These values will be used when generating monthly salary records.
+              </p>
+              
+              {/* Role Filter */}
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Filter by Role</label>
+                <select
+                  value={selectedRoleFilter}
+                  onChange={(e) => {
+                    setSelectedRoleFilter(e.target.value);
+                  }}
+                  style={{ width: '100%', padding: 'var(--space-sm)', maxWidth: '300px' }}
+                >
+                  <option value="">All Roles</option>
+                  <option value="financial">Financial</option>
+                  <option value="secretary">Secretary</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Table area */}
+            <div style={{ 
+              paddingLeft: 'var(--space-xl)',
+              paddingRight: 'var(--space-xl)',
+              paddingBottom: 'var(--space-md)'
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>Staff</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>Email</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '20%' }}>Role</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'right', width: '30%' }}>Base Salary</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {staffSalaryGrid.length > 0 ? (
+                    staffSalaryGrid.map((item) => (
+                      <tr key={item.staff_id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: 'var(--space-md)', wordWrap: 'break-word' }}>
+                          {item.staff_name}
+                        </td>
+                        <td style={{ padding: 'var(--space-md)', color: 'var(--muted)', wordWrap: 'break-word' }}>{item.email}</td>
+                        <td style={{ padding: 'var(--space-md)', textTransform: 'capitalize' }}>{item.role}</td>
+                        <td style={{ padding: 'var(--space-md)', textAlign: 'right' }}>
+                          <input
+                            type="number"
+                            value={editingStaffSalaries[item.staff_id] || ''}
+                            onChange={(e) => setEditingStaffSalaries({
+                              ...editingStaffSalaries,
+                              [item.staff_id]: e.target.value
+                            })}
+                            placeholder="0.00"
+                            step="0.01"
+                            style={{ width: '100%', maxWidth: '200px', padding: 'var(--space-xs)', textAlign: 'right' }}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} style={{ padding: 'var(--space-xl)', textAlign: 'center', color: 'var(--muted)' }}>
+                        No staff members found{selectedRoleFilter ? ' with this role' : ''}.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Footer section */}
+            <div style={{ 
+              display: 'flex', 
+              gap: 'var(--space-md)', 
+              justifyContent: 'flex-end', 
+              padding: 'var(--space-xl)',
+              paddingTop: 'var(--space-md)',
+              borderTop: '1px solid var(--border)'
+            }}>
+              <button
+                className="btn btn--secondary"
+                onClick={() => setShowStaffSalaryGridModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn--primary"
+                onClick={handleSaveStaffSalaryGrid}
                 disabled={loading}
               >
                 {loading ? 'Saving...' : 'Save Changes'}
