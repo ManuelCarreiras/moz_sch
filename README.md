@@ -15,6 +15,7 @@ A comprehensive full-stack school management system with React frontend, Flask A
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
+- [User Documentation](#user-documentation)
 
 ## 🎯 Overview
 
@@ -22,11 +23,14 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 
 ### 🚀 **Current Status: Phase 3 & 4 Complete (90%+)**
 
-✅ **Personnel Management** - Students, Teachers, Guardians fully operational  
+✅ **Personnel Management** - Students, Teachers, Guardians, Staff fully operational  
 ✅ **Academic Foundation** - Complete academic structure setup with guided wizard  
 ✅ **Assignment System** - Complete assignment creation, management, and student views  
 ✅ **Grading System** - Full gradebook with 0-20 scale, weighted averages, year grade caching  
 ✅ **Attendance System** - Teacher attendance taking and student attendance tracking  
+✅ **Financial Management** - Teacher salaries, student mensality, staff salaries with role-based access  
+✅ **Staff Management** - Administrative staff (financial, secretary) with salary tracking  
+✅ **Multi-Role Access** - Admin, Secretary, Financial, Teacher, Student portals with role-based dashboards  
 ✅ **Student Portal** - Assignments, Grades, Attendance, and Schedule views fully working  
 ✅ **Teacher Portal** - Assignments, Gradebook, Attendance, and Schedule management complete  
 ✅ **Cascading Filters** - Year → Term → Subject → Class filters across all features  
@@ -39,6 +43,7 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 ### Core Functionality
 - **Student Management**: Complete student lifecycle from enrollment to graduation with wizard-based creation
 - **Teacher Management**: Teacher profiles, contact information, and department assignments with wizard interface
+- **Staff Management**: Administrative staff (financial, secretary roles) with Cognito integration and salary tracking
 - **Guardian Management**: Guardian creation and student-guardian relationship management
 - **Academic Structure**: Comprehensive academic foundation with year levels, terms, periods, and school years
 - **Subject Management**: Academic subjects organized by departments with integrated grading scales
@@ -49,6 +54,8 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 - **Attendance System**: Class roster attendance taking with status tracking and statistics
 - **Student Portal**: View assignments (list + calendar), grades (year averages + individual), attendance records, and class schedules
 - **Teacher Portal**: Create assignments, enter grades via gradebook, take attendance, manage classes
+- **Financial Portal**: Manage teacher salaries, student mensality, and staff salaries (financial role)
+- **Secretary Portal**: Student/teacher creation, academic setup, grading criteria, assessment types, guardian management (secretary role)
 - **Cascading Filters**: Intelligent Year → Term → Subject → Class filtering across all features
 
 ### Authentication & Security
@@ -57,8 +64,8 @@ Santa Isabel Escola is a modern full-stack school management system designed for
 - **Username Generation**: Cognito usernames generated from student names (first initial + middle initial + surname)
 - **Force Password Change**: Handles NEW_PASSWORD_REQUIRED challenge for first-time logins
 - **Username-Based Lookup**: Student records store Cognito username for authentication mapping
-- **Multi-Portal Access**: Admin, Teacher, and Student portals with role-based access
-- **Role-Based Access Control**: Admin-only restrictions on write operations (POST, PUT, DELETE)
+- **Multi-Portal Access**: Admin, Secretary, Financial, Teacher, and Student portals with role-based access
+- **Role-Based Access Control**: Role-specific permissions (admin, secretary, financial, teacher, student) with granular API decorators
 - **Multiple Auth Methods**: API key, debug mode, device access, and Cognito JWT
 - **Session Management**: Automatic token refresh and secure logout
 - **JWT Token Parsing**: Extracts username and email from access tokens for student lookup
@@ -128,6 +135,7 @@ The system uses a comprehensive relational database design with the following ke
 ### Core Educational Entities
 - **Students**: Personal information, enrollment dates, academic progress, Cognito username integration
 - **Teachers**: Professional profiles, contact details, subject assignments
+- **Staff**: Administrative staff (financial, secretary roles) with base salary, hire date, and Cognito integration
 - **Subjects**: Academic courses organized by departments
 - **Classes**: Scheduled courses with teacher, classroom, and time assignments
 
@@ -137,6 +145,11 @@ The system uses a comprehensive relational database design with the following ke
 - **Terms**: Academic periods within school years (semesters/quarters)
 - **Periods**: Time slots for class scheduling (daily periods)
 - **Score Ranges**: Grading scales and letter grades integrated with subject management
+
+### Financial & Payroll
+- **Staff Salary**: Monthly salary records for administrative staff with payment status and due dates
+- **Teacher Salary**: Monthly salary records for teachers (existing)
+- **Student Mensality**: Monthly payment records for students (existing)
 
 ### Relationships & Tracking
 - **Student-Year-Level**: Academic progression tracking with grade and level assignments
@@ -183,6 +196,33 @@ GET    /teacher/schedule/<id> # Get specific teacher's schedule
 - Adds user to 'teachers' Cognito group
 - Stores username in teacher record for authentication lookup
 - Sends welcome email with temporary password (NEW_PASSWORD_REQUIRED challenge)
+
+### Staff Management
+```
+POST   /staff              # Create new staff (admin only, creates Cognito user in financial/secretary group)
+GET    /staff              # Get all staff (admin, financial, secretary)
+GET    /staff/<id>         # Get staff by ID
+PUT    /staff              # Update staff (admin only)
+DELETE /staff/<id>         # Delete staff (admin only)
+```
+
+**Note**: Staff creation automatically:
+- Creates a Cognito user with generated username (first initial + surname)
+- Adds user to role-based group ('financial' or 'secretary')
+- Rolls back database transaction on Cognito failure (no partial commits)
+
+### Staff Salary
+```
+GET    /staff_salary                    # Get salary records (admin, financial) - supports staff_id, month, year, paid filters
+GET    /staff_salary/<id>              # Get specific salary record
+GET    /staff_salary/staff/<staff_id>  # Get all salaries for a staff member
+GET    /staff_salary/grid              # Get staff base salary grid
+POST   /staff_salary                   # Create salary record (admin, financial)
+PUT    /staff_salary                   # Update salary record (admin, financial)
+PUT    /staff_salary/grid              # Update base salaries for multiple staff (admin, financial)
+POST   /staff_salary/generate          # Generate monthly salary records from base salaries (admin, financial)
+DELETE /staff_salary/<id>              # Delete salary record (admin only)
+```
 
 ### Academic Structure
 ```
@@ -368,6 +408,7 @@ DEBUG=true
 AWS_COGNITO_USERPOOL_ID=eu-west-1_xxxxxxxxx
 AWS_COGNITO_APP_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 COGNITO_REGION_NAME=eu-west-1
+# Required Cognito groups for role-based access: admin, teachers, students, financial, secretary
 
 # Frontend Configuration
 VITE_API_BASE_URL=http://localhost:5000
@@ -480,6 +521,8 @@ docker-compose exec api pytest tests/test_student.py
 Tests are organized by entity:
 - `test_student.py` - Student management tests
 - `test_teacher.py` - Teacher management tests
+- `test_staff.py` - Staff management tests
+- `test_staff_salary.py` - Staff salary tests
 - `test_school_year.py` - Academic year tests
 - `test_year_level.py` - Year level tests
 
@@ -560,8 +603,10 @@ The system runs the following services:
 1. **User Access**: Users visit the frontend at `http://localhost:3000`
 2. **Landing Page**: Users see the school portal introduction at `/landing`
 3. **Login**: Users navigate to `/login` and authenticate via AWS Cognito
-4. **Portal Navigation**: Users can access any portal:
-   - **Admin Dashboard**: `/dashboard` - Administrative management
+4. **Portal Navigation**: Users can access any portal based on their Cognito group:
+   - **Admin Dashboard**: `/dashboard` - Full administrative management (admin role)
+   - **Secretary Portal**: `/dashboard` or `/secretary` - Student/teacher creation, academic setup, guardians (secretary role)
+   - **Financial Portal**: `/dashboard` or `/financial` - Financial Management tab: salaries, mensality (financial role)
    - **Student Portal**: `/student` - Student features and management
    - **Teacher Portal**: `/teacher` - Teacher features and management
 5. **Token Management**: JWT tokens are automatically managed
@@ -570,7 +615,7 @@ The system runs the following services:
 
 ### Current Development Status
 
-- **Role-Based Access Control**: Admin-only restrictions enabled for write operations (POST, PUT, DELETE) on all resources
+- **Role-Based Access Control**: Granular permissions per role (admin, secretary, financial, teacher, student) across API endpoints
 - **Student Management**: Fully functional with frontend form integration and Cognito user creation
 - **Teacher Management**: Fully functional with frontend form integration and Cognito user creation
 - **Student Portal**: ✅ **Complete** - Read-only schedule view with authentication and JWT-based username lookup working
@@ -584,15 +629,19 @@ The system runs the following services:
 - **API Integration**: Student and teacher creation forms directly connected to Flask backend with Cognito integration
 - **Backend Validation**: Teacher conflict detection prevents double-booking (same teacher, term, period, day)
 
-**Latest Update**: November 6, 2025 - Grading and Attendance systems fully operational
+**Latest Update**: February 2026 - Staff Management, Financial/Secretary roles, and enhanced role-based access
 
 **What's New:**
+- ✅ **Staff Management**: Administrative staff (financial, secretary) with CRUD, Cognito integration, and DB rollback on failure
+- ✅ **Staff Salary**: Monthly salary records, grid management, and batch generation from base salaries
+- ✅ **Financial Role**: Dedicated portal for teacher salary, student mensality, and staff salary management
+- ✅ **Secretary Role**: Student/teacher creation, academic setup, grading criteria, assessment types, guardian management
+- ✅ **Role-Based Dashboards**: AdminDashboard with role-filtered tabs (admin, secretary, financial)
+- ✅ **Cognito Rollback**: Student, teacher, and staff creation roll back DB transaction on Cognito failure
 - ✅ **Assignments**: Teachers can create/publish assignments with cascading filters
 - ✅ **Gradebook**: Assignment-focused grade entry with vertical student lists
 - ✅ **Grading**: 0-20 scale with weighted averages and automatic year grade calculation
-- ✅ **Student Grades**: View year averages, individual assignment grades, and performance metrics
 - ✅ **Attendance**: Teacher attendance taking with class rosters and bulk actions
-- ✅ **Student Attendance**: Personal attendance records with statistics and filtering
 - ✅ **Cascading Filters**: Consistent Year → Term → Subject → Class filtering everywhere
 
 ## 🤝 Contributing
@@ -619,6 +668,15 @@ The system runs the following services:
 - Update documentation for API changes
 - Use meaningful commit messages
 - Test authentication flows with different user roles
+
+## 📖 User Documentation
+
+For daily users (students, teachers, secretaries, financial users, and administrators), step-by-step guides are available in two languages:
+
+- **[User Manual (English)](docs/USER_MANUAL_EN.md)** – How to use the platform
+- **[Manual de Instruções (Português)](docs/MANUAL_DE_INSTRUCOES_PT.md)** – Como usar a plataforma
+
+These manuals cover logging in, navigating each portal, and common tasks for each role. They can be converted to PDF using tools like [Pandoc](https://pandoc.org/) or by printing from a Markdown viewer.
 
 ## 📝 License
 
