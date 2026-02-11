@@ -57,7 +57,7 @@ interface StudentInfo {
 
 const StudentOverview: React.FC = () => {
   const user = useUser();
-  const isAdmin = user?.role === 'admin';
+  const isAdminOrSecretary = user?.role === 'admin' || user?.role === 'secretary';
   const [studentMetrics, setStudentMetrics] = useState<StudentMetrics | null>(null);
   const [classTestScores, setClassTestScores] = useState<number[]>([]);
   const [studentTestScores, setStudentTestScores] = useState<number[]>([]);
@@ -187,15 +187,15 @@ const StudentOverview: React.FC = () => {
     }
   };
 
-  // Load students when class is selected (for admin)
+  // Load students when class is selected (for admin/secretary)
   useEffect(() => {
-    if (isAdmin && filterClass) {
+    if (isAdminOrSecretary && filterClass) {
       loadStudentsInClass();
     } else {
       setStudents([]);
       setSelectedStudent(null);
     }
-  }, [filterClass, isAdmin]);
+  }, [filterClass, isAdminOrSecretary]);
 
   // Reset selected student when filters change
   useEffect(() => {
@@ -204,8 +204,8 @@ const StudentOverview: React.FC = () => {
 
   // Reload overview when filters change or student is selected
   useEffect(() => {
-    if (isAdmin) {
-      // For admin, only load if a student is selected
+    if (isAdminOrSecretary) {
+      // For admin/secretary, only load if a student is selected
       if (selectedStudent) {
         loadStudentOverview();
       }
@@ -267,8 +267,8 @@ const StudentOverview: React.FC = () => {
       if (filterSubject) params.append('subject_id', filterSubject);
       if (filterClass) params.append('class_name', filterClass);
       
-      // For admin, add student_id parameter
-      if (isAdmin && selectedStudent) {
+      // For admin/secretary, add student_id parameter
+      if (isAdminOrSecretary && selectedStudent) {
         params.append('student_id', selectedStudent._id);
       }
       
@@ -607,8 +607,8 @@ const StudentOverview: React.FC = () => {
           </select>
         </div>
 
-        {/* Student Selection (for admin) */}
-        {isAdmin && (
+        {/* Student Selection (for admin/secretary) */}
+        {isAdminOrSecretary && (
           <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
             Student
@@ -635,7 +635,7 @@ const StudentOverview: React.FC = () => {
       </div>
 
       {/* Student Performance Metrics */}
-      {(!isAdmin || selectedStudent) && studentMetrics ? (
+      {(!isAdminOrSecretary || selectedStudent) && studentMetrics ? (
         <>
           <div style={{ 
             display: 'grid', 
@@ -1233,7 +1233,7 @@ const StudentOverview: React.FC = () => {
             </div>
           ) : null}
         </>
-      ) : (!isAdmin || selectedStudent) ? (
+      ) : (!isAdminOrSecretary || selectedStudent) ? (
         <div style={{
           padding: '2rem',
           textAlign: 'center',
@@ -1243,7 +1243,7 @@ const StudentOverview: React.FC = () => {
         }}>
           No performance data available yet
         </div>
-      ) : isAdmin && !selectedStudent && students.length === 0 && filterClass ? (
+      ) : isAdminOrSecretary && !selectedStudent && students.length === 0 && filterClass ? (
         <div style={{
           padding: '2rem',
           textAlign: 'center',
@@ -1253,7 +1253,7 @@ const StudentOverview: React.FC = () => {
         }}>
           No students found in this class. Please select a different class.
         </div>
-      ) : isAdmin && !filterClass ? (
+      ) : isAdminOrSecretary && !filterClass ? (
         <div style={{
           padding: '2rem',
           textAlign: 'center',

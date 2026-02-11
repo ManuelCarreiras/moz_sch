@@ -39,9 +39,11 @@ interface TeacherClass {
 
 interface TeacherOverviewProps {
   isAdmin?: boolean;
+  isSecretary?: boolean;
 }
 
-const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) => {
+const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSecretary = false }) => {
+  const isAdminOrSecretary = isAdmin || isSecretary;
   const [students, setStudents] = useState<StudentPerformance[]>([]);
   const [testScores, setTestScores] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,10 +62,10 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) =>
 
   useEffect(() => {
     loadFilterOptions();
-    if (isAdmin) {
+    if (isAdminOrSecretary) {
       loadTeachers();
     }
-  }, [isAdmin]);
+  }, [isAdminOrSecretary]);
 
   useEffect(() => {
     if (filterYear) {
@@ -90,7 +92,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) =>
   }, [filterYear, filterTerm, filterSubject, filterClass, filterTeacher]);
 
   const loadTeachers = async () => {
-    if (!isAdmin) return;
+    if (!isAdminOrSecretary) return;
     
     try {
       const response = await apiService.getTeachers();
@@ -197,7 +199,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) =>
           params.append('class_name', selectedClass.class_name);
         }
       }
-      if (isAdmin && filterTeacher) {
+      if (isAdminOrSecretary && filterTeacher) {
         params.append('teacher_id', filterTeacher);
       }
       
@@ -394,7 +396,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false }) =>
         border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '4px'
       }}>
-        {isAdmin && (
+        {isAdminOrSecretary && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
               Teacher

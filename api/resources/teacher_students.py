@@ -23,7 +23,7 @@ class TeacherStudentsResource(Resource):
     Get teacher's students with performance metrics
     """
 
-    @require_any_role(['admin', 'teacher'])
+    @require_any_role(['admin', 'teacher', 'secretary'])
     def get(self):
         """
         GET /teacher/students?year_id=&term_id=&subject_id=
@@ -48,8 +48,8 @@ class TeacherStudentsResource(Resource):
             teacher_id_param = request.args.get('teacher_id')  # Allow teacher_id as query parameter for admin
             
             # Get teacher's classes
-            if user_role == 'admin':
-                # Admin can filter by teacher_id if provided
+            if user_role in ['admin', 'secretary']:
+                # Admin/secretary can filter by teacher_id if provided
                 if teacher_id_param:
                     teacher_classes = ClassModel.list_by_teacher_id(teacher_id_param)
                 else:

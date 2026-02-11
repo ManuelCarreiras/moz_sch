@@ -2,7 +2,7 @@ from flask import request, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
 from models.department import DepartmentModel
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_role, require_any_role
 from db import db
 import json
 import os
@@ -18,7 +18,7 @@ except Exception:
 
 
 class TeacherResource(Resource):
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         data = request.get_json()
 

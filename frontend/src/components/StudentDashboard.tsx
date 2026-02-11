@@ -18,6 +18,7 @@ export function StudentDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<StudentTab>('overview');
   const isAdmin = user?.role === 'admin';
+  const isSecretary = user?.role === 'secretary';
 
   const handleSignOut = async () => {
     try {
@@ -56,10 +57,12 @@ export function StudentDashboard() {
     { id: 'students' as StudentTab, label: 'Students', icon: '👥', showForAdmin: true, adminOnly: true },
   ];
 
-  // Filter tabs based on admin role
+  // Filter tabs based on user role
   const tabs = isAdmin 
     ? allTabs.filter(tab => tab.showForAdmin)
-    : allTabs;
+    : isSecretary
+      ? allTabs.filter(tab => ['overview', 'students'].includes(tab.id))
+      : allTabs;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -92,7 +95,7 @@ export function StudentDashboard() {
           </div>
         );
       case 'students':
-        if (isAdmin) {
+        if (isAdmin || isSecretary) {
           return <StudentsTable />;
         }
         return null;

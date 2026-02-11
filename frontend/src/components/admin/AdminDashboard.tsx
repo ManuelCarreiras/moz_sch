@@ -303,7 +303,7 @@ export function AdminDashboard() {
   const allTabs = [
     { id: 'overview' as AdminTab, label: 'Overview', icon: '🏠', roles: ['admin', 'secretary'] },
     { id: 'students' as AdminTab, label: 'Students', icon: '👥', roles: ['admin', 'secretary'] },
-    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin'] },
+    { id: 'teachers' as AdminTab, label: 'Teachers', icon: '👨‍🏫', roles: ['admin', 'secretary'] },
     { id: 'guardians' as AdminTab, label: 'Guardian Management', icon: '👨‍👩‍👧‍👦', roles: ['admin', 'secretary'] },
     { id: 'academic-setup' as AdminTab, label: 'Academic Setup', icon: '🏗️', roles: ['admin', 'secretary'] },
     { id: 'academic-foundation' as AdminTab, label: 'Academic Foundation', icon: '📋', roles: ['admin', 'secretary'] },

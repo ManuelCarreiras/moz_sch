@@ -16,7 +16,7 @@ import logging
 class TeacherScheduleResource(Resource):
     """Get teacher schedule filtered by term and year"""
 
-    @require_any_role(['admin', 'teacher', 'student'])
+    @require_any_role(['admin', 'teacher', 'student', 'secretary'])
     def get(self, teacher_id=None):
         # Get query parameters for filtering
         term_id = request.args.get('term_id')
@@ -48,8 +48,8 @@ class TeacherScheduleResource(Resource):
             
             if teacher:
                 teacher_id = str(teacher._id)
-            elif user_role == 'admin':
-                # For admins, return all classes (no teacher_id filter)
+            elif user_role in ['admin', 'secretary']:
+                # For admins/secretaries, return all classes (no teacher_id filter)
                 teacher_id = None
             else:
                 # Check if any teachers exist in the database
@@ -72,8 +72,8 @@ class TeacherScheduleResource(Resource):
                 }
                 return Response(json.dumps(response), 404)
         
-        # If admin and no teacher_id, get all classes
-        if user_role == 'admin' and not teacher_id:
+        # If admin/secretary and no teacher_id, get all classes
+        if user_role in ['admin', 'secretary'] and not teacher_id:
             teacher_classes = ClassModel.query.all()
             teacher_name = "All Teachers (Admin View)"
         else:
