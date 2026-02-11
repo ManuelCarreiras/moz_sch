@@ -85,6 +85,8 @@ class StaffModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
+        if not data:
+            return
         if data.get('given_name') is not None:
             self.given_name = data['given_name']
         if data.get('email_address') is not None:

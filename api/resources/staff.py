@@ -20,6 +20,8 @@ class StaffResource(Resource):
     @require_role('admin')
     def post(self):
         data = request.get_json()
+        if not data:
+            return Response(json.dumps({'success': False, 'message': 'Request body required'}), 400)
 
         if (
             not data.get('given_name')
@@ -135,6 +137,7 @@ class StaffResource(Resource):
                         logging.info(f"User {email} added to group '{group_name}' using email")
                     except ClientError as email_e:
                         logging.error(f"CRITICAL: Failed to add user to group '{group_name}' (tried both username and email): {group_e}, {email_e}")
+                    # Other exceptions (e.g. network errors) propagate
                 cognito_result = 'created'
                 # Cognito succeeded, commit the database transaction
                 db.session.commit()
@@ -155,7 +158,7 @@ class StaffResource(Resource):
                                 GroupName=group_name
                             )
                             logging.info(f"Existing user {unique_username} added to group '{group_name}'")
-                        except Exception:
+                        except ClientError:
                             # Fallback to email if username doesn't work
                             try:
                                 cognito.admin_add_user_to_group(
@@ -164,9 +167,10 @@ class StaffResource(Resource):
                                     GroupName=group_name
                                 )
                                 logging.info(f"Existing user {email} added to group '{group_name}' using email")
-                            except Exception as inner:
+                            except ClientError as inner:
                                 logging.error(f"CRITICAL: Add existing user to group failed (tried both username and email): {inner}")
-                    except Exception as inner:
+                            # Other exceptions propagate
+                    except ClientError as inner:
                         logging.error(f"CRITICAL: Failed to add existing user to group: {inner}")
                     cognito_result = 'exists'
                     # Username exists is acceptable, commit the database transaction
@@ -242,7 +246,11 @@ class StaffResource(Resource):
     @require_role('admin')
     def put(self):
         data = request.get_json()
+        if not data:
+            return Response(json.dumps({'success': False, 'message': 'Request body required'}), 400)
         id = data.get('_id')
+        if not id:
+            return Response(json.dumps({'success': False, 'message': '_id is required'}), 400)
 
         staff = StaffModel.find_by_id(id)
 
@@ -266,7 +274,10 @@ class StaffResource(Resource):
 
     @require_role('admin')
     def delete(self, id):
-        staff = StaffModel.find_by_id(id)
+        try:
+            staff = StaffModel.find_by_id(UUID(id))
+        except (ValueError, TypeError):
+            return {'message': 'Invalid staff ID'}, 400
 
         if staff is None:
             return {'message': 'Staff member not found'}, 404

@@ -37,6 +37,12 @@ class StaffSalaryResource(Resource):
             if salary:
                 return {'salary': salary.json_with_staff()}, 200
             return {'salary': None}, 200
+        elif staff_id and paid:
+            # Apply paid filter when both staff_id and paid are present
+            is_paid = paid.lower() == 'true'
+            records = [r for r in StaffSalaryModel.find_by_staff_id(staff_id) if r.paid == is_paid]
+            enhanced_records = [r.json_with_staff() for r in records]
+            return {'salary_records': enhanced_records, 'count': len(enhanced_records)}, 200
         elif staff_id:
             records = StaffSalaryModel.find_by_staff_id(staff_id)
             enhanced_records = [r.json_with_staff() for r in records]
@@ -47,11 +53,8 @@ class StaffSalaryResource(Resource):
             return {'salary_records': enhanced_records, 'count': len(enhanced_records)}, 200
         elif paid:
             is_paid = paid.lower() == 'true'
-            if staff_id:
-                records = [r for r in StaffSalaryModel.find_by_staff_id(staff_id) if r.paid == is_paid]
-            else:
-                records = StaffSalaryModel.find_unpaid() if not is_paid else StaffSalaryModel.find_all()
-                records = [r for r in records if r.paid == is_paid]
+            records = StaffSalaryModel.find_unpaid() if not is_paid else StaffSalaryModel.find_all()
+            records = [r for r in records if r.paid == is_paid]
             enhanced_records = [r.json_with_staff() for r in records]
             return {'salary_records': enhanced_records, 'count': len(enhanced_records)}, 200
         else:
@@ -65,6 +68,9 @@ class StaffSalaryResource(Resource):
         POST /staff_salary - Create a new salary record
         """
         data = request.get_json()
+
+        if not data:
+            return {'message': 'Request body required'}, 400
 
         # Validate required fields
         if not data.get('staff_id'):

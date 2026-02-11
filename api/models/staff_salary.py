@@ -97,6 +97,8 @@ class StaffSalaryModel(db.Model):
 
     def update_entry(self, data=None):
         """Update salary record"""
+        if not data:
+            return
         if data.get('paid') is not None:
             self.paid = data['paid']
             # Set payment_date when marking as paid
