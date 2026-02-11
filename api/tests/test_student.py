@@ -62,13 +62,15 @@ class TestStudent(unittest.TestCase):
             pass
 
     def test_create_student(self):
-        # Add unique email field (required for student creation)
+        # Add unique email and student_number fields (required/optional for student creation)
         test_student = self.student.copy()
         unique_student_email = (
             f"student.{int(time.time() * 1000)}."
             f"{uuid.uuid4().hex[:8]}@example.com"
         )
         test_student['email'] = unique_student_email
+        unique_student_number = f"STU_{int(time.time() * 1000)}_{uuid.uuid4().hex[:6]}"
+        test_student['student_number'] = unique_student_number
 
         response = self.client.post('/student',
                                     headers={"Authorization": API_KEY},
@@ -82,6 +84,7 @@ class TestStudent(unittest.TestCase):
         self.assertIn("_id", res_answer["message"])
         self.assertEqual(res_answer["message"]["given_name"],
                          "Vena")
+        self.assertEqual(res_answer["message"]["student_number"], unique_student_number)
         self.student_id = res_answer["message"]["_id"]
 
     def test_create_student_missing(self):
@@ -177,6 +180,7 @@ class TestStudent(unittest.TestCase):
         res_answer = json.loads(response.get_data())
         self.assertEqual(res_answer["message"]["given_name"],
                          "Manuel")
+        self.assertEqual(res_answer["message"]["student_number"], "STU002")
 
     def test_put_student_wrong(self):
         # Add unique email field (required for student creation)

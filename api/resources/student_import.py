@@ -1,7 +1,7 @@
 from flask import request, Response
 from flask_restful import Resource
 from models.student import StudentModel
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_any_role
 import json
 import os
 import logging
@@ -29,7 +29,7 @@ class StudentBulkImportResource(Resource):
     - Data rows: student information matching the header
     """
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         if not OPENPYXL_AVAILABLE:
             response = {
@@ -80,9 +80,11 @@ class StudentBulkImportResource(Resource):
                 'date_of_birth': ['date_of_birth', 'date of birth', 'dob', 'birthdate'],
                 'gender': ['gender', 'sex'],
                 'enrollment_date': ['enrollment_date', 'enrollment date', 'enrolment_date', 'enrolment date', 'enrollment'],
-                'email': ['email', 'email address', 'e-mail']
+                'email': ['email', 'email address', 'e-mail'],
+                'student_number': ['student_number', 'student number', 'student_no', 'student no']
             }
-            
+            required_columns = {'given_name', 'middle_name', 'surname', 'date_of_birth', 'gender', 'enrollment_date', 'email'}
+
             # Find column indices
             column_indices = {}
             for field, aliases in expected_columns.items():
@@ -90,7 +92,7 @@ class StudentBulkImportResource(Resource):
                     if header in aliases:
                         column_indices[field] = i
                         break
-                if field not in column_indices:
+                if field not in column_indices and field in required_columns:
                     response = {
                         'success': False,
                         'message': f'Required column not found: {field}. Expected one of: {", ".join(aliases)}'
@@ -128,7 +130,11 @@ class StudentBulkImportResource(Resource):
                     email = str(email_val).strip() if email_val else None
                     if email == '':
                         email = None
-                    
+                    student_number_val = row[column_indices['student_number']].value if 'student_number' in column_indices else None
+                    student_number = str(student_number_val).strip() if student_number_val else None
+                    if student_number == '':
+                        student_number = None
+
                     # Skip empty rows
                     if not given_name and not surname:
                         continue
@@ -259,7 +265,8 @@ class StudentBulkImportResource(Resource):
                         date_of_birth=date_of_birth,
                         gender=gender,
                         enrollment_date=enrollment_date_obj,
-                        email=email
+                        email=email,
+                        student_number=student_number
                     )
                     try:
                         new_student.save_to_db()

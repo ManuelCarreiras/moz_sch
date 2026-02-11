@@ -376,6 +376,7 @@ DELETE /classroom_types/<id> # Delete classroom type
 # Run the migration scripts
 docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_username_to_student.sql
 docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_username_to_teacher.sql
+docker-compose exec postgres psql -U postgres -d santa_isabel_db -f /path/to/add_student_number_to_student.sql
 
 # Or manually run:
 docker-compose exec postgres psql -U postgres -d santa_isabel_db
@@ -384,9 +385,13 @@ ALTER TABLE student ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE;
 CREATE INDEX IF NOT EXISTS idx_student_username ON student(username);
 ALTER TABLE professor ADD COLUMN IF NOT EXISTS username VARCHAR(100) UNIQUE;
 CREATE INDEX IF NOT EXISTS idx_professor_username ON professor(username);
+
+-- Add student_number column to student table:
+ALTER TABLE student ADD COLUMN IF NOT EXISTS student_number VARCHAR(50) UNIQUE;
+CREATE INDEX IF NOT EXISTS idx_student_student_number ON student(student_number) WHERE student_number IS NOT NULL;
 ```
 
-The migration scripts (`add_username_to_student.sql` and `add_username_to_teacher.sql`) are included in the project root. Existing records will have NULL username values until they are updated or new records are created.
+The migration scripts (`add_username_to_student.sql`, `add_username_to_teacher.sql`, and `add_student_number_to_student.sql`) are included in the project root. Existing records will have NULL username/student_number values until they are updated or new records are created.
 
 ### Configuration (Doppler Secrets)
 

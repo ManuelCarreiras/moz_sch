@@ -14,6 +14,7 @@ interface StudentFormData {
   gender: 'Male' | 'Female';
   enrollment_date: string;
   email: string;
+  student_number: string;
 }
 
 export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
@@ -27,6 +28,7 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
     gender: 'Male',
     enrollment_date: new Date().toISOString().split('T')[0], // Today's date
     email: '',
+    student_number: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -43,7 +45,11 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
     setError(null);
 
     try {
-      const response = await apiService.post('/student', formData);
+      const { student_number, ...rest } = formData;
+      const payload = student_number?.trim()
+        ? { ...rest, student_number: student_number.trim() }
+        : rest;
+      const response = await apiService.post('/student', payload);
       
       if (response.success) {
         onSuccess();
@@ -159,6 +165,17 @@ export function StudentWizard({ onClose, onSuccess }: StudentWizardProps) {
                   onChange={handleInputChange}
                   required
                   placeholder="Enter email address"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="student_number">Student Number</label>
+                <input
+                  type="text"
+                  id="student_number"
+                  name="student_number"
+                  value={formData.student_number}
+                  onChange={handleInputChange}
+                  placeholder="Enter student number"
                 />
               </div>
             </div>

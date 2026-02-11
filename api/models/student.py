@@ -15,8 +15,9 @@ class StudentModel(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=True)
     username = db.Column(db.String(100), unique=True, nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)  # Track if student is still enrolled
+    student_number = db.Column(db.String(50), unique=True, nullable=True)
 
-    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date, email=None, username=None, is_active=True):     # noqa501
+    def __init__(self, given_name, middle_name, surname, date_of_birth, gender, enrollment_date, email=None, username=None, is_active=True, student_number=None):     # noqa501
         self.given_name = given_name
         self.middle_name = middle_name
         self.surname = surname
@@ -26,6 +27,7 @@ class StudentModel(db.Model):
         self.email = email
         self.username = username
         self.is_active = is_active
+        self.student_number = student_number
 
     def json(self):
         return {
@@ -38,7 +40,8 @@ class StudentModel(db.Model):
             'enrollment_date': self.enrollment_date.isoformat() if self.enrollment_date else None,  # noqa501
             'email': self.email,
             'username': self.username,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'student_number': self.student_number
         }
 
     def json_with_year_levels(self):
@@ -88,6 +91,10 @@ class StudentModel(db.Model):
     def find_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
 
+    @classmethod
+    def find_by_student_number(cls, student_number):
+        return cls.query.filter_by(student_number=student_number).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
@@ -111,6 +118,8 @@ class StudentModel(db.Model):
             self.username = data['username']
         if data.get('is_active') is not None:
             self.is_active = data['is_active']
+        if data.get('student_number') is not None:
+            self.student_number = data['student_number']
         self.save_to_db()
 
     def delete_by_id(self, record_id):
