@@ -41,12 +41,14 @@ from resources.student_assignment import StudentAssignmentResource
 from resources.term_grade import TermGradeResource, TermGradeCalculateResource
 from resources.grading_criteria import GradingCriteriaResource
 from resources.resource import ResourceResource, ResourceDownloadResource, TeacherResourceResource
+from resources.audit_log import AuditLogResource
 # Import models to ensure they're registered with SQLAlchemy before db.create_all()
 from models.resource import ResourceModel  # noqa: F401
 from models.student_mensality import StudentMensalityModel  # noqa: F401
 from models.teacher_salary import TeacherSalaryModel  # noqa: F401
 from models.staff import StaffModel  # noqa: F401
 from models.staff_salary import StaffSalaryModel  # noqa: F401
+from models.audit_log import AuditLogModel  # noqa: F401
 
 # Get environment variables from Doppler
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -111,6 +113,9 @@ api = Api(app)
 
 db.init_app(app)
 
+from audit import init_audit_listener
+init_audit_listener()
+
 # Create postgres tables with error handling
 with app.app_context():
     db.create_all()
@@ -145,6 +150,19 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
         app.logger.info(f"Professor base_salary column check: {str(e)}")
+
+    # Run audit setup (triggers, RLS) after tables exist
+    try:
+        from sqlalchemy import text
+        sql_path = os.path.join(os.path.dirname(__file__), 'sql', 'audit_setup.sql')
+        with open(sql_path, 'r', encoding='utf-8') as f:
+            audit_script = f.read()
+        db.session.execute(text(audit_script))
+        db.session.commit()
+        app.logger.info("Audit triggers and RLS setup completed")
+    except Exception as e:
+        db.session.rollback()
+        app.logger.info(f"Audit setup check: {str(e)}")
 
 
 # Add authentication middleware
@@ -232,6 +250,9 @@ api.add_resource(StudentYearLevelAssignmentResource, "/student-year-level-assign
 # Authentication endpoints
 api.add_resource(AuthLoginResource, "/auth/login")
 api.add_resource(AuthMeResource, "/auth/me")
+
+# Audit log (admin only)
+api.add_resource(AuditLogResource, "/audit_log")
 
 # Phase 3: Grading System endpoints
 api.add_resource(AssessmentTypeResource, "/assessment_type", "/assessment_type/<type_id>")
