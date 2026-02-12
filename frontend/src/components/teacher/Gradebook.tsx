@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface Assignment {
@@ -46,6 +47,7 @@ interface GradebookProps {
 }
 
 const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
+  const { t } = useTranslation();
   const [gradebook, setGradebook] = useState<GradebookData | null>(null);
   const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -275,11 +277,11 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
   }, [classId, termId]);
 
   if (loading) {
-    return <div>Loading gradebook...</div>;
+    return <div>{t('teacher.gradebook.loadingGradebook')}</div>;
   }
 
   if (!gradebook) {
-    return <div>No gradebook data available</div>;
+    return <div>{t('teacher.gradebook.noData')}</div>;
   }
 
   // Get selected assignment
@@ -314,7 +316,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
               color: 'var(--text)',
               fontSize: '0.9rem'
             }}>
-              Filter by Type:
+              {t('teacher.gradebook.filterByType')}
             </label>
             <select
               value={filterAssessmentType}
@@ -332,7 +334,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                 fontSize: '1rem'
               }}
             >
-              <option value="">All Types</option>
+              <option value="">{t('common.allTypes')}</option>
               {assessmentTypes.map((type) => (
                 <option key={type._id} value={type._id}>{type.type_name}</option>
               ))}
@@ -347,7 +349,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
               color: 'var(--text)',
               fontSize: '0.9rem'
             }}>
-              Select Assignment:
+              {t('teacher.gradebook.selectAssignment')}
             </label>
             <select
               value={selectedAssignmentId}
@@ -362,7 +364,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                 fontSize: '1rem'
               }}
             >
-              <option value="">-- Select Assignment --</option>
+              <option value="">{t('teacher.gradebook.selectAssignmentPlaceholder')}</option>
               {getFilteredAssignments().map((assignment) => (
                 <option key={assignment._id} value={assignment._id}>
                   {assignment.title} (Max: {assignment.max_score})
@@ -387,13 +389,13 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
             <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--card)', borderRadius: '8px', overflow: 'hidden' }}>
               <thead>
                 <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left', minWidth: '200px' }}>Student</th>
-                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '150px' }}>Score</th>
-                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>Percentage</th>
-                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>Status</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', minWidth: '200px' }}>{t('teacher.gradebook.studentCol')}</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '150px' }}>{t('teacher.gradebook.scoreCol')}</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>{t('teacher.gradebook.percentageCol')}</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', minWidth: '120px' }}>{t('teacher.gradebook.statusCol')}</th>
                   {termId && (
                     <th style={{ padding: '1rem', textAlign: 'center', minWidth: '140px', background: 'rgba(0, 123, 255, 0.1)' }}>
-                      Term Grade
+                      {t('teacher.gradebook.termGradeCol')}
                     </th>
                   )}
                 </tr>
@@ -402,7 +404,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                 {gradebook.students.length === 0 ? (
                   <tr>
                     <td colSpan={termId ? 5 : 4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                      No students enrolled in this class
+                      {t('teacher.gradebook.noStudentsEnrolled')}
                     </td>
                   </tr>
                 ) : (
@@ -491,13 +493,13 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                             <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text)' }}>
                               {!selectedAssignment.is_scored ? (
                                 // Show completion status for homework
-                                grade.status === 'graded' ? '✓ Done' : '○ Not Done'
+                                grade.status === 'graded' ? t('teacher.gradebook.done') : t('teacher.gradebook.notDone')
                               ) : (
                                 // Show score for tests
                                 grade.score !== null ? (
                                   <span>{grade.score} / {selectedAssignment.max_score}</span>
                                 ) : (
-                                  <span style={{ color: 'var(--muted)' }}>Not graded</span>
+                                  <span style={{ color: 'var(--muted)' }}>{t('teacher.gradebook.notGraded')}</span>
                                 )
                               )}
                             </div>
@@ -527,10 +529,10 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                               cursor: 'pointer'
                             }}
                           >
-                            <option value="not_submitted" style={{ background: '#6c757d', color: 'white' }}>Not Submitted</option>
-                            <option value="submitted" style={{ background: '#ffc107', color: 'white' }}>Submitted</option>
-                            <option value="graded" style={{ background: '#28a745', color: 'white' }}>Graded</option>
-                            <option value="late" style={{ background: '#dc3545', color: 'white' }}>Late</option>
+                            <option value="not_submitted" style={{ background: '#6c757d', color: 'white' }}>{t('teacher.gradebook.notSubmitted')}</option>
+                            <option value="submitted" style={{ background: '#ffc107', color: 'white' }}>{t('teacher.gradebook.submitted')}</option>
+                            <option value="graded" style={{ background: '#28a745', color: 'white' }}>{t('teacher.gradebook.graded')}</option>
+                            <option value="late" style={{ background: '#dc3545', color: 'white' }}>{t('teacher.gradebook.lateStatus')}</option>
                           </select>
                         </td>
                         {termId && (
@@ -551,7 +553,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
                               </div>
                             ) : (
                               <span style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
-                                Not calculated
+                                {t('teacher.gradebook.notCalculated')}
                               </span>
                             )}
                           </td>
@@ -573,7 +575,7 @@ const Gradebook: React.FC<GradebookProps> = ({ classId, termId }) => {
           color: 'var(--muted)',
           marginTop: '1.5rem'
         }}>
-          {gradebook.assignment_count === 0 ? 'No assignments found for this class' : 'Please select an assignment to view grades'}
+          {gradebook.assignment_count === 0 ? t('teacher.gradebook.noAssignments') : t('teacher.gradebook.selectAssignmentToView')}
         </div>
       )}
 

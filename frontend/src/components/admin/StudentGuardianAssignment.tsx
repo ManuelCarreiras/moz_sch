@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 export interface Student {
@@ -31,6 +32,7 @@ interface StudentGuardianAssignmentProps {
 }
 
 export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuardianId }: StudentGuardianAssignmentProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -114,10 +116,10 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
         
         setStudents(currentPageStudents);
       } else {
-        setError(response.error || 'Failed to fetch students');
+        setError(response.error || t('admin.studentSelector.failedFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error fetching students:', err);
     } finally {
       setLoading(false);
@@ -151,14 +153,14 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
     e.preventDefault();
     
     if (selectedStudents.length === 0 || !selectedGuardian || !selectedGuardianType) {
-      setError('Please select at least one student, guardian, and relationship type');
+      setError(t('admin.guardianAssignment.selectAtLeastOne'));
       return;
     }
 
     // Check if "Other" is selected but no custom type provided
     const selectedType = guardianTypes.find(t => t._id === selectedGuardianType);
     if (selectedType?.name === 'Other' && !customGuardianType.trim()) {
-      setError('Please specify the relationship type when "Other" is selected');
+      setError(t('admin.guardianAssignment.specifyOther'));
       return;
     }
 
@@ -196,14 +198,15 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
       }
 
       if (successCount > 0) {
-        alert(`Guardian ${selectedGuardian.given_name} ${selectedGuardian.surname} assigned to ${successCount} student(s) as ${relationshipText}!${errorCount > 0 ? ` (${errorCount} assignments failed)` : ''}`);
+        const failedMsg = errorCount > 0 ? ` (${errorCount} assignments failed)` : '';
+        alert(t('admin.guardianAssignment.assignSuccess', { name: `${selectedGuardian.given_name} ${selectedGuardian.surname}`, count: successCount, type: relationshipText }) + failedMsg);
         onSuccess();
         onClose();
       } else {
-        setError('Failed to assign guardian to any students');
+        setError(t('admin.guardianAssignment.failedAssign'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error assigning guardian to students:', err);
     } finally {
       setLoading(false);
@@ -214,25 +217,25 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
     <div className="modal assignment-modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Assign Guardian to Student</h2>
-          <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
+          <h2>{t('admin.guardianAssignment.title')}</h2>
+          <button className="icon-btn" aria-label={t('common.close')} onClick={onClose}>✕</button>
         </div>
 
         <div className="modal__content">
           <form onSubmit={handleSubmit} className="assignment-form">
             {/* Guardian Selection */}
             <div className="selection-section">
-              <h3>1. Select Guardian</h3>
+              <h3>{t('admin.guardianAssignment.step1')}</h3>
               <div className="search-form">
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="guardian-search">Search Guardians</label>
+                    <label htmlFor="guardian-search">{t('admin.guardianAssignment.searchGuardians')}</label>
                     <input
                       type="text"
                       id="guardian-search"
                       value={guardianSearchTerm}
                       onChange={(e) => setGuardianSearchTerm(e.target.value)}
-                      placeholder="Search by name, email, or phone..."
+                      placeholder={t('admin.guardianAssignment.searchByNameEmailPhone')}
                     />
                   </div>
                 </div>
@@ -271,22 +274,22 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
 
             {/* Student Search and Selection */}
             <div className="selection-section">
-              <h3>2. Search and Select Student</h3>
+              <h3>{t('admin.guardianAssignment.step2')}</h3>
               <form onSubmit={handleSearch} className="search-form">
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="search">Search Students</label>
+                    <label htmlFor="search">{t('admin.guardianAssignment.searchStudents')}</label>
                     <input
                       type="text"
                       id="search"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search by name..."
+                      placeholder={t('admin.guardianAssignment.searchByName')}
                     />
                   </div>
                   <div className="form-group">
                     <button type="submit" className="btn btn--secondary">
-                      Search
+                      {t('common.search')}
                     </button>
                   </div>
                 </div>
@@ -304,9 +307,9 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
                       >
                         <div className="student-info">
                           <h4>{student.given_name} {student.middle_name} {student.surname}</h4>
-                          <p>ID: {student._id.substring(0, 8)}...</p>
-                          <p>Gender: {student.gender}</p>
-                          <p>Enrolled: {new Date(student.enrollment_date).toLocaleDateString()}</p>
+                          <p>{t('admin.studentSelector.id')} {student._id.substring(0, 8)}...</p>
+                          <p>{t('admin.studentSelector.gender')} {student.gender}</p>
+                          <p>{t('admin.studentSelector.enrolled')} {new Date(student.enrollment_date).toLocaleDateString()}</p>
                         </div>
                         <div className="selection-indicator">
                           {isSelected ? '✓' : ''}
@@ -320,7 +323,7 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
               {/* Selected Students Summary */}
               {selectedStudents.length > 0 && (
                 <div className="selected-students-summary">
-                  <h4>Selected Students ({selectedStudents.length}):</h4>
+                  <h4>{t('admin.guardianAssignment.selectedStudents', { count: selectedStudents.length })}</h4>
                   <div className="selected-students-list">
                     {selectedStudents.map((student) => (
                       <div key={student._id} className="selected-student-item">
@@ -330,7 +333,7 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
                           className="btn btn--small btn--danger"
                           onClick={() => handleStudentSelect(student)}
                         >
-                          Remove
+                          {t('common.remove')}
                         </button>
                       </div>
                     ))}
@@ -341,10 +344,10 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
 
             {/* Guardian Type Selection */}
             <div className="selection-section">
-              <h3>3. Select Relationship Type</h3>
+              <h3>{t('admin.guardianAssignment.step3')}</h3>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="guardian_type">Relationship Type *</label>
+                  <label htmlFor="guardian_type">{t('admin.guardianAssignment.relationshipType')}</label>
                   <select
                     id="guardian_type"
                     value={selectedGuardianType}
@@ -354,7 +357,7 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
                     }}
                     required
                   >
-                    <option value="">Select relationship type</option>
+                    <option value="">{t('admin.guardianAssignment.selectRelationshipType')}</option>
                     {guardianTypes.map((type) => (
                       <option key={type._id} value={type._id}>
                         {type.name}
@@ -368,13 +371,13 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
               {selectedGuardianType && guardianTypes.find(t => t._id === selectedGuardianType)?.name === 'Other' && (
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="custom_guardian_type">Specify Relationship *</label>
+                    <label htmlFor="custom_guardian_type">{t('admin.guardianAssignment.specifyRelationship')}</label>
                     <input
                       type="text"
                       id="custom_guardian_type"
                       value={customGuardianType}
                       onChange={(e) => setCustomGuardianType(e.target.value)}
-                      placeholder="e.g., Legal Guardian, Uncle, Aunt..."
+                      placeholder={t('admin.guardianAssignment.specifyRelationshipPlaceholder')}
                       required
                     />
                   </div>
@@ -395,14 +398,14 @@ export function StudentGuardianAssignment({ onClose, onSuccess, preselectedGuard
                 className="btn btn--secondary"
                 disabled={loading}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading || selectedStudents.length === 0 || !selectedGuardian || !selectedGuardianType}
                 className="btn btn--primary"
               >
-                {loading ? 'Assigning...' : `Assign Guardian to ${selectedStudents.length} Student${selectedStudents.length !== 1 ? 's' : ''}`}
+                {loading ? t('common.assigning') : t('admin.guardianAssignment.assignToStudents', { count: selectedStudents.length })}
               </button>
             </div>
           </form>

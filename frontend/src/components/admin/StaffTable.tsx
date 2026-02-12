@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 import { StaffWizard } from './StaffWizard';
 
@@ -16,6 +17,7 @@ export interface Staff {
 }
 
 export function StaffTable() {
+  const { t } = useTranslation();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +38,10 @@ export function StaffTable() {
         const staffData = (response.data as any).message || response.data;
         setStaff(Array.isArray(staffData) ? staffData : []);
       } else {
-        setError(response.error || 'Failed to load staff');
+        setError(response.error || t('admin.staff.failedLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading staff:', err);
     } finally {
       setLoading(false);
@@ -51,7 +53,7 @@ export function StaffTable() {
   };
 
   const handleDeleteStaff = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this staff member?')) {
+    if (!confirm(t('admin.staff.confirmDelete'))) {
       return;
     }
 
@@ -60,16 +62,16 @@ export function StaffTable() {
       if (response.success) {
         await loadStaff(); // Reload the list
       } else {
-        setError(response.error || 'Failed to delete staff member');
+        setError(response.error || t('admin.staff.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting staff:', err);
     }
   };
 
   const formatCurrency = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return 'Not set';
+    if (value === null || value === undefined) return t('admin.staff.notSet');
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
@@ -77,7 +79,7 @@ export function StaffTable() {
   };
 
   const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return t('common.na');
     try {
       return new Date(dateString).toLocaleDateString();
     } catch {
@@ -95,7 +97,7 @@ export function StaffTable() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading staff...
+        {t('admin.staff.loadingStaff')}
       </div>
     );
   }
@@ -104,15 +106,15 @@ export function StaffTable() {
     <div className="staff-table">
       <div className="table-header">
         <div className="table-header__title">
-          <h2>Staff Management</h2>
-          <p>Manage administrative staff members (financial, secretary)</p>
+          <h2>{t('admin.staff.title')}</h2>
+          <p>{t('admin.staff.subtitle')}</p>
         </div>
         <div className="table-header__actions">
           <button 
             className="btn btn--primary"
             onClick={() => setShowCreateStaff(true)}
           >
-            ➕ Add New Staff
+            ➕ {t('admin.staff.addNew')}
           </button>
         </div>
       </div>
@@ -125,7 +127,7 @@ export function StaffTable() {
         gap: 'var(--space-sm)'
       }}>
         <label style={{ fontSize: 'var(--text-sm)', fontWeight: '500' }}>
-          Filter by Role:
+          {t('admin.staff.filterByRole')}
         </label>
         <select
           value={roleFilter}
@@ -142,9 +144,9 @@ export function StaffTable() {
             minWidth: '150px'
           }}
         >
-          <option value="" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>All Roles</option>
-          <option value="financial" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>Financial</option>
-          <option value="secretary" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>Secretary</option>
+          <option value="" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>{t('common.allRoles')}</option>
+          <option value="financial" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>{t('common.financial')}</option>
+          <option value="secretary" style={{ backgroundColor: 'var(--card)', color: 'var(--text)' }}>{t('common.secretary')}</option>
         </select>
       </div>
 
@@ -158,21 +160,21 @@ export function StaffTable() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Gender</th>
-              <th>Role</th>
-              <th>Hire Date</th>
-              <th>Base Salary</th>
-              <th>Actions</th>
+              <th>{t('common.name')}</th>
+              <th>{t('common.email')}</th>
+              <th>{t('common.phone')}</th>
+              <th>{t('common.gender')}</th>
+              <th>{t('common.role')}</th>
+              <th>{t('common.hireDate')}</th>
+              <th>{t('admin.staff.baseSalary')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {staff.length === 0 ? (
               <tr>
                 <td colSpan={8} className="empty-state">
-                  No staff members found.
+                  {t('admin.staff.noStaff')}
                 </td>
               </tr>
             ) : (
@@ -207,13 +209,13 @@ export function StaffTable() {
                   <td>{formatCurrency(member.base_salary)}</td>
                   <td>
                     <div className="action-buttons">
-                      <button className="btn btn--small btn--secondary">Edit</button>
+                      <button className="btn btn--small btn--secondary">{t('common.edit')}</button>
                       <button 
                         className="btn btn--small btn--danger"
                         onClick={() => handleDeleteStaff(member._id)}
-                        title="Delete staff member"
+                        title={t('admin.staff.deleteStaff')}
                       >
-                        Delete
+                        {t('common.delete')}
                       </button>
                     </div>
                   </td>

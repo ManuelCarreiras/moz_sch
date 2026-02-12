@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 import { StudentWizard } from './StudentWizard';
 
@@ -15,6 +16,7 @@ export interface Student {
 }
 
 export function StudentsTable() {
+  const { t } = useTranslation();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,10 +45,10 @@ export function StudentsTable() {
         const studentData = (response.data as any).message || response.data;
         setStudents(Array.isArray(studentData) ? studentData : []);
       } else {
-        setError(response.error || 'Failed to load students');
+        setError(response.error || t('admin.studentsTable.failedLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading students:', err);
     } finally {
       setLoading(false);
@@ -59,7 +61,7 @@ export function StudentsTable() {
   };
 
   const handleDeleteStudent = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this student?')) {
+    if (!confirm(t('admin.studentsTable.confirmDelete'))) {
       return;
     }
 
@@ -68,10 +70,10 @@ export function StudentsTable() {
       if (response.success) {
         await loadStudents(); // Reload the list
       } else {
-        setError(response.error || 'Failed to delete student');
+        setError(response.error || t('admin.studentsTable.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting student:', err);
     }
   };
@@ -89,7 +91,7 @@ export function StudentsTable() {
       const validExtensions = ['.xlsx', '.xls'];
       const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
       if (!validExtensions.includes(fileExtension)) {
-        setError('Invalid file type. Please upload an Excel file (.xlsx or .xls)');
+        setError(t('admin.studentsTable.invalidFile'));
         return;
       }
       setImportFile(file);
@@ -99,7 +101,7 @@ export function StudentsTable() {
 
   const handleImportSubmit = async () => {
     if (!importFile) {
-      setError('Please select a file to import');
+      setError(t('admin.studentsTable.selectFilePlease'));
       return;
     }
 
@@ -119,10 +121,10 @@ export function StudentsTable() {
           setImportResult(null);
         }, 3000);
       } else {
-        setError(response.error || 'Failed to import students');
+        setError(response.error || t('admin.studentsTable.failedImport'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error importing students:', err);
     } finally {
       setImporting(false);
@@ -159,7 +161,7 @@ export function StudentsTable() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading students...
+        {t('admin.studentsTable.loadingStudents')}
       </div>
     );
   }
@@ -169,8 +171,8 @@ export function StudentsTable() {
       {/* Header */}
       <div className="table-header">
         <div className="table-header__title">
-          <h2>Student Management</h2>
-          <p>Manage student records, enrollment, and academic progress</p>
+          <h2>{t('admin.studentsTable.title')}</h2>
+          <p>{t('admin.studentsTable.subtitle')}</p>
         </div>
         <div className="table-header__actions">
           <button 
@@ -178,13 +180,13 @@ export function StudentsTable() {
             onClick={handleImportClick}
             style={{ marginRight: 'var(--space-sm)' }}
           >
-            📥 Import from Excel
+            📥 {t('admin.studentsTable.importExcel')}
           </button>
           <button 
             className="btn btn--primary"
             onClick={() => setShowWizard(true)}
           >
-            ➕ Add New Student
+            ➕ {t('admin.studentsTable.addNew')}
           </button>
         </div>
       </div>
@@ -194,14 +196,14 @@ export function StudentsTable() {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search students by name or email..."
+            placeholder={t('admin.studentsTable.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
         </div>
         <div className="table-stats">
-          <span>Total: {filteredStudents.length} students</span>
+          <span>{t('common.totalCount', { count: filteredStudents.length })}</span>
         </div>
       </div>
 
@@ -218,19 +220,19 @@ export function StudentsTable() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Date of Birth</th>
-              <th>Status</th>
-              <th>Enrollment Date</th>
-              <th>Actions</th>
+              <th>{t('common.name')}</th>
+              <th>{t('common.email')}</th>
+              <th>{t('common.dateOfBirth')}</th>
+              <th>{t('common.status')}</th>
+              <th>{t('admin.studentsTable.enrollmentDate')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {paginatedStudents.length === 0 ? (
               <tr>
                 <td colSpan={6} className="empty-state">
-                  {searchTerm ? 'No students found matching your search.' : 'No students found.'}
+                  {searchTerm ? t('admin.studentsTable.noStudentsSearch') : t('admin.studentsTable.noStudents')}
                 </td>
               </tr>
             ) : (
@@ -244,22 +246,22 @@ export function StudentsTable() {
                       </span>
                     </div>
                   </td>
-                  <td>{student.email || 'N/A'}</td>
-                  <td>{student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : 'N/A'}</td>
+                  <td>{student.email || t('common.na')}</td>
+                  <td>{student.date_of_birth ? new Date(student.date_of_birth).toLocaleDateString() : t('common.na')}</td>
                   <td>
                     <span className={`status-badge status-badge--${student.is_active ? 'active' : 'inactive'}`}>
-                      {student.is_active ? 'Active' : 'Inactive'}
+                      {student.is_active ? t('common.active') : t('common.inactive')}
                     </span>
                   </td>
-                  <td>{student.enrollment_date ? new Date(student.enrollment_date).toLocaleDateString() : 'N/A'}</td>
+                  <td>{student.enrollment_date ? new Date(student.enrollment_date).toLocaleDateString() : t('common.na')}</td>
                   <td>
                     <div className="action-buttons">
                       <button
                         className="btn btn--small btn--danger"
                         onClick={() => handleDeleteStudent(student._id)}
-                        title="Delete student"
+                        title={t('admin.studentsTable.deleteStudent')}
                       >
-                        Delete
+                        {t('common.delete')}
                       </button>
                     </div>
                   </td>
@@ -278,17 +280,17 @@ export function StudentsTable() {
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           >
-            Previous
+            {t('common.previous')}
           </button>
           <span className="pagination-info">
-            Page {currentPage} of {totalPages}
+            {t('common.pageOf', { current: currentPage, total: totalPages })}
           </span>
           <button
             className="btn btn--small"
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
           >
-            Next
+            {t('common.next')}
           </button>
         </div>
       )}
@@ -334,25 +336,25 @@ export function StudentsTable() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ marginTop: 0, marginBottom: 'var(--space-md)' }}>
-              Import Students from Excel
+              {t('admin.studentsTable.importTitle')}
             </h2>
             
             <div style={{ marginBottom: 'var(--space-md)' }}>
               <p style={{ color: 'var(--muted)', marginBottom: 'var(--space-md)' }}>
-                Upload an Excel file (.xlsx or .xls) with the following columns:
+                {t('admin.studentsTable.importDesc')}
               </p>
               <ul style={{ 
                 color: 'var(--muted)', 
                 marginLeft: 'var(--space-lg)',
                 marginBottom: 'var(--space-md)'
               }}>
-                <li><strong>given_name</strong> - First name (required)</li>
-                <li><strong>middle_name</strong> - Middle name (optional)</li>
-                <li><strong>surname</strong> - Last name (required)</li>
-                <li><strong>date_of_birth</strong> - Date of birth (required, format: YYYY-MM-DD or DD/MM/YYYY)</li>
-                <li><strong>gender</strong> - Male or Female (required)</li>
-                <li><strong>enrollment_date</strong> - Enrollment date (required, format: YYYY-MM-DD or DD/MM/YYYY)</li>
-                <li><strong>email</strong> - Email address (optional, must be unique)</li>
+                <li><strong>given_name</strong> - {t('admin.studentsTable.importGivenName')}</li>
+                <li><strong>middle_name</strong> - {t('admin.studentsTable.importMiddleName')}</li>
+                <li><strong>surname</strong> - {t('admin.studentsTable.importSurname')}</li>
+                <li><strong>date_of_birth</strong> - {t('admin.studentsTable.importDob')}</li>
+                <li><strong>gender</strong> - {t('admin.studentsTable.importGender')}</li>
+                <li><strong>enrollment_date</strong> - {t('admin.studentsTable.importEnrollment')}</li>
+                <li><strong>email</strong> - {t('admin.studentsTable.importEmail')}</li>
               </ul>
             </div>
 
@@ -384,14 +386,14 @@ export function StudentsTable() {
               }}>
                 <strong>{importResult.message}</strong>
                 <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--text-sm)' }}>
-                  Created: {importResult.summary.total_created} | 
-                  Failed: {importResult.summary.total_failed} | 
-                  Skipped: {importResult.summary.total_skipped}
+                  {t('admin.studentsTable.created')} {importResult.summary.total_created} | 
+                  {t('admin.studentsTable.failed')} {importResult.summary.total_failed} | 
+                  {t('admin.studentsTable.skipped')} {importResult.summary.total_skipped}
                 </div>
                 {importResult.failed && importResult.failed.length > 0 && (
                   <details style={{ marginTop: 'var(--space-sm)' }}>
                     <summary style={{ cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
-                      View failed rows
+                      {t('admin.studentsTable.viewFailed')}
                     </summary>
                     <ul style={{ marginLeft: 'var(--space-lg)', fontSize: 'var(--text-sm)' }}>
                       {importResult.failed.map((item: any, idx: number) => (
@@ -403,7 +405,7 @@ export function StudentsTable() {
                 {importResult.skipped && importResult.skipped.length > 0 && (
                   <details style={{ marginTop: 'var(--space-sm)' }}>
                     <summary style={{ cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
-                      View skipped rows
+                      {t('admin.studentsTable.viewSkipped')}
                     </summary>
                     <ul style={{ marginLeft: 'var(--space-lg)', fontSize: 'var(--text-sm)' }}>
                       {importResult.skipped.map((item: any, idx: number) => (
@@ -421,7 +423,7 @@ export function StudentsTable() {
                 marginBottom: 'var(--space-sm)',
                 fontWeight: '500'
               }}>
-                Select Excel File:
+                {t('admin.studentsTable.selectFile')}
               </label>
               <input
                 type="file"
@@ -443,7 +445,7 @@ export function StudentsTable() {
                   fontSize: 'var(--text-sm)',
                   color: 'var(--muted)'
                 }}>
-                  Selected: {importFile.name} ({(importFile.size / 1024).toFixed(2)} KB)
+                  {t('admin.studentsTable.selected', { name: importFile.name, size: (importFile.size / 1024).toFixed(2) })}
                 </div>
               )}
             </div>
@@ -458,14 +460,14 @@ export function StudentsTable() {
                 onClick={handleCloseImportModal}
                 disabled={importing}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn--primary"
                 onClick={handleImportSubmit}
                 disabled={!importFile || importing}
               >
-                {importing ? 'Importing...' : 'Import Students'}
+                {importing ? t('common.importing') : t('admin.studentsTable.importStudents')}
               </button>
             </div>
           </div>

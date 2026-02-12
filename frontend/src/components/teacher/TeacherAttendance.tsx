@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface TeacherClass {
@@ -45,6 +46,7 @@ interface RosterData {
 }
 
 const TeacherAttendance: React.FC = () => {
+  const { t } = useTranslation();
   const [classes, setClasses] = useState<TeacherClass[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -161,7 +163,7 @@ const TeacherAttendance: React.FC = () => {
       const response = await apiService.saveAttendance(attendanceData);
       
       if (response.success) {
-        alert('Attendance saved successfully!');
+        alert(t('teacher.attendance.saveSuccess'));
         await loadRoster(); // Reload to get saved data
       } else {
         alert('Error saving attendance: ' + (response.message || response.error));
@@ -214,9 +216,9 @@ const TeacherAttendance: React.FC = () => {
 
   return (
     <div className="teacher-attendance">
-      <h2>Attendance</h2>
+      <h2>{t('teacher.attendance.title')}</h2>
       <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-        Take and manage student attendance for your classes
+        {t('teacher.attendance.subtitle')}
       </p>
 
       {/* Cascading Filters */}
@@ -224,7 +226,7 @@ const TeacherAttendance: React.FC = () => {
         {/* School Year */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-            School Year:
+            {t('common.schoolYear')}:
           </label>
           <select
             value={filterYear}
@@ -243,7 +245,7 @@ const TeacherAttendance: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">-- Select Year --</option>
+            <option value="">{t('common.selectAYear')}</option>
             {schoolYears.map(year => (
               <option key={year._id} value={year._id}>
                 {year.year_name}
@@ -255,7 +257,7 @@ const TeacherAttendance: React.FC = () => {
         {/* Term */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-            Term:
+            {t('common.term')}:
           </label>
           <select
             value={filterTerm}
@@ -275,14 +277,14 @@ const TeacherAttendance: React.FC = () => {
               cursor: !filterYear ? 'not-allowed' : 'pointer'
             }}
           >
-            <option value="">-- Select Term --</option>
+            <option value="">{t('common.selectATerm')}</option>
             {(() => {
               const filteredTerms = filterYear 
-                ? terms.filter(t => t.year_id === filterYear)
+                ? terms.filter(tm => tm.year_id === filterYear)
                 : [];
               return filteredTerms.map(term => (
                 <option key={term._id} value={term._id}>
-                  Term {term.term_number}
+                  {t('common.termNumber', { number: term.term_number })}
                 </option>
               ));
             })()}
@@ -292,7 +294,7 @@ const TeacherAttendance: React.FC = () => {
         {/* Subject */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-            Subject:
+            {t('common.subject')}:
           </label>
           <select
             value={filterSubject}
@@ -310,7 +312,7 @@ const TeacherAttendance: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">-- Select Subject --</option>
+            <option value="">{t('common.selectASubject')}</option>
             {subjects.map(subject => (
               <option key={subject._id} value={subject._id}>
                 {subject.subject_name}
@@ -322,7 +324,7 @@ const TeacherAttendance: React.FC = () => {
         {/* Class */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-            Class:
+            {t('common.class')}:
           </label>
           <select
             value={selectedClassId}
@@ -337,7 +339,7 @@ const TeacherAttendance: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">-- Select Class --</option>
+            <option value="">{t('common.selectAClass')}</option>
             {(() => {
               // Filter classes by all selections
               const filteredClasses = classes.filter(cls => {
@@ -368,7 +370,7 @@ const TeacherAttendance: React.FC = () => {
         {/* Date */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>
-            Date:
+            {t('teacher.attendance.dateLabel')}
           </label>
           <input
             type="date"
@@ -397,23 +399,23 @@ const TeacherAttendance: React.FC = () => {
         }}>
           <div style={{ padding: '1rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #28a745' }}>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#28a745' }}>{statusCounts.present}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Present</div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('teacher.attendance.present')}</div>
           </div>
           <div style={{ padding: '1rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #dc3545' }}>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#dc3545' }}>{statusCounts.absent}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Absent</div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('teacher.attendance.absent')}</div>
           </div>
           <div style={{ padding: '1rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #ffc107' }}>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#ffc107' }}>{statusCounts.late}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Late</div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('teacher.attendance.late')}</div>
           </div>
           <div style={{ padding: '1rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #17a2b8' }}>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: '#17a2b8' }}>{statusCounts.excused}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Excused</div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('teacher.attendance.excused')}</div>
           </div>
           <div style={{ padding: '1rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid var(--border)' }}>
             <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text)' }}>{attendanceRate}%</div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Attendance Rate</div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{t('teacher.attendance.attendanceRate')}</div>
           </div>
         </div>
       )}
@@ -433,7 +435,7 @@ const TeacherAttendance: React.FC = () => {
               fontSize: '0.9rem'
             }}
           >
-            Mark All Present
+            {t('teacher.attendance.markAllPresent')}
           </button>
           <button
             onClick={() => handleMarkAll('absent')}
@@ -447,7 +449,7 @@ const TeacherAttendance: React.FC = () => {
               fontSize: '0.9rem'
             }}
           >
-            Mark All Absent
+            {t('teacher.attendance.markAllAbsent')}
           </button>
           <button
             onClick={handleSaveAttendance}
@@ -464,7 +466,7 @@ const TeacherAttendance: React.FC = () => {
               marginLeft: 'auto'
             }}
           >
-            {saving ? 'Saving...' : 'Save Attendance'}
+            {saving ? t('common.saving') : t('teacher.attendance.saveAttendance')}
           </button>
         </div>
       )}
@@ -472,7 +474,7 @@ const TeacherAttendance: React.FC = () => {
       {/* Roster Table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
-          Loading roster...
+          {t('teacher.attendance.loadingRoster')}
         </div>
       ) : !selectedClassId ? (
         <div style={{ 
@@ -482,7 +484,7 @@ const TeacherAttendance: React.FC = () => {
           borderRadius: '8px',
           color: 'var(--muted)'
         }}>
-          Please select a class to take attendance
+          {t('teacher.attendance.selectClassToTake')}
         </div>
       ) : roster && roster.student_count > 0 ? (
         <div style={{ overflowX: 'auto' }}>
@@ -495,9 +497,9 @@ const TeacherAttendance: React.FC = () => {
           }}>
             <thead>
               <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                <th style={{ padding: '1rem', textAlign: 'left', minWidth: '250px' }}>Student</th>
-                <th style={{ padding: '1rem', textAlign: 'center', minWidth: '180px' }}>Status</th>
-                <th style={{ padding: '1rem', textAlign: 'left', minWidth: '300px' }}>Notes</th>
+                <th style={{ padding: '1rem', textAlign: 'left', minWidth: '250px' }}>{t('common.student')}</th>
+                <th style={{ padding: '1rem', textAlign: 'center', minWidth: '180px' }}>{t('common.status')}</th>
+                <th style={{ padding: '1rem', textAlign: 'left', minWidth: '300px' }}>{t('common.notes')}</th>
               </tr>
             </thead>
             <tbody>
@@ -525,10 +527,10 @@ const TeacherAttendance: React.FC = () => {
                         minWidth: '140px'
                       }}
                     >
-                      <option value="present" style={{ background: '#28a745', color: 'white' }}>✓ Present</option>
-                      <option value="absent" style={{ background: '#dc3545', color: 'white' }}>✗ Absent</option>
-                      <option value="late" style={{ background: '#ffc107', color: 'white' }}>⏰ Late</option>
-                      <option value="excused" style={{ background: '#17a2b8', color: 'white' }}>📝 Excused</option>
+                      <option value="present" style={{ background: '#28a745', color: 'white' }}>✓ {t('teacher.attendance.present')}</option>
+                      <option value="absent" style={{ background: '#dc3545', color: 'white' }}>✗ {t('teacher.attendance.absent')}</option>
+                      <option value="late" style={{ background: '#ffc107', color: 'white' }}>⏰ {t('teacher.attendance.late')}</option>
+                      <option value="excused" style={{ background: '#17a2b8', color: 'white' }}>📝 {t('teacher.attendance.excused')}</option>
                     </select>
                   </td>
                   <td style={{ padding: '1rem' }}>
@@ -536,7 +538,7 @@ const TeacherAttendance: React.FC = () => {
                       type="text"
                       value={student.notes || ''}
                       onChange={(e) => handleNotesChange(student.student_id, e.target.value)}
-                      placeholder="Add notes..."
+                      placeholder={t('teacher.attendance.addNotes')}
                       style={{
                         width: '100%',
                         padding: '0.5rem',
@@ -561,7 +563,7 @@ const TeacherAttendance: React.FC = () => {
           borderRadius: '8px',
           color: 'var(--muted)'
         }}>
-          No students enrolled in this class
+          {t('teacher.attendance.noStudentsEnrolled')}
         </div>
       ) : null}
 
@@ -574,12 +576,12 @@ const TeacherAttendance: React.FC = () => {
           borderRadius: '8px',
           border: '1px solid var(--border)'
         }}>
-          <strong style={{ color: 'var(--text)' }}>Status Legend:</strong>
+          <strong style={{ color: 'var(--text)' }}>{t('teacher.attendance.statusLegend')}</strong>
           <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ color: '#28a745' }}>✓ Present</span>
-            <span style={{ color: '#dc3545' }}>✗ Absent</span>
-            <span style={{ color: '#ffc107' }}>⏰ Late</span>
-            <span style={{ color: '#17a2b8' }}>📝 Excused</span>
+            <span style={{ color: '#28a745' }}>✓ {t('teacher.attendance.present')}</span>
+            <span style={{ color: '#dc3545' }}>✗ {t('teacher.attendance.absent')}</span>
+            <span style={{ color: '#ffc107' }}>⏰ {t('teacher.attendance.late')}</span>
+            <span style={{ color: '#17a2b8' }}>📝 {t('teacher.attendance.excused')}</span>
           </div>
         </div>
       )}

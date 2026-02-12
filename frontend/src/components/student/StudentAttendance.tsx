@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import { useUser } from '../../contexts/AuthContext';
 
@@ -35,6 +36,7 @@ interface ClassItem {
 }
 
 const StudentAttendance: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   
@@ -259,7 +261,7 @@ const StudentAttendance: React.FC = () => {
 
   if (loading && (!schoolYears.length && !terms.length && !subjects.length)) {
     return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)' }}>
-      Loading filter options...
+      {t('student.attendance.loadingFilters')}
     </div>;
   }
 
@@ -267,9 +269,9 @@ const StudentAttendance: React.FC = () => {
 
   return (
     <div className="student-attendance">
-      <h2>My Attendance</h2>
+      <h2>{t('student.attendance.title')}</h2>
       <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-        View your attendance record across all classes
+        {t('student.attendance.subtitle')}
       </p>
 
       {/* Cascading Filters */}
@@ -281,7 +283,7 @@ const StudentAttendance: React.FC = () => {
       }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
-            School Year:
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -299,7 +301,7 @@ const StudentAttendance: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map(year => (
               <option key={year._id} value={year._id}>
                 {year.year_name}
@@ -310,7 +312,7 @@ const StudentAttendance: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
-            Term:
+            {t('common.term')}
           </label>
           <select
             value={filterTerm}
@@ -329,14 +331,14 @@ const StudentAttendance: React.FC = () => {
               cursor: !filterYear ? 'not-allowed' : 'pointer'
             }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {(() => {
               const filteredTerms = filterYear 
-                ? terms.filter(t => t.year_id === filterYear)
+                ? terms.filter(tm => tm.year_id === filterYear)
                 : [];
               return filteredTerms.map(term => (
                 <option key={term._id} value={term._id}>
-                  Term {term.term_number}
+                  {t('common.termNumber', { number: term.term_number })}
                 </option>
               ));
             })()}
@@ -345,7 +347,7 @@ const StudentAttendance: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
-            Subject:
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -362,7 +364,7 @@ const StudentAttendance: React.FC = () => {
               minWidth: '200px'
             }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map(subject => (
               <option key={subject._id} value={subject._id}>
                 {subject.subject_name}
@@ -374,7 +376,7 @@ const StudentAttendance: React.FC = () => {
         {isAdmin && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>
-              Class:
+              {t('common.class')}
             </label>
             <select
               value={filterClass}
@@ -391,7 +393,7 @@ const StudentAttendance: React.FC = () => {
                 minWidth: '150px'
               }}
             >
-              <option value="">All Classes</option>
+              <option value="">{t('common.allClasses')}</option>
               {classes.map(cls => (
                 <option key={cls.class_id} value={cls.class_name}>
                   {cls.class_name}
@@ -413,7 +415,7 @@ const StudentAttendance: React.FC = () => {
             color: 'var(--muted)',
             marginBottom: '2rem'
           }}>
-            Please select School Year, Term, Subject, and Class to view attendance
+            {t('student.attendance.selectFiltersAdmin')}
           </div>
         )
       ) : (
@@ -426,7 +428,7 @@ const StudentAttendance: React.FC = () => {
             color: 'var(--muted)',
             marginBottom: '2rem'
           }}>
-            Please select School Year, Term, and Subject to view attendance
+            {t('student.attendance.selectFiltersStudent')}
           </div>
         )
       )}
@@ -441,23 +443,23 @@ const StudentAttendance: React.FC = () => {
         }}>
         <div style={{ padding: '1.5rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #28a745' }}>
           <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#28a745' }}>{stats.present}</div>
-          <div style={{ color: 'var(--muted)' }}>Present</div>
+          <div style={{ color: 'var(--muted)' }}>{t('student.attendance.present')}</div>
         </div>
         <div style={{ padding: '1.5rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #dc3545' }}>
           <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#dc3545' }}>{stats.absent}</div>
-          <div style={{ color: 'var(--muted)' }}>Absent</div>
+          <div style={{ color: 'var(--muted)' }}>{t('student.attendance.absent')}</div>
         </div>
         <div style={{ padding: '1.5rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #ffc107' }}>
           <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#ffc107' }}>{stats.late}</div>
-          <div style={{ color: 'var(--muted)' }}>Late</div>
+          <div style={{ color: 'var(--muted)' }}>{t('student.attendance.late')}</div>
         </div>
         <div style={{ padding: '1.5rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid #17a2b8' }}>
           <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#17a2b8' }}>{stats.excused}</div>
-          <div style={{ color: 'var(--muted)' }}>Excused</div>
+          <div style={{ color: 'var(--muted)' }}>{t('student.attendance.excused')}</div>
         </div>
         <div style={{ padding: '1.5rem', background: 'var(--card)', borderRadius: '8px', border: '2px solid var(--border)' }}>
           <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--text)' }}>{stats.attendanceRate}%</div>
-          <div style={{ color: 'var(--muted)' }}>Attendance Rate</div>
+          <div style={{ color: 'var(--muted)' }}>{t('student.attendance.attendanceRate')}</div>
         </div>
         </div>
       )}
@@ -465,7 +467,7 @@ const StudentAttendance: React.FC = () => {
       {/* Attendance Records Table */}
       {filterYear && filterTerm && filterSubject && (
         <div>
-        <h3 style={{ marginBottom: '1rem' }}>Attendance History</h3>
+        <h3 style={{ marginBottom: '1rem' }}>{t('student.attendance.attendanceHistory')}</h3>
         
         {filteredRecords.length === 0 ? (
           <div style={{ 
@@ -475,7 +477,7 @@ const StudentAttendance: React.FC = () => {
             borderRadius: '8px',
             color: 'var(--muted)'
           }}>
-            No attendance records found
+            {t('student.attendance.noRecords')}
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
@@ -488,11 +490,11 @@ const StudentAttendance: React.FC = () => {
             }}>
               <thead>
                 <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
-                  {isAdmin && <th style={{ padding: '1rem', textAlign: 'left' }}>Student</th>}
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Notes</th>
+                  <th style={{ padding: '1rem', textAlign: 'left' }}>{t('common.date')}</th>
+                  {isAdmin && <th style={{ padding: '1rem', textAlign: 'left' }}>{t('common.student')}</th>}
+                  <th style={{ padding: '1rem', textAlign: 'left' }}>{t('common.class')}</th>
+                  <th style={{ padding: '1rem', textAlign: 'center' }}>{t('common.status')}</th>
+                  <th style={{ padding: '1rem', textAlign: 'left' }}>{t('common.notes')}</th>
                 </tr>
               </thead>
               <tbody>

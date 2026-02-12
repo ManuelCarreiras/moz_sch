@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import AssignmentWizard from './AssignmentWizard';
 // import AssignmentWizard from './AssignmentWizardSimple';
@@ -48,6 +49,7 @@ interface AssessmentType {
 }
 
 const AssignmentList: React.FC = () => {
+  const { t } = useTranslation();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [filteredAssignments, setFilteredAssignments] = useState<Assignment[]>([]);
   const [availableClasses, setAvailableClasses] = useState<TeacherClass[]>([]);
@@ -301,21 +303,21 @@ const AssignmentList: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading assignments...</div>;
+    return <div>{t('teacher.assignments.loadingAssignments')}</div>;
   }
 
   return (
     <div className="assignment-list">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2>My Assignments</h2>
-          <p>Manage your assignments and assessments</p>
+          <h2>{t('teacher.assignments.title')}</h2>
+          <p>{t('teacher.assignments.subtitle')}</p>
         </div>
         <button
           className="btn btn-primary"
           onClick={() => setShowWizard(true)}
         >
-          + Create Assignment
+          {t('teacher.assignments.createNew')}
         </button>
       </div>
 
@@ -331,7 +333,7 @@ const AssignmentList: React.FC = () => {
         borderRadius: '4px'
       }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>School Year</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.schoolYear')}</label>
           <select
             value={filterYear}
             onChange={(e) => {
@@ -341,7 +343,7 @@ const AssignmentList: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
             ))}
@@ -349,7 +351,7 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Subject</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.subject')}</label>
           <select
             value={filterSubject}
             onChange={(e) => {
@@ -359,7 +361,7 @@ const AssignmentList: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>{subject.subject_name}</option>
             ))}
@@ -367,13 +369,13 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Class</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.class')}</label>
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Classes</option>
+            <option value="">{t('common.allClasses')}</option>
             {getUniqueClasses().map(({ id, name }) => (
               <option key={id} value={id}>{name}</option>
             ))}
@@ -381,13 +383,13 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Type</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.type')}</label>
           <select
             value={filterAssessmentType}
             onChange={(e) => setFilterAssessmentType(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Types</option>
+            <option value="">{t('common.allTypes')}</option>
             {assessmentTypes.map((type) => (
               <option key={type._id} value={type._id}>{type.type_name}</option>
             ))}
@@ -395,16 +397,16 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Status</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.status')}</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="closed">Closed</option>
+            <option value="">{t('common.allStatuses')}</option>
+            <option value="draft">{t('teacher.assignments.statusDraft')}</option>
+            <option value="published">{t('teacher.assignments.statusPublished')}</option>
+            <option value="closed">{t('teacher.assignments.statusClosed')}</option>
           </select>
         </div>
 
@@ -421,7 +423,7 @@ const AssignmentList: React.FC = () => {
             }}
               style={{ width: '100%' }}
             >
-              Clear Filters
+              {t('common.clearFilters')}
             </button>
           </div>
         )}
@@ -438,15 +440,15 @@ const AssignmentList: React.FC = () => {
         }}>
           <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '1rem' }}>
             {assignments.length === 0 
-              ? "You haven't created any assignments yet." 
-              : "No assignments match your filters."}
+              ? t('teacher.assignments.noAssignmentsYet')
+              : t('teacher.assignments.noAssignmentsFilter')}
           </p>
           {assignments.length === 0 && (
             <button
               className="btn btn-primary"
               onClick={() => setShowWizard(true)}
             >
-              Create Your First Assignment
+              {t('teacher.assignments.createFirst')}
             </button>
           )}
         </div>
@@ -454,15 +456,14 @@ const AssignmentList: React.FC = () => {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Subject</th>
-              <th>Class</th>
-              <th>Type</th>
-              <th>Due Date</th>
-              <th>Max Score</th>
-              <th>Weight</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>{t('teacher.assignments.titleCol')}</th>
+              <th>{t('teacher.assignments.subjectCol')}</th>
+              <th>{t('common.class')}</th>
+              <th>{t('common.type')}</th>
+              <th>{t('common.dueDate')}</th>
+              <th>{t('common.score')}</th>
+              <th>{t('common.status')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -489,13 +490,13 @@ const AssignmentList: React.FC = () => {
                       className="btn btn-secondary btn-sm"
                       onClick={() => handleEdit(assignment)}
                     >
-                      Edit
+                      {t('common.edit')}
                     </button>
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleDelete(assignment)}
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </div>
                 </td>
@@ -506,7 +507,7 @@ const AssignmentList: React.FC = () => {
       )}
 
       <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-        Showing {filteredAssignments.length} of {assignments.length} assignments
+        {t('teacher.assignments.showingAssignments', { count: filteredAssignments.length, total: assignments.length })}
       </div>
 
       {showWizard && (

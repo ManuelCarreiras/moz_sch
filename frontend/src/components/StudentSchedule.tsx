@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../services/apiService';
 import { useUser } from '../contexts/AuthContext';
 
@@ -54,6 +55,7 @@ function getOrdinalSuffix(num: number): string {
 }
 
 export function StudentSchedule() {
+  const { t } = useTranslation();
   const user = useUser();
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export function StudentSchedule() {
 
       // Get user info
       if (!user?.id) {
-        setError('Unable to identify student. Please contact your administrator.');
+        setError(t('student.schedule.unableToIdentify'));
         setLoading(false);
         return;
       }
@@ -107,10 +109,10 @@ export function StudentSchedule() {
           setAllAvailableYears(data.available_years || []);
         }
       } else {
-        setError('Unable to load timetable.');
+        setError(t('student.schedule.unableToLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading student timetable:', err);
     } finally {
       setLoading(false);
@@ -178,7 +180,7 @@ export function StudentSchedule() {
     return (
       <div className="student-content">
         <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <p>Loading your schedule...</p>
+          <p>{t('student.schedule.loadingSchedule')}</p>
         </div>
       </div>
     );
@@ -187,8 +189,8 @@ export function StudentSchedule() {
   if (error) {
     return (
       <div className="student-content">
-        <h2>Schedule</h2>
-        <p>Check your class schedule and upcoming assignments.</p>
+        <h2>{t('student.schedule.title')}</h2>
+        <p>{t('student.schedule.subtitle')}</p>
         <div className="error-message" style={{ marginTop: 'var(--space-md)' }}>
           {error}
         </div>
@@ -198,15 +200,15 @@ export function StudentSchedule() {
 
   const grid = organizeTimetableGrid();
   const daysOfWeek = [1, 2, 3, 4, 5]; // Monday to Friday
-  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const dayNames = [t('common.monday'), t('common.tuesday'), t('common.wednesday'), t('common.thursday'), t('common.friday')];
 
   if (!timetable || !grid || grid.periods.length === 0) {
     return (
       <div className="student-content">
-        <h2>Schedule</h2>
-        <p>Check your class schedule and upcoming assignments.</p>
+        <h2>{t('student.schedule.title')}</h2>
+        <p>{t('student.schedule.subtitle')}</p>
         <div className="placeholder-content" style={{ marginTop: 'var(--space-md)' }}>
-          <p>No schedule available yet. Please contact your administrator.</p>
+          <p>{t('student.schedule.noSchedule')}</p>
         </div>
       </div>
     );
@@ -214,8 +216,8 @@ export function StudentSchedule() {
 
   return (
     <div className="student-content">
-      <h2>Schedule</h2>
-      <p>Check your class schedule and upcoming assignments.</p>
+      <h2>{t('student.schedule.title')}</h2>
+      <p>{t('student.schedule.subtitle')}</p>
 
       {timetable && (
         <div style={{ marginTop: 'var(--space-lg)' }}>
@@ -233,7 +235,7 @@ export function StudentSchedule() {
           }}>
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
               <label htmlFor="year-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                Year:
+                {t('student.schedule.yearLabel')}
               </label>
               <select
                 id="year-filter"
@@ -249,7 +251,7 @@ export function StudentSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="">All Years</option>
+                <option value="">{t('common.allYears')}</option>
                 {allAvailableYears.map((year) => (
                   <option key={year._id} value={year._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
                     {year.year_name}
@@ -260,7 +262,7 @@ export function StudentSchedule() {
 
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
               <label htmlFor="term-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                Term:
+                {t('student.schedule.termLabel')}
               </label>
               <select
                 id="term-filter"
@@ -276,12 +278,12 @@ export function StudentSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="">All Terms</option>
+                <option value="">{t('common.allTerms')}</option>
                 {allAvailableTerms
                   .filter(term => !selectedYearId || String(term.year_id) === String(selectedYearId))
                   .map((term) => (
                     <option key={term._id} value={term._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
-                      Term {term.term_number}
+                      {t('common.termNumber', { number: term.term_number })}
                     </option>
                   ))}
               </select>
@@ -303,7 +305,7 @@ export function StudentSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                Clear Filters
+                {t('common.clearFilters')}
               </button>
             )}
           </div>
@@ -315,9 +317,9 @@ export function StudentSchedule() {
             borderRadius: '0.5rem',
             border: '1px solid var(--border)'
           }}>
-            <strong>Class:</strong> {timetable.year_level_order > 0 
+            <strong>{t('student.schedule.classLabel')}</strong> {timetable.year_level_order > 0 
               ? `${timetable.year_level_order}${getOrdinalSuffix(timetable.year_level_order)} ${timetable.year_level_name}` 
-              : timetable.year_level_name || 'No class assigned'}
+              : timetable.year_level_name || t('common.noClassAssigned')}
           </div>
 
           <div style={{ overflowX: 'auto', marginTop: 'var(--space-lg)' }}>
@@ -331,7 +333,7 @@ export function StudentSchedule() {
               <thead>
                 <tr style={{ background: 'var(--primary)', color: 'white' }}>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', minWidth: '120px', maxWidth: '120px' }}>
-                    Time
+                    {t('common.time')}
                   </th>
                   {dayNames.map((dayName, idx) => (
                     <th key={idx} style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '150px', maxWidth: '150px' }}>

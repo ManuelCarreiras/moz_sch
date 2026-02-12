@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 export interface Student {
@@ -18,6 +19,7 @@ interface StudentSelectorProps {
 }
 
 export function StudentSelector({ onSelect, onClose, preselectedStudentId }: StudentSelectorProps) {
+  const { t } = useTranslation();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,10 +73,10 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
         
         setStudents(currentPageStudents);
       } else {
-        setError(response.error || 'Failed to fetch students');
+        setError(response.error || t('admin.studentSelector.failedFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error fetching students:', err);
     } finally {
       setLoading(false);
@@ -106,7 +108,7 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
       <div className="modal" role="dialog" aria-modal="true">
         <div className="modal__dialog">
           <div className="modal__content">
-            <div className="loading">Loading students...</div>
+            <div className="loading">{t('admin.studentSelector.loadingStudents')}</div>
           </div>
         </div>
       </div>
@@ -117,26 +119,26 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Select Student</h2>
-          <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
+          <h2>{t('admin.studentSelector.title')}</h2>
+          <button className="icon-btn" aria-label={t('common.close')} onClick={onClose}>✕</button>
         </div>
 
         <div className="modal__content">
           <form onSubmit={handleSearch} className="search-form">
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="search">Search Students</label>
+                <label htmlFor="search">{t('admin.studentSelector.searchStudents')}</label>
                 <input
                   type="text"
                   id="search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name..."
+                  placeholder={t('admin.studentSelector.searchByName')}
                 />
               </div>
               <div className="form-group">
                 <button type="submit" className="btn btn--secondary">
-                  Search
+                  {t('common.search')}
                 </button>
               </div>
             </div>
@@ -149,11 +151,11 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
           )}
 
           <div className="student-list">
-            <h3>Students ({students.length} found)</h3>
+            <h3>{t('admin.studentSelector.studentsFound', { count: students.length })}</h3>
             
             {students.length === 0 ? (
               <div className="no-data">
-                No students found. {searchTerm && 'Try adjusting your search terms.'}
+                {t('admin.studentSelector.noStudentsFound')}
               </div>
             ) : (
               <>
@@ -166,9 +168,9 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
                     >
                       <div className="student-info">
                         <h4>{student.given_name} {student.middle_name} {student.surname}</h4>
-                        <p>ID: {student._id.substring(0, 8)}...</p>
-                        <p>Gender: {student.gender}</p>
-                        <p>Enrolled: {new Date(student.enrollment_date).toLocaleDateString()}</p>
+                        <p>{t('admin.studentSelector.id')} {student._id.substring(0, 8)}...</p>
+                        <p>{t('admin.studentSelector.gender')} {student.gender}</p>
+                        <p>{t('admin.studentSelector.enrolled')} {new Date(student.enrollment_date).toLocaleDateString()}</p>
                       </div>
                       <div className="selection-indicator">
                         {selectedStudent?._id === student._id ? '✓' : ''}
@@ -185,11 +187,11 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
                       disabled={currentPage === 1}
                       className="btn btn--secondary"
                     >
-                      ← Previous
+                      ← {t('common.previous')}
                     </button>
                     
                     <span className="pagination-info">
-                      Page {currentPage} of {totalPages}
+                      {t('common.pageOf', { current: currentPage, total: totalPages })}
                     </span>
                     
                     <button
@@ -197,7 +199,7 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
                       disabled={currentPage === totalPages}
                       className="btn btn--secondary"
                     >
-                      Next →
+                      {t('common.next')} →
                     </button>
                   </div>
                 )}
@@ -211,7 +213,7 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
               onClick={onClose}
               className="btn btn--secondary"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -219,7 +221,7 @@ export function StudentSelector({ onSelect, onClose, preselectedStudentId }: Stu
               disabled={!selectedStudent}
               className="btn btn--primary"
             >
-              Select Student
+              {t('admin.studentSelector.title')}
             </button>
           </div>
         </div>

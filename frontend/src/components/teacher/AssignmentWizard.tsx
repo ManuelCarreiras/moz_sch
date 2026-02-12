@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface AssignmentWizardProps {
@@ -62,6 +63,7 @@ interface Class {
 }
 
 const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess, editingAssignment }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -325,15 +327,15 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
       }
 
       if (response.success) {
-        alert(editingAssignment ? 'Assignment updated successfully!' : 'Assignment created successfully!');
+        alert(editingAssignment ? t('teacher.assignments.updateSuccess') : t('teacher.assignments.createSuccess'));
         onSuccess();
         onClose();
       } else {
-        alert('Error: ' + (response.message || response.error || 'Failed to save assignment'));
+        alert('Error: ' + (response.message || response.error || t('teacher.assignments.failedSave')));
       }
     } catch (error) {
       console.error('Error saving assignment:', error);
-      alert('Error saving assignment');
+      alert(t('teacher.assignments.failedSave'));
     } finally {
       setLoading(false);
     }
@@ -344,8 +346,8 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', textAlign: 'center' }}>
-          <h3>Loading...</h3>
-          <p>Fetching data, please wait...</p>
+          <h3>{t('teacher.assignments.loadingForm')}</h3>
+          <p>{t('teacher.assignments.loadingFormDesc')}</p>
         </div>
       </div>
     );
@@ -356,7 +358,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
           <div className="modal-header">
-            <h3>{editingAssignment ? 'Edit Assignment' : 'Create New Assignment'}</h3>
+            <h3>{editingAssignment ? t('teacher.assignments.editTitle') : t('teacher.assignments.createTitle')}</h3>
             <button className="modal-close" onClick={onClose}>×</button>
           </div>
 
@@ -381,7 +383,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
                   onChange={(e) => handleDepartmentChange(e.target.value)}
                   disabled={!!editingAssignment}
                 >
-                  <option value="">All Departments</option>
+                  <option value="">{t('common.allDepartments')}</option>
                   {(departments || []).map((dept) => (
                     <option key={dept._id} value={dept._id}>
                       {dept.department_name}
@@ -397,7 +399,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
                   onChange={(e) => handleSubjectChange(e.target.value)}
                   disabled={!!editingAssignment}
                 >
-                  <option value="">All Subjects</option>
+                  <option value="">{t('common.allSubjects')}</option>
                   {getFilteredSubjects().map((subject) => (
                     <option key={subject._id} value={subject._id}>
                       {subject.subject_name}
@@ -413,7 +415,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
                   onChange={(e) => handleYearChange(e.target.value)}
                   disabled={!!editingAssignment}
                 >
-                  <option value="">All Years</option>
+                  <option value="">{t('common.allYears')}</option>
                   {(schoolYears || []).map((year) => (
                     <option key={year._id} value={year._id}>
                       {year.year_name}
@@ -429,10 +431,10 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
                   onChange={(e) => handleTermChange(e.target.value)}
                   disabled={!!editingAssignment}
                 >
-                  <option value="">All Terms</option>
+                  <option value="">{t('common.allTerms')}</option>
                   {getFilteredTerms().map((term) => (
                     <option key={term._id} value={term._id}>
-                      Term {term.term_number}
+                      {t('common.termNumber', { number: term.term_number })}
                     </option>
                   ))}
                 </select>
@@ -441,14 +443,14 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
           </div>
 
           <div className="form-group">
-            <label>Class *</label>
+            <label>{t('teacher.assignments.classLabel')}</label>
             <select
               value={formData.class_id}
               onChange={(e) => handleClassChange(e.target.value)}
               required
               disabled={!!editingAssignment}
             >
-              <option value="">Select a class</option>
+              <option value="">{t('teacher.assignments.selectAClass')}</option>
               {(filteredClasses || []).map((cls) => (
                 <option key={cls._id} value={cls._id}>
                   {cls.class_name}
@@ -459,7 +461,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
           </div>
 
           <div className="form-group">
-            <label>Assignment Title *</label>
+            <label>{t('teacher.assignments.titleFieldLabel')}</label>
             <input
               type="text"
               value={formData.title}
@@ -477,7 +479,7 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
               onChange={(e) => setFormData({ ...formData, assessment_type_id: e.target.value })}
               required
             >
-              <option value="">Select type</option>
+              <option value="">{t('teacher.assignments.selectType')}</option>
               {(assessmentTypes || []).map((type) => (
                 <option key={type._id} value={type._id}>
                   {type.type_name}
@@ -545,9 +547,9 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 required
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="closed">Closed</option>
+                <option value="draft">{t('teacher.assignments.statusDraft')}</option>
+                <option value="published">{t('teacher.assignments.statusPublished')}</option>
+                <option value="closed">{t('teacher.assignments.statusClosed')}</option>
               </select>
               <small>Students see published only</small>
             </div>
@@ -555,10 +557,10 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
 
           <div className="modal-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Saving...' : (editingAssignment ? 'Update Assignment' : 'Create Assignment')}
+              {loading ? t('common.saving') : (editingAssignment ? t('teacher.assignments.updateAssignment') : t('teacher.assignments.createAssignment'))}
             </button>
           </div>
         </form>
@@ -570,9 +572,9 @@ const AssignmentWizard: React.FC<AssignmentWizardProps> = ({ onClose, onSuccess,
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <h3>Error Loading Form</h3>
-          <p>There was an error loading the assignment form. Please check the console for details.</p>
-          <button onClick={onClose}>Close</button>
+          <h3>{t('teacher.assignments.errorLoadingForm')}</h3>
+          <p>{t('teacher.assignments.errorLoadingFormDesc')}</p>
+          <button onClick={onClose}>{t('common.close')}</button>
         </div>
       </div>
     );

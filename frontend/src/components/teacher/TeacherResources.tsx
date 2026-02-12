@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface Resource {
@@ -39,6 +40,7 @@ interface YearLevel {
 }
 
 const TeacherResources: React.FC = () => {
+  const { t } = useTranslation();
   const [resources, setResources] = useState<Resource[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -153,7 +155,7 @@ const TeacherResources: React.FC = () => {
     e.preventDefault();
     
     if (!uploadFile || !uploadTitle || !uploadYearId || !uploadSubjectId) {
-      alert('Please fill in all required fields');
+      alert(t('teacher.resources.fillRequired'));
       return;
     }
 
@@ -169,7 +171,7 @@ const TeacherResources: React.FC = () => {
       );
 
       if (response.success) {
-        alert('Resource uploaded successfully!');
+        alert(t('teacher.resources.uploadSuccess'));
         setShowUploadModal(false);
         setUploadFile(null);
         setUploadTitle('');
@@ -179,11 +181,11 @@ const TeacherResources: React.FC = () => {
         setUploadYearLevelId('');
         loadResources();
       } else {
-        alert(response.error || 'Failed to upload resource');
+        alert(response.error || t('teacher.resources.failedUpload'));
       }
     } catch (error: any) {
       console.error('Error uploading resource:', error);
-      alert(error.message || 'Failed to upload resource');
+      alert(error.message || t('teacher.resources.failedUpload'));
     } finally {
       setUploading(false);
     }
@@ -198,14 +200,14 @@ const TeacherResources: React.FC = () => {
       const response = await apiService.deleteResource(resourceId);
       
       if (response.success) {
-        alert('Resource deleted successfully!');
+        alert(t('teacher.resources.deleteSuccess'));
         loadResources();
       } else {
-        alert(response.error || 'Failed to delete resource');
+        alert(response.error || t('teacher.resources.failedDelete'));
       }
     } catch (error: any) {
       console.error('Error deleting resource:', error);
-      alert(error.message || 'Failed to delete resource');
+      alert(error.message || t('teacher.resources.failedDelete'));
     }
   };
 
@@ -230,8 +232,8 @@ const TeacherResources: React.FC = () => {
     <div className="teacher-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h2>Resources</h2>
-          <p>Upload and manage teaching materials and educational resources.</p>
+          <h2>{t('teacher.resources.title')}</h2>
+          <p>{t('teacher.resources.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowUploadModal(true)}
@@ -245,7 +247,7 @@ const TeacherResources: React.FC = () => {
             fontSize: '14px',
           }}
         >
-          + Upload Resource
+          {t('teacher.resources.uploadResource')}
         </button>
       </div>
 
@@ -258,7 +260,7 @@ const TeacherResources: React.FC = () => {
       }}>
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            School Year
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -273,7 +275,7 @@ const TeacherResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>
                 {year.year_name}
@@ -284,7 +286,7 @@ const TeacherResources: React.FC = () => {
 
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            Subject
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -299,7 +301,7 @@ const TeacherResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>
                 {subject.subject_name}
@@ -310,7 +312,7 @@ const TeacherResources: React.FC = () => {
 
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            Grade
+            {t('teacher.resources.gradeLabel')}
           </label>
           <select
             value={filterYearLevel}
@@ -325,7 +327,7 @@ const TeacherResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Grades</option>
+            <option value="">{t('common.allGrades')}</option>
             {yearLevels
               .filter((level: YearLevel, index: number, self: YearLevel[]) => 
                 index === self.findIndex((l: YearLevel) => l.level_order === level.level_order)
@@ -346,7 +348,7 @@ const TeacherResources: React.FC = () => {
       {/* Resources List */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#ccc' }}>
-          Loading resources...
+          {t('teacher.resources.loadingResources')}
         </div>
       ) : resources.length === 0 ? (
         <div style={{ 
@@ -356,7 +358,7 @@ const TeacherResources: React.FC = () => {
           backgroundColor: '#2a2a3a',
           borderRadius: '8px',
         }}>
-          No resources found. Upload your first resource to get started!
+          {t('teacher.resources.noResources')}
         </div>
       ) : (
         <div style={{ 
@@ -425,7 +427,7 @@ const TeacherResources: React.FC = () => {
                       fontSize: '13px',
                     }}
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -462,12 +464,12 @@ const TeacherResources: React.FC = () => {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ margin: '0 0 20px 0', color: '#fff' }}>Upload Resource</h2>
+            <h2 style={{ margin: '0 0 20px 0', color: '#fff' }}>{t('teacher.resources.uploadTitle')}</h2>
             
             <form onSubmit={handleUpload}>
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  File *
+                  {t('teacher.resources.fileLabel')}
                 </label>
                 <input
                   type="file"
@@ -486,7 +488,7 @@ const TeacherResources: React.FC = () => {
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  Title *
+                  {t('teacher.resources.titleLabel')}
                 </label>
                 <input
                   type="text"
@@ -506,7 +508,7 @@ const TeacherResources: React.FC = () => {
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  Description
+                  {t('common.description')}
                 </label>
                 <textarea
                   value={uploadDescription}
@@ -526,7 +528,7 @@ const TeacherResources: React.FC = () => {
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  School Year *
+                  {t('teacher.resources.schoolYearLabel')}
                 </label>
                 <select
                   value={uploadYearId}
@@ -541,7 +543,7 @@ const TeacherResources: React.FC = () => {
                     borderRadius: '5px',
                   }}
                 >
-                  <option value="">Select Year</option>
+                  <option value="">{t('teacher.resources.selectYear')}</option>
                   {schoolYears.map((year) => (
                     <option key={year._id} value={year._id}>
                       {year.year_name}
@@ -552,7 +554,7 @@ const TeacherResources: React.FC = () => {
 
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  Subject *
+                  {t('teacher.resources.subjectLabel')}
                 </label>
                 <select
                   value={uploadSubjectId}
@@ -567,7 +569,7 @@ const TeacherResources: React.FC = () => {
                     borderRadius: '5px',
                   }}
                 >
-                  <option value="">Select Subject</option>
+                  <option value="">{t('teacher.resources.selectSubject')}</option>
                   {subjects.map((subject) => (
                     <option key={subject._id} value={subject._id}>
                       {subject.subject_name}
@@ -578,7 +580,7 @@ const TeacherResources: React.FC = () => {
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '14px' }}>
-                  Grade
+                  {t('teacher.resources.gradeLabel')}
                 </label>
                 <select
                   value={uploadYearLevelId}
@@ -592,7 +594,7 @@ const TeacherResources: React.FC = () => {
                     borderRadius: '5px',
                   }}
                 >
-                  <option value="">Select Grade (Optional)</option>
+                  <option value="">{t('teacher.resources.selectGrade')}</option>
                   {yearLevels
                     .filter((level: YearLevel, index: number, self: YearLevel[]) => 
                       index === self.findIndex((l: YearLevel) => l.level_order === level.level_order)
@@ -623,7 +625,7 @@ const TeacherResources: React.FC = () => {
                     cursor: uploading ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -637,7 +639,7 @@ const TeacherResources: React.FC = () => {
                     cursor: uploading ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {uploading ? 'Uploading...' : 'Upload'}
+                  {uploading ? t('common.uploading') : t('common.upload')}
                 </button>
               </div>
             </form>

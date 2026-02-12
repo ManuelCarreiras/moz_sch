@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import { useUser } from '../../contexts/AuthContext';
 
@@ -52,6 +53,7 @@ interface Teacher {
 }
 
 const TeacherStudents: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   const [students, setStudents] = useState<StudentPerformance[]>([]);
@@ -250,14 +252,14 @@ const TeacherStudents: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading students...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>{t('teacher.students.loadingStudents')}</div>;
   }
 
   return (
     <div className="teacher-students">
       <div style={{ marginBottom: '1.5rem' }}>
-        <h2>Students</h2>
-        <p>Access student information and track academic progress.</p>
+        <h2>{t('teacher.students.title')}</h2>
+        <p>{t('teacher.students.subtitle')}</p>
       </div>
 
       {/* Filters */}
@@ -274,7 +276,7 @@ const TeacherStudents: React.FC = () => {
         {isAdmin && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-              Teacher
+              {t('common.teacher')}
             </label>
             <select
               value={filterTeacher}
@@ -287,7 +289,7 @@ const TeacherStudents: React.FC = () => {
               }}
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
             >
-              <option value="">All Teachers</option>
+              <option value="">{t('common.allTeachers')}</option>
               {teachers.map((teacher) => (
                 <option key={teacher._id} value={teacher._id}>
                   {teacher.given_name} {teacher.surname}
@@ -299,7 +301,7 @@ const TeacherStudents: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            School Year
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -311,7 +313,7 @@ const TeacherStudents: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
             ))}
@@ -320,7 +322,7 @@ const TeacherStudents: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Term
+            {t('common.term')}
           </label>
           <select
             value={filterTerm}
@@ -332,16 +334,16 @@ const TeacherStudents: React.FC = () => {
             disabled={!filterYear}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {terms.map((term) => (
-              <option key={term._id} value={term._id}>Term {term.term_number}</option>
+              <option key={term._id} value={term._id}>{t('common.termNumber', { number: term.term_number })}</option>
             ))}
           </select>
         </div>
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Subject
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -351,7 +353,7 @@ const TeacherStudents: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>{subject.subject_name}</option>
             ))}
@@ -360,7 +362,7 @@ const TeacherStudents: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Class
+            {t('common.class')}
           </label>
           <select
             value={filterClass}
@@ -368,7 +370,7 @@ const TeacherStudents: React.FC = () => {
             disabled={!filterYear || (!filterTerm && !filterSubject)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Classes</option>
+            <option value="">{t('common.allClasses')}</option>
             {classes.map((cls) => (
               <option key={cls._id} value={cls._id}>{cls.class_name}</option>
             ))}
@@ -387,7 +389,7 @@ const TeacherStudents: React.FC = () => {
               }}
               style={{ width: '100%' }}
             >
-              Clear Filters
+              {t('common.clearFilters')}
             </button>
           </div>
         )}
@@ -403,25 +405,25 @@ const TeacherStudents: React.FC = () => {
           borderRadius: '4px' 
         }}>
           <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '1rem' }}>
-            {loading ? 'Loading students...' : 'No students found. Try adjusting your filters.'}
+            {loading ? t('teacher.students.loadingStudents') : t('teacher.students.noStudents')}
           </p>
         </div>
       ) : (
         <>
           <div style={{ marginBottom: '1rem', color: '#fff', fontSize: '0.9rem' }}>
-            Showing {students.length} student{students.length !== 1 ? 's' : ''}
+            {t('teacher.students.showingStudents', { count: students.length })}
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table" style={{ width: '100%' }}>
               <thead>
                 <tr>
-                  <th>Student Name</th>
-                  <th>Email</th>
-                  <th>Homework Completion</th>
-                  <th>Attendance Ratio</th>
-                  <th>Test Average</th>
-                  <th>Subjects</th>
-                  <th>Classes</th>
+                  <th>{t('teacher.students.studentName')}</th>
+                  <th>{t('common.email')}</th>
+                  <th>{t('teacher.students.homeworkCompletion')}</th>
+                  <th>{t('teacher.students.attendanceRatio')}</th>
+                  <th>{t('teacher.students.testAverage')}</th>
+                  <th>{t('teacher.students.subjectsCol')}</th>
+                  <th>{t('teacher.students.classesCol')}</th>
                 </tr>
               </thead>
               <tbody>

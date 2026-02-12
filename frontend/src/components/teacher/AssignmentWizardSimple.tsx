@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AssignmentWizardSimpleProps {
   onClose: () => void;
 }
 
 const AssignmentWizardSimple: React.FC<AssignmentWizardSimpleProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   console.log('AssignmentWizardSimple rendering');
 
   return (
@@ -38,7 +40,7 @@ const AssignmentWizardSimple: React.FC<AssignmentWizardSimpleProps> = ({ onClose
       >
         <h3>Test Modal</h3>
         <p>If you see this, the modal rendering works!</p>
-        <button onClick={onClose} style={{ marginTop: '1rem' }}>Close</button>
+        <button onClick={onClose} style={{ marginTop: '1rem' }}>{t('common.close')}</button>
       </div>
     </div>
   );

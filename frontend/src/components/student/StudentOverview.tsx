@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import { useUser } from '../../contexts/AuthContext';
 
@@ -56,6 +57,7 @@ interface StudentInfo {
 }
 
 const StudentOverview: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdminOrSecretary = user?.role === 'admin' || user?.role === 'secretary';
   const [studentMetrics, setStudentMetrics] = useState<StudentMetrics | null>(null);
@@ -505,14 +507,14 @@ const StudentOverview: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading overview...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>{t('student.overview.loadingOverview')}</div>;
   }
 
   return (
     <div className="student-overview" style={{ paddingBottom: '2rem', overflow: 'visible' }}>
       <div style={{ marginBottom: '1.5rem' }}>
-        <h2>Overview</h2>
-        <p>View your academic performance metrics</p>
+        <h2>{t('student.overview.title')}</h2>
+        <p>{t('student.overview.subtitle')}</p>
       </div>
 
       {/* Filters */}
@@ -528,7 +530,7 @@ const StudentOverview: React.FC = () => {
       }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            School Year
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -540,7 +542,7 @@ const StudentOverview: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
             ))}
@@ -549,7 +551,7 @@ const StudentOverview: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Term
+            {t('common.term')}
           </label>
           <select
             value={filterTerm}
@@ -561,16 +563,16 @@ const StudentOverview: React.FC = () => {
             disabled={!filterYear}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {terms.map((term) => (
-              <option key={term._id} value={term._id}>Term {term.term_number}</option>
+              <option key={term._id} value={term._id}>{t('common.termNumber', { number: term.term_number })}</option>
             ))}
           </select>
         </div>
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Subject
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -580,7 +582,7 @@ const StudentOverview: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>{subject.subject_name}</option>
             ))}
@@ -589,7 +591,7 @@ const StudentOverview: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Class
+            {t('common.class')}
           </label>
           <select
             value={filterClass}
@@ -600,7 +602,7 @@ const StudentOverview: React.FC = () => {
             disabled={!filterYear || (!filterTerm && !filterSubject)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Classes</option>
+            <option value="">{t('common.allClasses')}</option>
             {classes.map((cls) => (
               <option key={cls._id} value={cls.class_name}>{cls.class_name}</option>
             ))}
@@ -611,7 +613,7 @@ const StudentOverview: React.FC = () => {
         {isAdminOrSecretary && (
           <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Student
+            {t('common.student')}
           </label>
           <select
             value={selectedStudent?._id || ''}
@@ -623,7 +625,7 @@ const StudentOverview: React.FC = () => {
             disabled={!filterClass || students.length === 0}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">Select a Student</option>
+            <option value="">{t('common.selectStudent')}</option>
             {students.map((student) => (
               <option key={student._id} value={student._id}>
                 {student.given_name} {student.surname}
@@ -643,11 +645,11 @@ const StudentOverview: React.FC = () => {
             gap: '2rem', 
             marginBottom: '2rem' 
           }}>
-            <CircularProgress value={studentMetrics.homework_completion_ratio} max={100} label="Homework Completion" />
-            <CircularProgress value={studentMetrics.attendance_ratio} max={100} label="Attendance Ratio" />
-            <CircularProgress value={studentMetrics.test_average} max={100} label="Test Average" />
+            <CircularProgress value={studentMetrics.homework_completion_ratio} max={100} label={t('student.overview.homeworkCompletion')} />
+            <CircularProgress value={studentMetrics.attendance_ratio} max={100} label={t('student.overview.attendanceRatio')} />
+            <CircularProgress value={studentMetrics.test_average} max={100} label={t('student.overview.testAverage')} />
             {studentMetrics.term_grade_average !== null && studentMetrics.term_grade_average !== undefined && (
-              <CircularProgress value={studentMetrics.term_grade_average} max={20} label="Term Grade" isTermGrade={true} />
+              <CircularProgress value={studentMetrics.term_grade_average} max={20} label={t('student.overview.termGrade')} isTermGrade={true} />
             )}
           </div>
 
@@ -662,7 +664,7 @@ const StudentOverview: React.FC = () => {
               overflow: 'visible'
             }}>
               <h3 style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.5rem' }}>
-                Class Test Score Distribution
+                {t('student.overview.classTestScoreDistribution')}
                 {studentPosition && (
                   <span style={{ fontSize: '1rem', color: '#aaa', marginLeft: '1rem', fontWeight: 'normal' }}>
                     (You are ranked #{studentPosition.rank} of {studentPosition.total_students} - {studentPosition.percentile.toFixed(1)}th percentile)
@@ -947,7 +949,7 @@ const StudentOverview: React.FC = () => {
               borderRadius: '8px',
               color: '#aaa'
             }}>
-              No class test scores available yet
+              {t('student.overview.noTestScores')}
             </div>
           )}
 
@@ -962,7 +964,7 @@ const StudentOverview: React.FC = () => {
               overflow: 'visible'
             }}>
               <h3 style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.5rem' }}>
-                Class Term Grade Distribution (0-20 Scale)
+                {t('student.overview.classTermGradeDistribution')}
                 {termGradePosition && (
                   <span style={{ fontSize: '1rem', color: '#aaa', marginLeft: '1rem', fontWeight: 'normal' }}>
                     (You are ranked #{termGradePosition.rank} of {termGradePosition.total_students} - {termGradePosition.percentile.toFixed(1)}th percentile)
@@ -1241,7 +1243,7 @@ const StudentOverview: React.FC = () => {
           borderRadius: '8px',
           color: '#aaa'
         }}>
-          No performance data available yet
+          {t('student.overview.noPerformanceData')}
         </div>
       ) : isAdminOrSecretary && !selectedStudent && students.length === 0 && filterClass ? (
         <div style={{
@@ -1251,7 +1253,7 @@ const StudentOverview: React.FC = () => {
           borderRadius: '8px',
           color: '#aaa'
         }}>
-          No students found in this class. Please select a different class.
+          {t('student.overview.noStudentsInClass')}
         </div>
       ) : isAdminOrSecretary && !filterClass ? (
         <div style={{
@@ -1261,7 +1263,7 @@ const StudentOverview: React.FC = () => {
           borderRadius: '8px',
           color: '#aaa'
         }}>
-          Please select a class to view student overview.
+          {t('student.overview.selectClassToView')}
         </div>
       ) : null}
     </div>

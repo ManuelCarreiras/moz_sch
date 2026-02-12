@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Assignment {
   _id: string;
@@ -18,6 +19,7 @@ interface StudentAssignmentCalendarProps {
 }
 
 const StudentAssignmentCalendar: React.FC<StudentAssignmentCalendarProps> = ({ assignments }) => {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Get assignments grouped by date
@@ -95,13 +97,13 @@ const StudentAssignmentCalendar: React.FC<StudentAssignmentCalendarProps> = ({ a
         borderRadius: '4px'
       }}>
         <button className="btn btn-secondary" onClick={previousMonth}>
-          ← Previous
+          {t('student.calendar.previous')}
         </button>
         <h3 style={{ margin: 0 }}>
           {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </h3>
         <button className="btn btn-secondary" onClick={nextMonth}>
-          Next →
+          {t('student.calendar.next')}
         </button>
       </div>
 
@@ -115,7 +117,7 @@ const StudentAssignmentCalendar: React.FC<StudentAssignmentCalendarProps> = ({ a
         overflow: 'hidden'
       }}>
         {/* Day Headers */}
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+        {[t('common.sun'), t('common.mon'), t('common.tue'), t('common.wed'), t('common.thu'), t('common.fri'), t('common.sat')].map(day => (
           <div key={day} style={{ 
             padding: '0.5rem', 
             background: 'rgba(255, 255, 255, 0.1)', 
@@ -195,10 +197,10 @@ const StudentAssignmentCalendar: React.FC<StudentAssignmentCalendarProps> = ({ a
         gap: '1.5rem',
         fontSize: '0.85rem'
       }}>
-        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#dc3545', marginRight: '0.5rem', borderRadius: '2px' }}></span> Not Submitted</div>
-        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#ffc107', marginRight: '0.5rem', borderRadius: '2px' }}></span> Submitted</div>
-        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#28a745', marginRight: '0.5rem', borderRadius: '2px' }}></span> Graded</div>
-        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#e74c3c', marginRight: '0.5rem', borderRadius: '2px' }}></span> Late</div>
+        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#dc3545', marginRight: '0.5rem', borderRadius: '2px' }}></span> {t('student.calendar.notSubmitted')}</div>
+        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#ffc107', marginRight: '0.5rem', borderRadius: '2px' }}></span> {t('student.calendar.submitted')}</div>
+        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#28a745', marginRight: '0.5rem', borderRadius: '2px' }}></span> {t('student.calendar.graded')}</div>
+        <div><span style={{ display: 'inline-block', width: '12px', height: '12px', background: '#e74c3c', marginRight: '0.5rem', borderRadius: '2px' }}></span> {t('student.calendar.lateStatus')}</div>
       </div>
     </div>
   );

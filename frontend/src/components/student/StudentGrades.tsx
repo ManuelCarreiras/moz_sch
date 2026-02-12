@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import { useUser } from '../../contexts/AuthContext';
 
@@ -83,6 +84,7 @@ interface StudentInfo {
 }
 
 const StudentGrades: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   const [assignments, setAssignments] = useState<StudentAssignment[]>([]);
@@ -666,7 +668,7 @@ const StudentGrades: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading grades...</div>;
+    return <div>{t('student.grades.loadingGrades')}</div>;
   }
 
   console.log('[StudentGrades] RENDER - assignments state:', assignments.length);
@@ -682,9 +684,9 @@ const StudentGrades: React.FC = () => {
 
   return (
     <div className="student-grades">
-      <h2>Grades</h2>
+      <h2>{t('student.grades.title')}</h2>
       <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
-        View grades and academic performance across all subjects
+        {t('student.grades.subtitle')}
       </p>
 
       {/* Filters */}
@@ -696,7 +698,7 @@ const StudentGrades: React.FC = () => {
       }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            School Year:
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -710,7 +712,7 @@ const StudentGrades: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map(year => (
               <option key={year._id} value={year._id}>
                 {year.year_name}
@@ -721,7 +723,7 @@ const StudentGrades: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            Term:
+            {t('common.term')}
           </label>
           <select
             value={filterTerm}
@@ -738,10 +740,10 @@ const StudentGrades: React.FC = () => {
               cursor: !filterYear ? 'not-allowed' : 'pointer'
             }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {getFilteredTerms().map(term => (
               <option key={term._id} value={term._id}>
-                Term {term.term_number}
+                {t('common.termNumber', { number: term.term_number })}
               </option>
             ))}
           </select>
@@ -749,7 +751,7 @@ const StudentGrades: React.FC = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            Class:
+            {t('common.class')}
           </label>
           <select
             value={filterClass}
@@ -766,7 +768,7 @@ const StudentGrades: React.FC = () => {
               cursor: !filterTerm ? 'not-allowed' : 'pointer'
             }}
           >
-            <option value="">All Classes</option>
+            <option value="">{t('common.allClasses')}</option>
             {getFilteredClasses().map(cls => (
               <option key={cls.class_id} value={cls.class_name}>
                 {cls.class_name}
@@ -779,7 +781,7 @@ const StudentGrades: React.FC = () => {
         {(!isAdmin || selectedStudent) && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-              Subject:
+              {t('common.subject')}
             </label>
             <select
               value={filterSubject}
@@ -796,7 +798,7 @@ const StudentGrades: React.FC = () => {
                 cursor: !filterClass ? 'not-allowed' : 'pointer'
               }}
             >
-              <option value="">All Subjects</option>
+              <option value="">{t('common.allSubjects')}</option>
               {getFilteredSubjects().map(subject => (
                 <option key={subject._id} value={subject.subject_name}>
                   {subject.subject_name}
@@ -809,7 +811,7 @@ const StudentGrades: React.FC = () => {
         {/* Assessment Type filter */}
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-            Type:
+            {t('common.type')}
           </label>
           <select
             value={filterAssessmentType}
@@ -823,7 +825,7 @@ const StudentGrades: React.FC = () => {
               minWidth: '150px'
             }}
           >
-            <option value="">All Types</option>
+            <option value="">{t('common.allTypes')}</option>
             {assessmentTypes.map((type) => (
               <option key={type._id} value={type._id}>
                 {type.type_name}
@@ -836,7 +838,7 @@ const StudentGrades: React.FC = () => {
         {isAdmin && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
-              Student:
+              {t('common.student')}
             </label>
             <select
               value={selectedStudent?._id || ''}
@@ -857,7 +859,7 @@ const StudentGrades: React.FC = () => {
                 cursor: !filterClass || students.length === 0 ? 'not-allowed' : 'pointer'
               }}
             >
-              <option value="">Select a Student</option>
+              <option value="">{t('common.selectStudent')}</option>
               {students.map(student => (
                 <option key={student._id} value={student._id}>
                   {student.given_name} {student.surname}
@@ -889,7 +891,7 @@ const StudentGrades: React.FC = () => {
                 fontSize: '0.9rem'
               }}
             >
-              Clear Filters
+              {t('common.clearFilters')}
             </button>
           </div>
         )}
@@ -899,7 +901,7 @@ const StudentGrades: React.FC = () => {
       {/* Term Grades by Subject Section */}
       {(!isAdmin || selectedStudent) && filterTerm && (
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>📊 Term Grades by Subject</h3>
+          <h3 style={{ marginBottom: '1rem' }}>📊 {t('student.grades.termGradesBySubject')}</h3>
         
           {subjectGrades.length === 0 ? (
             <div style={{ 
@@ -911,14 +913,14 @@ const StudentGrades: React.FC = () => {
             }}>
               {filterTerm ? (
                 <div>
-                  <p>No grades found for this term.</p>
+                  <p>{t('student.grades.noGradesForTerm')}</p>
                   <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--muted)' }}>
-                    Term grades are calculated automatically when assignments are graded.
-                    {filterSubject && ' Make sure grading criteria are set up for this subject.'}
+                    {t('student.grades.gradesAutoCalculated')}
+                    {filterSubject && ` ${t('student.grades.setupCriteria')}`}
                   </p>
                 </div>
               ) : (
-                'Please select a term to view grades'
+                t('student.grades.selectTermToView')
               )}
             </div>
           ) : (
@@ -932,12 +934,12 @@ const StudentGrades: React.FC = () => {
               }}>
                 <thead>
                   <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Subject</th>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Tests</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Homework</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Attendance</th>
-                    <th style={{ padding: '1rem', textAlign: 'center', background: 'rgba(0, 123, 255, 0.1)' }}>Final Term Grade</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>{t('student.grades.subjectCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>{t('student.grades.classCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.testsCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.homeworkCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.attendanceCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center', background: 'rgba(0, 123, 255, 0.1)' }}>{t('student.grades.finalTermGrade')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -981,7 +983,7 @@ const StudentGrades: React.FC = () => {
                               {sg.final_term_grade.toFixed(2)} / 20
                             </span>
                           ) : (
-                            <span style={{ color: 'var(--muted)' }}>Not calculated</span>
+                            <span style={{ color: 'var(--muted)' }}>{t('student.grades.notCalculated')}</span>
                           )}
                         </td>
                       </tr>
@@ -1005,7 +1007,7 @@ const StudentGrades: React.FC = () => {
               padding: '0.5rem',
               cursor: 'pointer'
             }}>
-              📝 Individual Assignment Grades ({filteredAssignments.length})
+              📝 {t('student.grades.individualGrades', { count: filteredAssignments.length })}
             </summary>
         
             <div style={{ overflowX: 'auto' }}>
@@ -1018,13 +1020,13 @@ const StudentGrades: React.FC = () => {
               }}>
                 <thead>
                   <tr style={{ background: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Assignment</th>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Subject</th>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Class</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Year</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Score</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Percentage</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Graded On</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>{t('student.grades.assignmentCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>{t('student.grades.subjectCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'left' }}>{t('student.grades.classCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.yearCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.scoreCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.percentageCol')}</th>
+                    <th style={{ padding: '1rem', textAlign: 'center' }}>{t('student.grades.gradedOn')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1082,12 +1084,12 @@ const StudentGrades: React.FC = () => {
           borderRadius: '8px',
           fontSize: '0.9rem'
         }}>
-          <strong>Grade Scale (0-20):</strong>
+          <strong>{t('student.grades.gradeScale')}</strong>
           <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ color: '#28a745' }}>■ 16-20: Excellent</span>
-            <span style={{ color: '#17a2b8' }}>■ 14-15.9: Good</span>
-            <span style={{ color: '#ffc107' }}>■ 10-13.9: Satisfactory</span>
-            <span style={{ color: '#dc3545' }}>■ 0-9.9: Needs Improvement</span>
+            <span style={{ color: '#28a745' }}>■ {t('student.grades.excellent')}</span>
+            <span style={{ color: '#17a2b8' }}>■ {t('student.grades.good')}</span>
+            <span style={{ color: '#ffc107' }}>■ {t('student.grades.satisfactory')}</span>
+            <span style={{ color: '#dc3545' }}>■ {t('student.grades.needsImprovement')}</span>
           </div>
         </div>
       )}

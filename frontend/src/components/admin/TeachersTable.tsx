@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 import { TeacherWizard } from './TeacherWizard';
 
@@ -14,6 +15,7 @@ export interface Teacher {
 }
 
 export function TeachersTable() {
+  const { t } = useTranslation();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,10 +40,10 @@ export function TeachersTable() {
         const teacherData = (response.data as any).message || response.data;
         setTeachers(Array.isArray(teacherData) ? teacherData : []);
       } else {
-        setError(response.error || 'Failed to load teachers');
+        setError(response.error || t('admin.teachersTable.failedLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading teachers:', err);
     } finally {
       setLoading(false);
@@ -61,7 +63,7 @@ export function TeachersTable() {
       const validExtensions = ['.xlsx', '.xls'];
       const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
       if (!validExtensions.includes(fileExtension)) {
-        setError('Invalid file type. Please upload an Excel file (.xlsx or .xls)');
+        setError(t('admin.teachersTable.invalidFile'));
         return;
       }
       setImportFile(file);
@@ -71,7 +73,7 @@ export function TeachersTable() {
 
   const handleImportSubmit = async () => {
     if (!importFile) {
-      setError('Please select a file to import');
+      setError(t('admin.teachersTable.selectFilePlease'));
       return;
     }
 
@@ -91,10 +93,10 @@ export function TeachersTable() {
           setImportResult(null);
         }, 3000);
       } else {
-        setError(response.error || 'Failed to import teachers');
+        setError(response.error || t('admin.teachersTable.failedImport'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error importing teachers:', err);
     } finally {
       setImporting(false);
@@ -115,7 +117,7 @@ export function TeachersTable() {
   };
 
   const handleDeleteTeacher = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this teacher?')) {
+    if (!confirm(t('admin.teachersTable.confirmDelete'))) {
       return;
     }
 
@@ -124,10 +126,10 @@ export function TeachersTable() {
       if (response.success) {
         await loadTeachers(); // Reload the list
       } else {
-        setError(response.error || 'Failed to delete teacher');
+        setError(response.error || t('admin.teachersTable.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting teacher:', err);
     }
   };
@@ -142,7 +144,7 @@ export function TeachersTable() {
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading teachers...
+        {t('admin.teachersTable.loadingTeachers')}
       </div>
     );
   }
@@ -151,8 +153,8 @@ export function TeachersTable() {
     <div className="teachers-table">
       <div className="table-header">
         <div className="table-header__title">
-          <h2>Teacher Management</h2>
-          <p>Manage teacher profiles, assignments, and department information</p>
+          <h2>{t('admin.teachersTable.title')}</h2>
+          <p>{t('admin.teachersTable.subtitle')}</p>
         </div>
         <div className="table-header__actions">
           <button 
@@ -160,13 +162,13 @@ export function TeachersTable() {
             onClick={handleImportClick}
             style={{ marginRight: 'var(--space-sm)' }}
           >
-            📥 Import from Excel
+            📥 {t('admin.teachersTable.importExcel')}
           </button>
           <button 
             className="btn btn--primary"
             onClick={() => setShowCreateTeacher(true)}
           >
-            ➕ Add New Teacher
+            ➕ {t('admin.teachersTable.addNew')}
           </button>
         </div>
       </div>
@@ -181,19 +183,19 @@ export function TeachersTable() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Gender</th>
-              <th>Department</th>
-              <th>Actions</th>
+              <th>{t('common.name')}</th>
+              <th>{t('common.email')}</th>
+              <th>{t('common.phone')}</th>
+              <th>{t('common.gender')}</th>
+              <th>{t('common.department')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {teachers.length === 0 ? (
               <tr>
                 <td colSpan={6} className="empty-state">
-                  No teachers found.
+                  {t('admin.teachersTable.noTeachers')}
                 </td>
               </tr>
             ) : (
@@ -212,16 +214,16 @@ export function TeachersTable() {
                     </span>
                     {teacher.gender}
                   </td>
-                  <td>{teacher.department_name || 'Not Assigned'}</td>
+                  <td>{teacher.department_name || t('common.notAssigned')}</td>
                   <td>
                     <div className="action-buttons">
-                      <button className="btn btn--small btn--secondary">Edit</button>
+                      <button className="btn btn--small btn--secondary">{t('common.edit')}</button>
                       <button 
                         className="btn btn--small btn--danger"
                         onClick={() => handleDeleteTeacher(teacher._id)}
-                        title="Delete teacher"
+                        title={t('admin.teachersTable.deleteTeacher')}
                       >
-                        Delete
+                        {t('common.delete')}
                       </button>
                     </div>
                   </td>
@@ -265,23 +267,23 @@ export function TeachersTable() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ marginTop: 0, marginBottom: 'var(--space-md)' }}>
-              Import Teachers from Excel
+              {t('admin.teachersTable.importTitle')}
             </h2>
             
             <div style={{ marginBottom: 'var(--space-md)' }}>
               <p style={{ color: 'var(--muted)', marginBottom: 'var(--space-md)' }}>
-                Upload an Excel file (.xlsx or .xls) with the following columns:
+                {t('admin.teachersTable.importDesc')}
               </p>
               <ul style={{ 
                 color: 'var(--muted)', 
                 marginLeft: 'var(--space-lg)',
                 marginBottom: 'var(--space-md)'
               }}>
-                <li><strong>given_name</strong> - First name (required)</li>
-                <li><strong>surname</strong> - Last name (required)</li>
-                <li><strong>gender</strong> - Male or Female (required)</li>
-                <li><strong>email_address</strong> - Email address (required, must be unique)</li>
-                <li><strong>phone_number</strong> - Phone number (required)</li>
+                <li><strong>given_name</strong> - {t('admin.teachersTable.importGivenName')}</li>
+                <li><strong>surname</strong> - {t('admin.teachersTable.importSurname')}</li>
+                <li><strong>gender</strong> - {t('admin.teachersTable.importGender')}</li>
+                <li><strong>email_address</strong> - {t('admin.teachersTable.importEmail')}</li>
+                <li><strong>phone_number</strong> - {t('admin.teachersTable.importPhone')}</li>
               </ul>
             </div>
 
@@ -313,14 +315,14 @@ export function TeachersTable() {
               }}>
                 <strong>{importResult.message}</strong>
                 <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--text-sm)' }}>
-                  Created: {importResult.summary.total_created} | 
-                  Failed: {importResult.summary.total_failed} | 
-                  Skipped: {importResult.summary.total_skipped}
+                  {t('admin.teachersTable.created')} {importResult.summary.total_created} | 
+                  {t('admin.teachersTable.failed')} {importResult.summary.total_failed} | 
+                  {t('admin.teachersTable.skipped')} {importResult.summary.total_skipped}
                 </div>
                 {importResult.failed && importResult.failed.length > 0 && (
                   <details style={{ marginTop: 'var(--space-sm)' }}>
                     <summary style={{ cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
-                      View failed rows
+                      {t('admin.teachersTable.viewFailed')}
                     </summary>
                     <ul style={{ marginLeft: 'var(--space-lg)', fontSize: 'var(--text-sm)' }}>
                       {importResult.failed.map((item: any, idx: number) => (
@@ -332,7 +334,7 @@ export function TeachersTable() {
                 {importResult.skipped && importResult.skipped.length > 0 && (
                   <details style={{ marginTop: 'var(--space-sm)' }}>
                     <summary style={{ cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
-                      View skipped rows
+                      {t('admin.teachersTable.viewSkipped')}
                     </summary>
                     <ul style={{ marginLeft: 'var(--space-lg)', fontSize: 'var(--text-sm)' }}>
                       {importResult.skipped.map((item: any, idx: number) => (
@@ -350,7 +352,7 @@ export function TeachersTable() {
                 marginBottom: 'var(--space-sm)',
                 fontWeight: '500'
               }}>
-                Select Excel File:
+                {t('admin.teachersTable.selectFile')}
               </label>
               <input
                 type="file"
@@ -372,7 +374,7 @@ export function TeachersTable() {
                   fontSize: 'var(--text-sm)',
                   color: 'var(--muted)'
                 }}>
-                  Selected: {importFile.name} ({(importFile.size / 1024).toFixed(2)} KB)
+                  {t('admin.teachersTable.selected', { name: importFile.name, size: (importFile.size / 1024).toFixed(2) })}
                 </div>
               )}
             </div>
@@ -387,14 +389,14 @@ export function TeachersTable() {
                 onClick={handleCloseImportModal}
                 disabled={importing}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn--primary"
                 onClick={handleImportSubmit}
                 disabled={!importFile || importing}
               >
-                {importing ? 'Importing...' : 'Import Teachers'}
+                {importing ? t('common.importing') : t('admin.teachersTable.importTeachers')}
               </button>
             </div>
           </div>

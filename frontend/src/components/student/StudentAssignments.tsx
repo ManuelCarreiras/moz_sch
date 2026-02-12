@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 import StudentAssignmentCalendar from './StudentAssignmentCalendar';
 import { useUser } from '../../contexts/AuthContext';
@@ -60,6 +61,7 @@ interface AssessmentType {
 type ViewMode = 'list' | 'calendar';
 
 const StudentAssignments: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   
@@ -295,15 +297,15 @@ const StudentAssignments: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading assignments...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>{t('student.assignments.loadingAssignments')}</div>;
   }
 
   return (
     <div className="student-assignments">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h2>My Assignments</h2>
-          <p>Track your homework and project deadlines</p>
+          <h2>{t('student.assignments.title')}</h2>
+          <p>{t('student.assignments.subtitle')}</p>
         </div>
         
         {/* View Toggle */}
@@ -312,13 +314,13 @@ const StudentAssignments: React.FC = () => {
             className={`btn ${viewMode === 'list' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('list')}
           >
-            📋 List View
+            📋 {t('student.assignments.listView')}
           </button>
           <button
             className={`btn ${viewMode === 'calendar' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setViewMode('calendar')}
           >
-            📅 Calendar View
+            📅 {t('student.assignments.calendarView')}
           </button>
         </div>
       </div>
@@ -335,7 +337,7 @@ const StudentAssignments: React.FC = () => {
         borderRadius: '4px'
       }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>School Year</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.schoolYear')}</label>
           <select
             value={filterYear}
             onChange={(e) => {
@@ -344,7 +346,7 @@ const StudentAssignments: React.FC = () => {
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
             ))}
@@ -352,7 +354,7 @@ const StudentAssignments: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Term</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.term')}</label>
           <select
             value={filterTerm}
             onChange={(e) => setFilterTerm(e.target.value)}
@@ -364,21 +366,21 @@ const StudentAssignments: React.FC = () => {
               opacity: !filterYear ? 0.5 : 1
             }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {getFilteredTerms().map((term) => (
-              <option key={term._id} value={term._id}>Term {term.term_number}</option>
+              <option key={term._id} value={term._id}>{t('common.termNumber', { number: term.term_number })}</option>
             ))}
           </select>
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Subject</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.subject')}</label>
           <select
             value={filterSubject}
             onChange={(e) => setFilterSubject(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>{subject.subject_name}</option>
             ))}
@@ -387,13 +389,13 @@ const StudentAssignments: React.FC = () => {
 
         {isAdmin && (
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Class</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.class')}</label>
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
             >
-              <option value="">All Classes</option>
+              <option value="">{t('common.allClasses')}</option>
               {classes.map((cls) => (
                 <option key={cls.class_id} value={cls.class_name}>{cls.class_name}</option>
               ))}
@@ -402,13 +404,13 @@ const StudentAssignments: React.FC = () => {
         )}
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Type</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.type')}</label>
           <select
             value={filterAssessmentType}
             onChange={(e) => setFilterAssessmentType(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Types</option>
+            <option value="">{t('common.allTypes')}</option>
             {assessmentTypes.map((type) => (
               <option key={type._id} value={type._id}>{type.type_name}</option>
             ))}
@@ -416,17 +418,17 @@ const StudentAssignments: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>Status</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.status')}</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Statuses</option>
-            <option value="not_submitted">Not Submitted</option>
-            <option value="submitted">Submitted</option>
-            <option value="graded">Graded</option>
-            <option value="late">Late</option>
+            <option value="">{t('common.allStatuses')}</option>
+            <option value="not_submitted">{t('student.assignments.notSubmitted')}</option>
+            <option value="submitted">{t('student.assignments.submitted')}</option>
+            <option value="graded">{t('student.assignments.graded')}</option>
+            <option value="late">{t('student.assignments.lateStatus')}</option>
           </select>
         </div>
 
@@ -444,7 +446,7 @@ const StudentAssignments: React.FC = () => {
               }}
               style={{ width: '100%' }}
             >
-              Clear Filters
+              {t('common.clearFilters')}
             </button>
           </div>
         )}
@@ -463,8 +465,8 @@ const StudentAssignments: React.FC = () => {
           }}>
             <p style={{ fontSize: '1.1rem', color: '#ccc', marginBottom: '1rem' }}>
               {assignments.length === 0 
-                ? "No assignments yet. Check back later!" 
-                : "No assignments match your filters."}
+                ? t('student.assignments.noAssignments')
+                : t('student.assignments.noAssignmentsFilter')}
             </p>
           </div>
         ) : (
@@ -472,12 +474,12 @@ const StudentAssignments: React.FC = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Assignment</th>
-                  <th>Subject</th>
-                  <th>Class</th>
-                  <th>Type</th>
-                  <th>Due Date</th>
-                  <th>Status</th>
+                  <th>{t('student.assignments.assignmentCol')}</th>
+                  <th>{t('student.assignments.subjectCol')}</th>
+                  <th>{t('student.assignments.classCol')}</th>
+                  <th>{t('student.assignments.typeCol')}</th>
+                  <th>{t('student.assignments.dueDateCol')}</th>
+                  <th>{t('student.assignments.statusCol')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -511,10 +513,10 @@ const StudentAssignments: React.FC = () => {
                             marginTop: '0.25rem'
                           }}>
                             {isOverdue 
-                              ? `${Math.abs(daysUntil)} days overdue` 
+                              ? t('student.assignments.daysOverdue', { count: Math.abs(daysUntil) })
                               : daysUntil === 0 
-                                ? 'Due today!' 
-                                : `${daysUntil} days left`}
+                                ? t('student.assignments.dueToday')
+                                : t('student.assignments.daysLeft', { count: daysUntil })}
                           </div>
                         )}
                       </td>
@@ -526,7 +528,7 @@ const StudentAssignments: React.FC = () => {
             </table>
             
             <div style={{ marginTop: '1rem', color: '#aaa', fontSize: '0.9rem' }}>
-              Showing {filteredAssignments.length} of {assignments.length} assignments
+              {t('student.assignments.showingAssignments', { count: filteredAssignments.length, total: assignments.length })}
             </div>
           </>
         )

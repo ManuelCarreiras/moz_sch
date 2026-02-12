@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../services/apiService';
 import { useUser } from '../contexts/AuthContext';
 
@@ -58,6 +59,7 @@ interface Teacher {
 }
 
 export function TeacherSchedule() {
+  const { t } = useTranslation();
   const user = useUser();
   const isAdmin = user?.role === 'admin';
   const [timetable, setTimetable] = useState<TimetableData | null>(null);
@@ -90,7 +92,7 @@ export function TeacherSchedule() {
       setError(null);
 
       if (!isAdmin && !user?.id) {
-        setError('Unable to identify teacher. Please contact your administrator.');
+        setError(t('teacher.schedule.unableToIdentify'));
         setLoading(false);
         return;
       }
@@ -119,10 +121,10 @@ export function TeacherSchedule() {
           setAllAvailableYears(data.available_years || []);
         }
       } else {
-        setError('Unable to load timetable.');
+        setError(t('teacher.schedule.unableToLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading teacher timetable:', err);
     } finally {
       setLoading(false);
@@ -202,7 +204,7 @@ export function TeacherSchedule() {
     return (
       <div className="teacher-content">
         <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <p>Loading your schedule...</p>
+          <p>{t('teacher.schedule.loadingSchedule')}</p>
         </div>
       </div>
     );

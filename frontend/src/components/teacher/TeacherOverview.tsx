@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface StudentPerformance {
@@ -43,6 +44,7 @@ interface TeacherOverviewProps {
 }
 
 const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSecretary = false }) => {
+  const { t } = useTranslation();
   const isAdminOrSecretary = isAdmin || isSecretary;
   const [students, setStudents] = useState<StudentPerformance[]>([]);
   const [testScores, setTestScores] = useState<number[]>([]);
@@ -371,7 +373,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading overview...</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>{t('teacher.overview.loadingOverview')}</div>;
   }
 
   return (
@@ -379,8 +381,8 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
       <div style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
           <div>
-            <h2>Overview</h2>
-            <p>View summarized performance metrics for your students</p>
+            <h2>{t('teacher.overview.title')}</h2>
+            <p>{t('teacher.overview.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -399,7 +401,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         {isAdminOrSecretary && (
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-              Teacher
+              {t('common.teacher')}
             </label>
             <select
               value={filterTeacher}
@@ -412,7 +414,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
               }}
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
             >
-              <option value="">All Teachers</option>
+              <option value="">{t('common.allTeachers')}</option>
               {teachers.map((teacher: any) => (
                 <option key={teacher._id} value={teacher._id}>
                   {teacher.given_name} {teacher.surname}
@@ -424,7 +426,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            School Year
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -436,7 +438,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>{year.year_name}</option>
             ))}
@@ -445,7 +447,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Term
+            {t('common.term')}
           </label>
           <select
             value={filterTerm}
@@ -457,16 +459,16 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             disabled={!filterYear}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Terms</option>
+            <option value="">{t('common.allTerms')}</option>
             {terms.map((term) => (
-              <option key={term._id} value={term._id}>Term {term.term_number}</option>
+              <option key={term._id} value={term._id}>{t('common.termNumber', { number: term.term_number })}</option>
             ))}
           </select>
         </div>
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Subject
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -476,7 +478,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             }}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>{subject.subject_name}</option>
             ))}
@@ -485,7 +487,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
 
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
-            Class
+            {t('common.class')}
           </label>
           <select
             value={filterClass}
@@ -493,7 +495,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             disabled={!filterYear || (!filterTerm && !filterSubject)}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
           >
-            <option value="">All Classes</option>
+            <option value="">{t('common.allClasses')}</option>
             {classes.map((cls) => (
               <option key={cls._id} value={cls._id}>{cls.class_name}</option>
             ))}
@@ -510,11 +512,11 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             gap: '2rem', 
             marginBottom: '2rem' 
           }}>
-            <CircularProgress value={avgHomework} max={100} label="Avg Homework Completion" />
-            <CircularProgress value={avgAttendance} max={100} label="Avg Attendance Ratio" />
-            <CircularProgress value={avgTestScore} max={100} label="Avg Test Score" />
+            <CircularProgress value={avgHomework} max={100} label={t('teacher.overview.avgHomework')} />
+            <CircularProgress value={avgAttendance} max={100} label={t('teacher.overview.avgAttendance')} />
+            <CircularProgress value={avgTestScore} max={100} label={t('teacher.overview.avgTestScore')} />
             {avgTermGrade > 0 && (
-              <CircularProgress value={avgTermGrade} max={20} label="Avg Term Grade" isTermGrade={true} />
+              <CircularProgress value={avgTermGrade} max={20} label={t('teacher.overview.avgTermGrade')} isTermGrade={true} />
             )}
           </div>
 
@@ -528,7 +530,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
               marginBottom: '1.5rem',
               overflow: 'visible'
             }}>
-              <h3 style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.5rem' }}>Test Score Distribution</h3>
+              <h3 style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.5rem' }}>{t('teacher.overview.testScoreDistribution')}</h3>
               
               {/* Enhanced Statistics */}
               <div style={{ 
@@ -702,7 +704,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
           )}
 
           <div style={{ color: '#aaa', fontSize: '0.9rem' }}>
-            Showing metrics for {students.length} student{students.length !== 1 ? 's' : ''}
+            {t('teacher.overview.showingMetrics', { count: students.length })}
           </div>
         </>
       ) : (
@@ -714,7 +716,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
           borderRadius: '4px' 
         }}>
           <p style={{ fontSize: '1.1rem', color: '#666' }}>
-            {loading ? 'Loading data...' : 'No students found. Try adjusting your filters.'}
+            {loading ? t('common.loadingData') : t('teacher.overview.noStudents')}
           </p>
         </div>
       )}

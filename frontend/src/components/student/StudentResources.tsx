@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface Resource {
@@ -39,6 +40,7 @@ interface YearLevel {
 }
 
 const StudentResources: React.FC = () => {
+  const { t } = useTranslation();
   const [resources, setResources] = useState<Resource[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -156,11 +158,11 @@ const StudentResources: React.FC = () => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } else {
-        alert('Failed to download resource');
+        alert(t('student.resources.failedDownload'));
       }
     } catch (error: any) {
       console.error('Error downloading resource:', error);
-      alert(error.message || 'Failed to download resource');
+      alert(error.message || t('student.resources.failedDownload'));
     } finally {
       setDownloading(null);
     }
@@ -186,8 +188,8 @@ const StudentResources: React.FC = () => {
   return (
     <div className="student-content">
       <div style={{ marginBottom: '20px' }}>
-        <h2>Resources</h2>
-        <p>Access learning materials and educational resources.</p>
+        <h2>{t('student.resources.title')}</h2>
+        <p>{t('student.resources.subtitle')}</p>
       </div>
 
       {/* Filters */}
@@ -199,7 +201,7 @@ const StudentResources: React.FC = () => {
       }}>
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            School Year
+            {t('common.schoolYear')}
           </label>
           <select
             value={filterYear}
@@ -214,7 +216,7 @@ const StudentResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Years</option>
+            <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
               <option key={year._id} value={year._id}>
                 {year.year_name}
@@ -225,7 +227,7 @@ const StudentResources: React.FC = () => {
 
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            Subject
+            {t('common.subject')}
           </label>
           <select
             value={filterSubject}
@@ -240,7 +242,7 @@ const StudentResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Subjects</option>
+            <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
               <option key={subject._id} value={subject._id}>
                 {subject.subject_name}
@@ -251,7 +253,7 @@ const StudentResources: React.FC = () => {
 
         <div style={{ flex: '1', minWidth: '200px' }}>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
-            Grade
+            {t('common.grade')}
           </label>
           <select
             value={filterYearLevel}
@@ -266,7 +268,7 @@ const StudentResources: React.FC = () => {
               fontSize: '14px',
             }}
           >
-            <option value="">All Grades</option>
+            <option value="">{t('common.allGrades')}</option>
             {yearLevels
               .filter((level: YearLevel, index: number, self: YearLevel[]) => 
                 index === self.findIndex((l: YearLevel) => l.level_order === level.level_order)
@@ -287,7 +289,7 @@ const StudentResources: React.FC = () => {
       {/* Resources List */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#ccc' }}>
-          Loading resources...
+          {t('student.resources.loadingResources')}
         </div>
       ) : resources.length === 0 ? (
         <div style={{ 
@@ -297,7 +299,7 @@ const StudentResources: React.FC = () => {
           backgroundColor: '#2a2a3a',
           borderRadius: '8px',
         }}>
-          No resources available.
+          {t('student.resources.noResources')}
         </div>
       ) : (
         <div style={{ 
@@ -364,7 +366,7 @@ const StudentResources: React.FC = () => {
                       fontSize: '13px',
                     }}
                   >
-                    {downloading === resource._id ? 'Downloading...' : 'Download'}
+                    {downloading === resource._id ? t('common.downloading') : t('common.download')}
                   </button>
                 </div>
               </div>
