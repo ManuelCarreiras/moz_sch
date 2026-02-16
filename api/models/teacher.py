@@ -18,17 +18,23 @@ class TeacherModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     email_address = db.Column(db.String(120), nullable=False)
     phone_number = db.Column(db.VARCHAR(20), nullable=False)
+    year_start = db.Column(db.Integer, nullable=False)
+    academic_level = db.Column(db.String(100), nullable=False)
+    years_of_experience = db.Column(db.Integer, nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=True)
     base_salary = db.Column(db.Numeric(10, 2), nullable=True)  # Base monthly salary
     # department_id removed - now using junction table for many-to-many relationship
 
     def __init__(self, given_name, surname, gender, email_address,
-                 phone_number, username=None, base_salary=None):
+                 phone_number, year_start, academic_level, years_of_experience, username=None, base_salary=None):
         self.given_name = given_name
         self.surname = surname
         self.gender = gender
         self.email_address = email_address
         self.phone_number = phone_number
+        self.year_start = year_start
+        self.academic_level = academic_level
+        self.years_of_experience = years_of_experience
         self.username = username
         self.base_salary = Decimal(str(base_salary)) if base_salary is not None else None
 
@@ -40,6 +46,9 @@ class TeacherModel(db.Model):
             'gender': self.gender,
             'email_address': self.email_address,
             'phone_number': self.phone_number,
+            'year_start': self.year_start,
+            'academic_level': self.academic_level,
+            'years_of_experience': self.years_of_experience,
             'username': self.username,
             'base_salary': float(self.base_salary) if self.base_salary else None
         }
@@ -80,6 +89,10 @@ class TeacherModel(db.Model):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
+    def find_by_academic_level(cls, academic_level):
+        return cls.query.filter_by(academic_level=academic_level).first()
+    
+    @classmethod
     def find_all(cls):
         return cls.query.all()
 
@@ -101,6 +114,8 @@ class TeacherModel(db.Model):
         db.session.commit()
 
     def update_entry(self, data=None):
+        if data is None:
+            data = {}
         if data.get('given_name') is not None:
             self.given_name = data['given_name']
         if data.get('email_address') is not None:
@@ -113,6 +128,12 @@ class TeacherModel(db.Model):
             self.username = data['username']
         if data.get('base_salary') is not None:
             self.base_salary = Decimal(str(data['base_salary'])) if data['base_salary'] else None
+        if data.get('year_start') is not None:
+            self.year_start = int(data['year_start'])
+        if data.get('academic_level') is not None:
+            self.academic_level = data['academic_level']
+        if data.get('years_of_experience') is not None:
+            self.years_of_experience = int(data['years_of_experience'])
         # department_id handling removed - now managed through junction table
 
         self.save_to_db()

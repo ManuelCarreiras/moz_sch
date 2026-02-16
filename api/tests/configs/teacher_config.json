@@ -3,5 +3,8 @@
 "surname":"Munhangane",
 "gender":"Male",
 "email_address":"email@test.mz",
-"phone_number":"+35192142"
+"phone_number":"+35192142",
+"year_start":2020,
+"academic_level":"PhD",
+"years_of_experience":10
 }

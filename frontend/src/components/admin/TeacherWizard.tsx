@@ -12,6 +12,9 @@ interface TeacherFormData {
   gender: string;
   email_address: string;
   phone_number: string;
+  year_start: string;
+  academic_level: string;
+  years_of_experience: string;
 }
 
 
@@ -23,7 +26,10 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
     surname: '',
     gender: 'Male',
     email_address: '',
-    phone_number: ''
+    phone_number: '',
+    year_start: new Date().getFullYear().toString(),
+    academic_level: 'Licentiate',
+    years_of_experience: '0'
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -40,7 +46,12 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
     setError(null);
 
     try {
-      const response = await apiService.post('/teacher', formData);
+      const payload = {
+        ...formData,
+        year_start: parseInt(formData.year_start, 10),
+        years_of_experience: parseInt(formData.years_of_experience, 10)
+      };
+      const response = await apiService.post('/teacher', payload);
       
       console.log('Teacher creation response:', response);
       if (response.success) {
@@ -147,6 +158,57 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
               </div>
             </div>
 
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="year_start">Year Start *</label>
+                <input
+                  type="number"
+                  id="year_start"
+                  name="year_start"
+                  value={formData.year_start}
+                  onChange={handleInputChange}
+                  required
+                  min={1900}
+                  max={2100}
+                  placeholder="e.g. 2020"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="academic_level">Academic Level *</label>
+                <select
+                  id="academic_level"
+                  name="academic_level"
+                  value={formData.academic_level}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="Bachelor">Bachelor</option>
+                  <option value="Licentiate">Licentiate</option>
+                  <option value="Master">Master</option>
+                  <option value="PhD">PhD</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="years_of_experience">Years of Experience *</label>
+                <input
+                  type="number"
+                  id="years_of_experience"
+                  name="years_of_experience"
+                  value={formData.years_of_experience}
+                  onChange={handleInputChange}
+                  required
+                  min={0}
+                  placeholder="e.g. 5"
+                />
+              </div>
+            </div>
 
             {error && (
               <div className="error-message">
@@ -165,7 +227,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
               </button>
               <button
                 type="submit"
-                disabled={loading || !formData.given_name || !formData.surname || !formData.email_address || !formData.phone_number}
+                disabled={loading || !formData.given_name || !formData.surname || !formData.email_address || !formData.phone_number || !formData.year_start || !formData.academic_level || formData.years_of_experience === ''}
                 className="btn btn--primary"
               >
                 {loading ? 'Creating...' : 'Create Teacher'}

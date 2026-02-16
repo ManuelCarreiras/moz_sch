@@ -10,6 +10,9 @@ export interface Teacher {
   email_address: string;
   phone_number: string;
   gender: string;
+  year_start?: number;
+  academic_level?: string;
+  years_of_experience?: number;
   department_id?: string;
   department_name?: string;
 }
@@ -194,7 +197,7 @@ export function TeachersTable() {
           <tbody>
             {teachers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="empty-state">
+                <td colSpan={8} className="empty-state">
                   {t('admin.teachersTable.noTeachers')}
                 </td>
               </tr>
@@ -214,6 +217,8 @@ export function TeachersTable() {
                     </span>
                     {teacher.gender}
                   </td>
+                  <td>{teacher.academic_level ?? '-'}</td>
+                  <td>{teacher.years_of_experience ?? '-'}</td>
                   <td>{teacher.department_name || t('common.notAssigned')}</td>
                   <td>
                     <div className="action-buttons">
@@ -284,6 +289,9 @@ export function TeachersTable() {
                 <li><strong>gender</strong> - {t('admin.teachersTable.importGender')}</li>
                 <li><strong>email_address</strong> - {t('admin.teachersTable.importEmail')}</li>
                 <li><strong>phone_number</strong> - {t('admin.teachersTable.importPhone')}</li>
+                <li><strong>year_start</strong> - Start year, e.g. 2020 (required)</li>
+                <li><strong>academic_level</strong> - e.g. PhD, Master, Licentiate (required)</li>
+                <li><strong>years_of_experience</strong> - Years of experience (required)</li>
               </ul>
             </div>
 

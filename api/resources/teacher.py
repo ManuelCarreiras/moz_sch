@@ -29,6 +29,9 @@ class TeacherResource(Resource):
             or not data.get('surname')
             or not data.get('gender')
             or not data.get('email_address')
+            or not data.get('year_start')
+            or not data.get('academic_level')
+            or not data.get('years_of_experience')
             or not data.get('phone_number')
         ):
             response = {

@@ -23,7 +23,7 @@ class TeacherBulkImportResource(Resource):
     """
     Bulk import teachers from Excel file
     Expected Excel format:
-    - Header row: given_name, surname, gender, email_address, phone_number
+    - Header row: given_name, surname, gender, email_address, phone_number, year_start, academic_level, years_of_experience
     - Data rows: teacher information matching the header
     """
     
@@ -76,7 +76,10 @@ class TeacherBulkImportResource(Resource):
                 'surname': ['surname', 'last name', 'lastname', 'family name'],
                 'gender': ['gender', 'sex'],
                 'email_address': ['email_address', 'email address', 'email', 'e-mail'],
-                'phone_number': ['phone_number', 'phone number', 'phone', 'mobile', 'telephone']
+                'phone_number': ['phone_number', 'phone number', 'phone', 'mobile', 'telephone'],
+                'year_start': ['year_start', 'year start', 'start year', 'joining year'],
+                'academic_level': ['academic_level', 'academic level', 'level', 'degree', 'qualification'],
+                'years_of_experience': ['years_of_experience', 'years of experience', 'experience years', 'experience']
             }
             
             # Find column indices
@@ -125,6 +128,10 @@ class TeacherBulkImportResource(Resource):
                     if phone_number == '':
                         phone_number = None
                     
+                    year_start_val = row[column_indices['year_start']].value
+                    academic_level_val = row[column_indices['academic_level']].value
+                    years_of_experience_val = row[column_indices['years_of_experience']].value
+                    
                     # Skip empty rows
                     if not given_name and not surname:
                         continue
@@ -134,6 +141,47 @@ class TeacherBulkImportResource(Resource):
                         skipped_rows.append({
                             'row': row_idx,
                             'reason': 'Missing required fields (given_name, surname, gender, email_address, phone_number)'
+                        })
+                        continue
+                    
+                    # Parse and validate year_start
+                    try:
+                        year_start = int(float(year_start_val)) if year_start_val is not None else None
+                        if year_start is None or year_start < 1900 or year_start > 2100:
+                            skipped_rows.append({
+                                'row': row_idx,
+                                'reason': f'Invalid year_start: {year_start_val}. Expected a valid year (1900-2100)'
+                            })
+                            continue
+                    except (TypeError, ValueError):
+                        skipped_rows.append({
+                            'row': row_idx,
+                            'reason': f'Invalid year_start: {year_start_val}. Expected an integer year'
+                        })
+                        continue
+                    
+                    # Parse and validate academic_level
+                    academic_level = str(academic_level_val).strip() if academic_level_val else ''
+                    if not academic_level:
+                        skipped_rows.append({
+                            'row': row_idx,
+                            'reason': 'Missing required field: academic_level'
+                        })
+                        continue
+                    
+                    # Parse and validate years_of_experience
+                    try:
+                        years_of_experience = int(float(years_of_experience_val)) if years_of_experience_val is not None else None
+                        if years_of_experience is None or years_of_experience < 0:
+                            skipped_rows.append({
+                                'row': row_idx,
+                                'reason': f'Invalid years_of_experience: {years_of_experience_val}. Expected a non-negative integer'
+                            })
+                            continue
+                    except (TypeError, ValueError):
+                        skipped_rows.append({
+                            'row': row_idx,
+                            'reason': f'Invalid years_of_experience: {years_of_experience_val}. Expected a non-negative integer'
                         })
                         continue
                     
@@ -167,7 +215,10 @@ class TeacherBulkImportResource(Resource):
                         surname=surname,
                         gender=gender,
                         email_address=email_address,
-                        phone_number=phone_number
+                        phone_number=phone_number,
+                        year_start=year_start,
+                        academic_level=academic_level,
+                        years_of_experience=years_of_experience
                     )
                     
                     try:
