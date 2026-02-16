@@ -2,7 +2,7 @@ from flask import request, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
 from models.department import DepartmentModel
-from utils.auth_middleware import require_role, require_any_role
+from utils.auth_middleware import require_any_role
 from db import db
 import json
 import os
@@ -226,7 +226,7 @@ class TeacherResource(Resource):
             }
             return Response(json.dumps(response), 200)
 
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def put(self):
         data = request.get_json()
         id = data.get('_id')
@@ -245,7 +245,7 @@ class TeacherResource(Resource):
         }
         return Response(json.dumps(response), 200)
 
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def delete(self, id):
         professor = TeacherModel.find_by_id(id)
 

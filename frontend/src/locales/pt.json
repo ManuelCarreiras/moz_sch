@@ -258,6 +258,11 @@
       "importGender": "gender - Masculino ou Feminino (obrigatório)",
       "importEmail": "email_address - Endereço de email (obrigatório, deve ser único)",
       "importPhone": "phone_number - Número de telefone (obrigatório)",
+      "academicLevel": "Nível Académico",
+      "yearsExp": "Anos Exp.",
+      "importYearStart": "year_start - Ano de início, ex. 2020 (obrigatório)",
+      "importAcademicLevel": "academic_level - ex. PhD, Mestrado, Licenciatura (obrigatório)",
+      "importYearsExp": "years_of_experience - Anos de experiência (obrigatório)",
       "viewFailed": "Ver linhas com falha",
       "viewSkipped": "Ver linhas ignoradas",
       "selectFile": "Selecionar Ficheiro Excel:",
@@ -306,7 +311,10 @@
       "title": "Criar Novo Professor",
       "createTeacher": "Criar Professor",
       "createSuccess": "Professor criado com sucesso!",
-      "failedCreate": "Falha ao criar professor"
+      "failedCreate": "Falha ao criar professor",
+      "yearStartLabel": "Ano de Início *",
+      "academicLevelLabel": "Nível Académico *",
+      "yearsOfExperienceLabel": "Anos de Experiência *"
     },
     "guardianWizard": {
       "title": "Criar Novo Encarregado",

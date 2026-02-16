@@ -190,6 +190,8 @@ export function TeachersTable() {
               <th>{t('common.email')}</th>
               <th>{t('common.phone')}</th>
               <th>{t('common.gender')}</th>
+              <th>{t('admin.teachersTable.academicLevel')}</th>
+              <th>{t('admin.teachersTable.yearsExp')}</th>
               <th>{t('common.department')}</th>
               <th>{t('common.actions')}</th>
             </tr>
@@ -289,9 +291,9 @@ export function TeachersTable() {
                 <li><strong>gender</strong> - {t('admin.teachersTable.importGender')}</li>
                 <li><strong>email_address</strong> - {t('admin.teachersTable.importEmail')}</li>
                 <li><strong>phone_number</strong> - {t('admin.teachersTable.importPhone')}</li>
-                <li><strong>year_start</strong> - Start year, e.g. 2020 (required)</li>
-                <li><strong>academic_level</strong> - e.g. PhD, Master, Licentiate (required)</li>
-                <li><strong>years_of_experience</strong> - Years of experience (required)</li>
+                <li><strong>year_start</strong> - {t('admin.teachersTable.importYearStart')}</li>
+                <li><strong>academic_level</strong> - {t('admin.teachersTable.importAcademicLevel')}</li>
+                <li><strong>years_of_experience</strong> - {t('admin.teachersTable.importYearsExp')}</li>
               </ul>
             </div>
 

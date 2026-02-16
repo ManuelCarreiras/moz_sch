@@ -1,7 +1,7 @@
 from flask import request, Response
 from flask_restful import Resource
 from models.teacher import TeacherModel
-from utils.auth_middleware import require_role
+from utils.auth_middleware import require_any_role
 import json
 import os
 import logging
@@ -27,7 +27,7 @@ class TeacherBulkImportResource(Resource):
     - Data rows: teacher information matching the header
     """
     
-    @require_role('admin')
+    @require_any_role(['admin', 'secretary'])
     def post(self):
         if not OPENPYXL_AVAILABLE:
             response = {

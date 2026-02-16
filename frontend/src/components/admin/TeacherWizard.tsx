@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface TeacherWizardProps {
@@ -19,6 +20,7 @@ interface TeacherFormData {
 
 
 export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<TeacherFormData>({
@@ -160,7 +162,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="year_start">Year Start *</label>
+                <label htmlFor="year_start">{t('admin.teacherWizard.yearStartLabel')}</label>
                 <input
                   type="number"
                   id="year_start"
@@ -177,7 +179,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="academic_level">Academic Level *</label>
+                <label htmlFor="academic_level">{t('admin.teacherWizard.academicLevelLabel')}</label>
                 <select
                   id="academic_level"
                   name="academic_level"
@@ -196,7 +198,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="years_of_experience">Years of Experience *</label>
+                <label htmlFor="years_of_experience">{t('admin.teacherWizard.yearsOfExperienceLabel')}</label>
                 <input
                   type="number"
                   id="years_of_experience"

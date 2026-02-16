@@ -258,6 +258,11 @@
       "importGender": "gender - Male or Female (required)",
       "importEmail": "email_address - Email address (required, must be unique)",
       "importPhone": "phone_number - Phone number (required)",
+      "academicLevel": "Academic Level",
+      "yearsExp": "Years Exp.",
+      "importYearStart": "year_start - Start year, e.g. 2020 (required)",
+      "importAcademicLevel": "academic_level - e.g. PhD, Master, Licentiate (required)",
+      "importYearsExp": "years_of_experience - Years of experience (required)",
       "viewFailed": "View failed rows",
       "viewSkipped": "View skipped rows",
       "selectFile": "Select Excel File:",
@@ -306,7 +311,10 @@
       "title": "Create New Teacher",
       "createTeacher": "Create Teacher",
       "createSuccess": "Teacher created successfully!",
-      "failedCreate": "Failed to create teacher"
+      "failedCreate": "Failed to create teacher",
+      "yearStartLabel": "Year Start *",
+      "academicLevelLabel": "Academic Level *",
+      "yearsOfExperienceLabel": "Years of Experience *"
     },
     "guardianWizard": {
       "title": "Create New Guardian",
