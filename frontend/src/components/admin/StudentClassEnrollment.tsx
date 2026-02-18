@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface StudentClassEnrollmentProps {
@@ -32,6 +33,7 @@ interface StudentClass {
 }
 
 export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) {
+  const { t } = useTranslation();
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [studentClasses, setStudentClasses] = useState<StudentClass[]>([]);
@@ -89,7 +91,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
         setStudentClasses(Array.isArray(enrollmentData) ? enrollmentData : []);
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('admin.classEnrollment.enrollError'));
       console.error('Error loading data:', err);
     } finally {
       setLoading(false);
@@ -200,7 +202,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
 
   const handleConfirmEnrollment = async () => {
     if (!selectedClassId || selectedStudentIds.size === 0) {
-      setError('Please select a class and at least one student');
+      setError(t('admin.classEnrollment.selectClassAndStudents'));
       return;
     }
 
@@ -211,7 +213,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
       // Find all classes with the selected class name
       const selectedClassName = classes.find(c => c._id === selectedClassId)?.class_name;
       if (!selectedClassName) {
-        setError('Selected class not found');
+        setError(t('admin.classEnrollment.classNotFound'));
         setIsEnrolling(false);
         return;
       }
@@ -239,10 +241,14 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
       const failed = results.some(r => !r.success);
       
       if (failed) {
-        setError('Some enrollments failed. Please try again.');
+        setError(t('admin.classEnrollment.someEnrollmentsFailed'));
       } else {
         const totalEnrollments = selectedStudentIds.size * classesToEnrollIn.length;
-        alert(`Successfully enrolled ${selectedStudentIds.size} student(s) in ${classesToEnrollIn.length} class(es) (${totalEnrollments} total enrollments)!`);
+        alert(t('admin.classEnrollment.enrollSuccess', {
+          students: selectedStudentIds.size,
+          classes: classesToEnrollIn.length,
+          total: totalEnrollments
+        }));
         // Reset state
         setSelectedClassId('');
         setSelectedStudentIds(new Set());
@@ -251,7 +257,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
         await loadData();
       }
     } catch (err) {
-      setError('Network error occurred during enrollment');
+      setError(t('admin.classEnrollment.enrollError'));
       console.error('Error enrolling students:', err);
     } finally {
       setIsEnrolling(false);
@@ -266,7 +272,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
     return (
       <div className="admin-content">
         <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <p>Loading enrollment data...</p>
+          <p>{t('admin.classEnrollment.loadingData')}</p>
         </div>
       </div>
     );
@@ -293,11 +299,11 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
     <div className="admin-content">
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
         <button className="btn btn--secondary" onClick={onBack}>
-          ← Back to Classes
+          {t('admin.classEnrollment.backToClasses')}
         </button>
         <div>
-          <h2>Student Class Enrollment</h2>
-          <p>Select a class and enroll unassigned students.</p>
+          <h2>{t('admin.classEnrollment.title')}</h2>
+          <p>{t('admin.classEnrollment.subtitle')}</p>
         </div>
       </div>
 
@@ -317,7 +323,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
         border: '1px solid var(--border)'
       }}>
         <h3 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', fontWeight: 600 }}>
-          Step 1: Select Class
+          {t('admin.classEnrollment.step1')}
         </h3>
         
         {/* Year and Term Filters */}
@@ -329,7 +335,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
               fontSize: '0.875rem',
               fontWeight: 500 
             }}>
-              School Year:
+              {t('admin.classEnrollment.schoolYearLabel')}
             </label>
             <select
               id="year_filter"
@@ -351,7 +357,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                 appearance: 'menulist'
               }}
             >
-              <option value="">-- All Years --</option>
+              <option value="">{t('admin.classEnrollment.allYearsPlaceholder')}</option>
               {getUniqueYears().map((year) => (
                 <option 
                   key={year.year_id} 
@@ -371,7 +377,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
               fontSize: '0.875rem',
               fontWeight: 500 
             }}>
-              Term:
+              {t('admin.classEnrollment.termLabel')}
             </label>
             <select
               id="term_filter"
@@ -390,14 +396,14 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                 appearance: 'menulist'
               }}
             >
-              <option value="">-- All Terms --</option>
+              <option value="">{t('admin.classEnrollment.allTermsPlaceholder')}</option>
               {getUniqueTerms().map((term) => (
                 <option 
                   key={term.term_id} 
                   value={term.term_id}
                   style={{ background: 'var(--card)', color: 'var(--text)' }}
                 >
-                  Term {term.term_number}
+                  {t('common.termNumber', { number: term.term_number })}
                 </option>
               ))}
             </select>
@@ -411,7 +417,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
             fontSize: '0.875rem',
             fontWeight: 500 
           }}>
-            Choose a class to enroll students into:
+            {t('admin.classEnrollment.chooseClass')}
           </label>
           <select
             id="class_selection"
@@ -430,7 +436,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
               appearance: 'menulist'
             }}
           >
-            <option value="">-- Select a Class --</option>
+            <option value="">{t('admin.classEnrollment.selectAClass')}</option>
             {uniqueClassNames.map((classGroup) => (
               <option 
                 key={classGroup.name} 
@@ -455,7 +461,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
-              Step 2: Select Students to Enroll
+              {t('admin.classEnrollment.step2')}
             </h3>
             {unassignedStudents.length > 0 && (
               <button
@@ -463,7 +469,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                 onClick={handleSelectAll}
                 style={{ fontSize: '0.875rem' }}
               >
-                {selectedStudentIds.size === unassignedStudents.length ? 'Deselect All' : 'Select All'}
+                {selectedStudentIds.size === unassignedStudents.length ? t('admin.classEnrollment.deselectAll') : t('admin.classEnrollment.selectAll')}
               </button>
             )}
           </div>
@@ -476,7 +482,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
               borderRadius: '0.25rem',
               color: 'var(--text-muted)'
             }}>
-              <p>All students are already assigned to classes.</p>
+              <p>{t('admin.classEnrollment.allAssigned')}</p>
             </div>
           ) : (
             <div style={{ 
@@ -501,7 +507,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                         style={{ cursor: 'pointer' }}
                       />
                     </th>
-                    <th style={{ padding: 'var(--space-sm)', textAlign: 'left' }}>Student Name</th>
+                    <th style={{ padding: 'var(--space-sm)', textAlign: 'left' }}>{t('admin.classEnrollment.studentName')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -544,7 +550,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
               textAlign: 'center'
             }}>
               <p style={{ margin: 0, fontWeight: 600 }}>
-                {selectedStudentIds.size} student{selectedStudentIds.size !== 1 ? 's' : ''} selected
+                {t('admin.classEnrollment.studentsSelected', { count: selectedStudentIds.size })}
               </p>
             </div>
           )}
@@ -556,7 +562,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                 onClick={() => setShowConfirmation(true)}
                 disabled={isEnrolling}
               >
-                Continue to Confirmation
+                {t('admin.classEnrollment.continueConfirm')}
               </button>
             </div>
           )}
@@ -569,7 +575,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
           <div className="modal__overlay" onClick={() => setShowConfirmation(false)}></div>
           <div className="modal__dialog" style={{ maxWidth: '600px' }}>
             <div className="modal__header">
-              <h3>Confirm Enrollment</h3>
+              <h3>{t('admin.classEnrollment.confirmEnrollment')}</h3>
               <button 
                 className="modal__close"
                 onClick={() => setShowConfirmation(false)}
@@ -579,7 +585,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
             </div>
             <div className="modal__content">
               <p style={{ marginBottom: 'var(--space-md)' }}>
-                Are you sure you want to enroll the following {selectedStudentIds.size} student{selectedStudentIds.size !== 1 ? 's' : ''} in all classes for:
+                {t('admin.classEnrollment.confirmQuestion', { count: selectedStudentIds.size })}
               </p>
               
               <div style={{ 
@@ -589,9 +595,9 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                 borderRadius: '0.25rem',
                 border: '1px solid var(--border)'
               }}>
-                <strong>Class:</strong> {selectedClassName}
+                <strong>{t('admin.classEnrollment.classLabel')}</strong> {selectedClassName}
                 <div style={{ marginTop: 'var(--space-xs)', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                  ({selectedClassGroup.classes.length} subject{selectedClassGroup.classes.length !== 1 ? 's' : ''})
+                  ({t('admin.classEnrollment.subjects', { count: selectedClassGroup.classes.length })})
                 </div>
               </div>
 
@@ -622,7 +628,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                   onClick={() => setShowConfirmation(false)}
                   disabled={isEnrolling}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button 
                   type="button" 
@@ -630,7 +636,7 @@ export function StudentClassEnrollment({ onBack }: StudentClassEnrollmentProps) 
                   onClick={handleConfirmEnrollment}
                   disabled={isEnrolling}
                 >
-                  {isEnrolling ? 'Enrolling...' : 'Confirm Enrollment'}
+                  {isEnrolling ? t('admin.classEnrollment.enrolling') : t('admin.classEnrollment.confirmEnrollment')}
                 </button>
               </div>
             </div>

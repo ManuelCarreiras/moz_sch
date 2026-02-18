@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface YearLevelTimetableProps {
@@ -52,6 +53,7 @@ interface TimetableData {
 }
 
 export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
+  const { t } = useTranslation();
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const [selectedLevelOrder, setSelectedLevelOrder] = useState<string>('');
   const [availableYearLevels, setAvailableYearLevels] = useState<YearLevel[]>([]);
@@ -206,10 +208,10 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
         const data = (response.data as any)?.message || response.data;
         setTimetable(data as TimetableData);
       } else {
-        setError('Failed to load timetable');
+        setError(t('admin.timetable.failedLoad'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error loading timetable:', err);
     } finally {
       setLoading(false);
@@ -244,7 +246,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     if (!draggedSubject || !timetable || !timetable.all_periods) return;
     
     if (!selectedTermId) {
-      setError('Please select a term first.');
+      setError(t('admin.timetable.selectTermFirst'));
       return;
     }
     
@@ -260,19 +262,19 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
 
   const handleAssignTeacherAndClassroom = async () => {
     if (!pendingSubject || !selectedTeacherId || !selectedClassroomId) {
-      setError('Please select both a teacher and a classroom');
+      setError(t('admin.timetable.selectBothTeacherClassroom'));
       return;
     }
 
     if (!timetable || !timetable.all_periods) {
-      setError('Timetable data not available');
+      setError(t('admin.timetable.timetableDataUnavailable'));
       return;
     }
 
     // Find the period in all_periods to get its ID
     const period = timetable.all_periods.find(p => p.name === pendingPeriodName);
     if (!period) {
-      setError('Period not found');
+      setError(t('admin.timetable.periodNotFound'));
       return;
     }
 
@@ -285,7 +287,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
       // Generate class name from year level order and name (not including subject)
       const selectedYearLevel = yearLevels.find(yl => yl._id === selectedYearLevelId);
       if (!selectedYearLevel) {
-        setError('Year level not found');
+        setError(t('admin.timetable.yearLevelNotFound'));
         return;
       }
       
@@ -325,7 +327,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
       loadTimetable(selectedYearLevelId);
     } catch (err) {
       console.error('Error assigning subject:', err);
-      setError('Failed to assign subject to timetable slot');
+      setError(t('admin.timetable.failedAssign'));
     }
   };
 
@@ -391,7 +393,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     return (
       <div className="admin-content">
         <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <p>Loading timetable...</p>
+          <p>{t('admin.timetable.loadingTimetable')}</p>
         </div>
       </div>
     );
@@ -411,14 +413,14 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
     <div className="admin-content" style={{ paddingLeft: 'var(--space-lg)' }}>
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
-          ← Back to Classes
+          {t('admin.timetable.backToClasses')}
         </button>
       </div>
 
       <div style={{ marginBottom: 'var(--space-lg)' }}>
-        <h2>Year Level Timetable</h2>
+        <h2>{t('admin.timetable.title')}</h2>
         <p className="table-description">
-          View the complete schedule for a year level showing all classes organized by time periods.
+          {t('admin.timetable.subtitle')}
         </p>
       </div>
 
@@ -430,7 +432,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
             marginBottom: 'var(--space-sm)',
             fontWeight: 600 
           }}>
-            Select Grade:
+            {t('admin.timetable.selectGrade')}
           </label>
           <select
             id="level_order_select"
@@ -446,10 +448,10 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               fontSize: 'var(--text-base)'
             }}
           >
-            <option value="">-- Select Grade --</option>
+            <option value="">{t('admin.timetable.selectGradePlaceholder')}</option>
             {[...new Set(yearLevels.map(y => y.level_order))].sort().map((order) => (
               <option key={order} value={order}>
-                Grade {order}
+                {t('admin.timetable.gradeN', { number: order })}
               </option>
             ))}
           </select>
@@ -462,7 +464,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               marginBottom: 'var(--space-sm)',
               fontWeight: 600 
             }}>
-              Select Section:
+              {t('admin.timetable.selectSection')}
             </label>
             <select
               id="year_level_select"
@@ -478,7 +480,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                 fontSize: 'var(--text-base)'
               }}
             >
-              <option value="">-- Select Section --</option>
+              <option value="">{t('admin.timetable.selectSectionPlaceholder')}</option>
               {availableYearLevels.map((yearLevel) => (
                 <option key={yearLevel._id} value={yearLevel._id}>
                   {yearLevel.level_name}
@@ -498,7 +500,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               marginBottom: 'var(--space-sm)',
               fontWeight: 600 
             }}>
-              Select School Year:
+              {t('admin.timetable.selectSchoolYear')}
             </label>
             <select
               id="year_select"
@@ -517,7 +519,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                 appearance: 'menulist'
               }}
             >
-              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Year --</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>{t('admin.timetable.selectYearPlaceholder')}</option>
               {schoolYears.map((year) => (
                 <option 
                   key={year._id} 
@@ -536,7 +538,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               marginBottom: 'var(--space-sm)',
               fontWeight: 600 
             }}>
-              Select Term:
+              {t('admin.timetable.selectTerm')}
             </label>
             <select
               id="term_select"
@@ -555,7 +557,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                 appearance: 'menulist'
               }}
             >
-              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>-- Select Term --</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>{t('admin.timetable.selectTermPlaceholder')}</option>
               {terms
                 .filter(term => {
                   if (!selectedYearId) return true;
@@ -567,7 +569,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                     value={term._id}
                     style={{ background: 'var(--card)', color: 'var(--text)' }}
                   >
-                    Term {term.term_number}
+                    {t('common.termNumber', { number: term.term_number })}
                   </option>
                 ))}
             </select>
@@ -599,13 +601,13 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
               color: 'var(--primary)',
               fontWeight: 600
             }}>
-              📚 Subjects
+              📚 {t('admin.timetable.subjects')}
             </h3>
             
             {/* Search input */}
             <input
               type="text"
-              placeholder="Search subjects..."
+              placeholder={t('admin.timetable.searchSubjects')}
               value={subjectSearchQuery}
               onChange={(e) => setSubjectSearchQuery(e.target.value)}
               style={{
@@ -638,7 +640,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                 appearance: 'menulist'
               }}
             >
-              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>All Departments</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>{t('common.allDepartments')}</option>
               {departments.map((dept) => (
                 <option 
                   key={dept._id} 
@@ -691,13 +693,13 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
             <thead>
               <tr style={{ background: 'var(--primary)', color: 'white' }}>
                 <th style={{ padding: 'var(--space-md)', textAlign: 'left', minWidth: '120px', maxWidth: '120px' }}>
-                  Time
+                  {t('common.time')}
                 </th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Monday</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Tuesday</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Wednesday</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Thursday</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>Friday</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>{t('common.monday')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>{t('common.tuesday')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>{t('common.wednesday')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>{t('common.thursday')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '100px', maxWidth: '100px' }}>{t('common.friday')}</th>
               </tr>
             </thead>
             <tbody>
@@ -786,7 +788,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
           borderRadius: '0.5rem',
           border: '1px solid var(--border)'
         }}>
-          <p>No periods have been defined yet. Please create periods first.</p>
+          <p>{t('admin.timetable.noPeriodsYet')}</p>
         </div>
       )}
 
@@ -796,7 +798,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
           <div className="modal__overlay" onClick={handleCancelAssignment}></div>
           <div className="modal__dialog" style={{ maxWidth: '500px' }}>
             <div className="modal__header">
-              <h3>Assign Teacher and Classroom</h3>
+              <h3>{t('admin.timetable.assignTeacherClassroom')}</h3>
               <button 
                 className="modal__close"
                 onClick={handleCancelAssignment}
@@ -811,7 +813,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   marginBottom: 'var(--space-xs)',
                   fontWeight: 600 
                 }}>
-                  Subject:
+                  {t('admin.timetable.subjectLabel')}
                 </label>
                 <input
                   type="text"
@@ -835,7 +837,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   marginBottom: 'var(--space-xs)',
                   fontWeight: 600 
                 }}>
-                  Teacher: *
+                  {t('admin.timetable.teacherLabel')}
                 </label>
                 <select
                   id="modal_teacher"
@@ -855,7 +857,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   }}
                   required
                 >
-                  <option value="">-- Select Teacher --</option>
+                  <option value="">{t('admin.timetable.selectTeacher')}</option>
                   {teachers
                     .filter(teacher => 
                       teacher.departments?.some(dept => dept._id === pendingSubject.department_id)
@@ -878,7 +880,7 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   marginBottom: 'var(--space-xs)',
                   fontWeight: 600 
                 }}>
-                  Classroom: *
+                  {t('admin.timetable.classroomLabel')}
                 </label>
                 <select
                   id="modal_classroom"
@@ -898,14 +900,14 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   }}
                   required
                 >
-                  <option value="">-- Select Classroom --</option>
+                  <option value="">{t('admin.timetable.selectClassroom')}</option>
                   {classrooms.map((classroom) => (
                     <option 
                       key={classroom._id} 
                       value={classroom._id}
                       style={{ background: 'var(--card)', color: 'var(--text)' }}
                     >
-                      {classroom.room_name} (Capacity: {classroom.capacity})
+                      {classroom.room_name} {t('admin.timetable.capacityN', { n: classroom.capacity })}
                     </option>
                   ))}
                 </select>
@@ -917,14 +919,14 @@ export function YearLevelTimetable({ onBack }: YearLevelTimetableProps) {
                   className="btn btn--secondary"
                   onClick={handleCancelAssignment}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button 
                   type="button" 
                   className="btn btn--primary"
                   onClick={handleAssignTeacherAndClassroom}
                 >
-                  Assign
+                  {t('admin.timetable.assignBtn')}
                 </button>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 export interface Class {
@@ -33,6 +34,7 @@ interface ClassesTableProps {
 }
 
 export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }: ClassesTableProps = {}) {
+  const { t } = useTranslation();
   const [classes, setClasses] = useState<Class[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
   const [schoolYears, setSchoolYears] = useState<any[]>([]);
@@ -64,7 +66,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
         setTerms(Array.isArray(termsData) ? termsData : []);
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error fetching data:', err);
     }
   };
@@ -83,7 +85,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
 
   const searchClasses = async () => {
     if (!searchTermId && !searchClassName) {
-      setError('Please select a term or enter a class name to search');
+      setError(t('admin.classes.selectTermOrName'));
       return;
     }
 
@@ -114,13 +116,13 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
         setClasses(filtered);
         
         if (filtered.length === 0) {
-          setError('No classes found matching your search criteria');
+          setError(t('admin.classes.noClassesSearch'));
         }
       } else {
-        setError('Failed to search classes');
+        setError(t('admin.classes.failedSearch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error searching classes:', err);
     } finally {
       setLoading(false);
@@ -128,20 +130,20 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this class?')) return;
+    if (!confirm(t('admin.classes.confirmDelete'))) return;
     
     try {
       const response = await apiService.deleteClass(id);
       
       if (response.success) {
-        alert('Class deleted successfully!');
+        alert(t('admin.classes.deleteSuccess'));
         // Refresh search results
         searchClasses();
       } else {
-        setError(response.error || 'Failed to delete class');
+        setError(response.error || t('admin.classes.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting class:', err);
     }
   };
@@ -169,7 +171,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
         fontSize: 'var(--text-lg)',
         color: 'var(--muted)'
       }}>
-        Loading classes...
+        {t('admin.classes.loadingClasses')}
       </div>
     );
   }
@@ -178,8 +180,8 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
     <div className="classes-table">
       <div className="table-header">
         <div className="table-header__title">
-          <h3>Class Management</h3>
-          <p className="table-description">Search and manage classes. To create classes, use the Timetable view.</p>
+          <h3>{t('admin.classes.title')}</h3>
+          <p className="table-description">{t('admin.classes.subtitle')}</p>
         </div>
         <div className="table-header__actions" style={{ display: 'flex', gap: 'var(--space-sm)' }}>
           {onNavigateToEnrollments && (
@@ -187,7 +189,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               className="btn btn--secondary"
               onClick={onNavigateToEnrollments}
             >
-              Manage Enrollments
+              {t('admin.classes.manageEnrollments')}
             </button>
           )}
           {onNavigateToTimetable && (
@@ -195,7 +197,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               className="btn btn--secondary"
               onClick={onNavigateToTimetable}
             >
-              View Timetables
+              {t('admin.classes.viewTimetables')}
             </button>
           )}
         </div>
@@ -209,7 +211,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
         marginBottom: 'var(--space-lg)',
         border: '1px solid var(--border)'
       }}>
-        <h4 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', fontWeight: 600 }}>Search Classes</h4>
+        <h4 style={{ marginBottom: 'var(--space-md)', fontSize: '1rem', fontWeight: 600 }}>{t('admin.classes.searchClasses')}</h4>
         <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: 1, minWidth: '200px' }}>
             <label htmlFor="search_year" style={{ 
@@ -218,7 +220,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               fontSize: '0.875rem',
               fontWeight: 500 
             }}>
-              School Year:
+              {t('admin.classes.schoolYearLabel')}
             </label>
             <select
               id="search_year"
@@ -237,7 +239,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
                 appearance: 'menulist'
               }}
             >
-              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>All Years</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>{t('common.allYears')}</option>
               {schoolYears.map((year) => (
                 <option 
                   key={year._id} 
@@ -257,7 +259,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               fontSize: '0.875rem',
               fontWeight: 500 
             }}>
-              Term:
+              {t('admin.classes.termLabel')}
             </label>
             <select
               id="search_term"
@@ -276,7 +278,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
                 appearance: 'menulist'
               }}
             >
-              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>All Terms</option>
+              <option value="" style={{ background: 'var(--card)', color: 'var(--text)' }}>{t('common.allTerms')}</option>
               {terms
                 .filter(term => !searchYearId || String(term.year_id) === String(searchYearId))
                 .map((term) => (
@@ -285,7 +287,7 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
                     value={term._id}
                     style={{ background: 'var(--card)', color: 'var(--text)' }}
                   >
-                    Term {term.term_number}
+                    {t('common.termNumber', { number: term.term_number })}
                   </option>
                 ))}
             </select>
@@ -298,12 +300,12 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               fontSize: '0.875rem',
               fontWeight: 500 
             }}>
-              Class Name:
+              {t('admin.classes.classNameLabel')}
             </label>
             <input
               id="search_class_name"
               type="text"
-              placeholder="e.g., 1st A, 2nd B..."
+              placeholder={t('admin.classes.classNamePlaceholder')}
               value={searchClassName}
               onChange={(e) => setSearchClassName(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -324,13 +326,13 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
               className="btn btn--primary"
               onClick={searchClasses}
             >
-              Search
+              {t('common.search')}
             </button>
             <button 
               className="btn btn--secondary"
               onClick={handleClearSearch}
             >
-              Clear
+              {t('common.clear')}
             </button>
           </div>
         </div>
@@ -347,38 +349,38 @@ export function ClassesTable({ onNavigateToEnrollments, onNavigateToTimetable }:
         <table className="data-table">
           <thead>
             <tr>
-              <th>Class Name</th>
-              <th>Subject</th>
-              <th>Teacher</th>
-              <th>Term</th>
-              <th>Period</th>
-              <th>Classroom</th>
-              <th>Actions</th>
+              <th>{t('admin.classes.className')}</th>
+              <th>{t('common.subject')}</th>
+              <th>{t('admin.classes.teacher')}</th>
+              <th>{t('common.term')}</th>
+              <th>{t('admin.classes.period')}</th>
+              <th>{t('admin.classes.classroom')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {classes.length === 0 ? (
               <tr>
-                <td colSpan={6} className="empty-state">
-                  {loading ? 'Searching...' : 'No classes found. Use the search form above to find classes.'}
+                <td colSpan={7} className="empty-state">
+                  {loading ? t('admin.classes.searching') : t('admin.classes.noClasses')}
                 </td>
               </tr>
             ) : (
               classes.map((classItem) => (
                 <tr key={classItem._id}>
                   <td><strong>{classItem.class_name}</strong></td>
-                  <td>{classItem.subject_name || 'N/A'}</td>
-                  <td>{classItem.teacher_name || 'N/A'}</td>
-                  <td>Term {classItem.term_number || 'N/A'}</td>
-                  <td>{classItem.period_name || 'N/A'}</td>
-                  <td>{classItem.classroom_name || classItem.room_name || 'N/A'}</td>
+                  <td>{classItem.subject_name || t('common.na')}</td>
+                  <td>{classItem.teacher_name || t('common.na')}</td>
+                  <td>{classItem.term_number ? t('common.termNumber', { number: classItem.term_number }) : t('common.na')}</td>
+                  <td>{classItem.period_name || t('common.na')}</td>
+                  <td>{classItem.classroom_name || classItem.room_name || t('common.na')}</td>
                   <td>
                     <div className="action-buttons">
                       <button 
                         onClick={() => handleDelete(classItem._id)}
                         className="btn btn--small btn--danger"
                       >
-                        Delete
+                        {t('common.delete')}
                       </button>
                     </div>
                   </td>

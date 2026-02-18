@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface Term {
@@ -18,6 +19,7 @@ interface SchoolYear {
 }
 
 const TermTable: React.FC = () => {
+  const { t } = useTranslation();
   const [terms, setTerms] = useState<Term[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,17 +80,17 @@ const TermTable: React.FC = () => {
       }
 
       if (response.success) {
-        alert(editingTerm ? 'Term updated successfully!' : 'Term created successfully!');
+        alert(editingTerm ? t('admin.terms.updateSuccess') : t('admin.terms.createSuccess'));
         setShowModal(false);
         setEditingTerm(null);
         setFormData({ year_id: '', term_number: 1, start_date: '', end_date: '' });
         fetchTerms();
       } else {
-        alert('Error: ' + (response.error || 'Failed to save term'));
+        alert('Error: ' + (response.error || t('admin.terms.failedSave')));
       }
     } catch (error) {
       console.error('Error saving term:', error);
-      alert('Error saving term');
+      alert(t('admin.terms.failedSave'));
     }
   };
 
@@ -104,25 +106,25 @@ const TermTable: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this term?')) {
+    if (window.confirm(t('admin.terms.confirmDelete'))) {
       try {
         const response = await apiService.deleteTerm(id);
         if (response.success) {
-          alert('Term deleted successfully!');
+          alert(t('admin.terms.deleteSuccess'));
           fetchTerms();
         } else {
-          alert('Error: ' + (response.error || 'Failed to delete term'));
+          alert('Error: ' + (response.error || t('admin.terms.failedDelete')));
         }
       } catch (error) {
         console.error('Error deleting term:', error);
-        alert('Error deleting term');
+        alert(t('admin.terms.failedDelete'));
       }
     }
   };
 
   const getSchoolYearName = (yearId: string) => {
     const year = schoolYears.find(y => y._id === yearId);
-    return year ? year.year_name : 'Unknown Year';
+    return year ? year.year_name : t('admin.terms.unknownYear');
   };
 
   // Filter terms by selected year
@@ -131,19 +133,19 @@ const TermTable: React.FC = () => {
     : terms;
 
   if (loading) {
-    return <div>Loading terms...</div>;
+    return <div>{t('admin.terms.loadingTerms')}</div>;
   }
 
   return (
     <div className="term-management">
       <div className="management-header">
-        <h2>Term Management</h2>
-        <p>Manage academic terms for school years. Terms represent semesters or quarters within a school year.</p>
+        <h2>{t('admin.terms.title')}</h2>
+        <p>{t('admin.terms.subtitle')}</p>
         <button 
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
         >
-          Add New Term
+          {t('admin.terms.addNew')}
         </button>
       </div>
 
@@ -155,7 +157,7 @@ const TermTable: React.FC = () => {
           fontSize: '0.875rem',
           fontWeight: 500 
         }}>
-          Filter by School Year:
+          {t('admin.terms.filterByYear')}
         </label>
         <select
           id="year_filter"
@@ -174,7 +176,7 @@ const TermTable: React.FC = () => {
             appearance: 'menulist'
           }}
         >
-          <option value="">-- All Years --</option>
+          <option value="">{t('common.selectAllYears')}</option>
           {schoolYears.map((year) => (
             <option 
               key={year._id} 
@@ -191,22 +193,22 @@ const TermTable: React.FC = () => {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Term Number</th>
-              <th>School Year</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Actions</th>
+              <th>{t('admin.terms.termNumber')}</th>
+              <th>{t('common.schoolYear')}</th>
+              <th>{t('common.startDate')}</th>
+              <th>{t('common.endDate')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {filteredTerms.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center">No terms found</td>
+                <td colSpan={5} className="text-center">{t('admin.terms.noTerms')}</td>
               </tr>
             ) : (
               filteredTerms.map((term) => (
                 <tr key={term._id}>
-                  <td>Term {term.term_number}</td>
+                  <td>{t('common.termNumber', { number: term.term_number })}</td>
                   <td>{getSchoolYearName(term.year_id)}</td>
                   <td>{new Date(term.start_date).toLocaleDateString()}</td>
                   <td>{new Date(term.end_date).toLocaleDateString()}</td>
@@ -215,13 +217,13 @@ const TermTable: React.FC = () => {
                       className="btn btn-sm btn-secondary"
                       onClick={() => handleEdit(term)}
                     >
-                      Edit
+                      {t('common.edit')}
                     </button>
                     <button 
                       className="btn btn-sm btn-danger"
                       onClick={() => handleDelete(term._id)}
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </td>
                 </tr>
@@ -236,7 +238,7 @@ const TermTable: React.FC = () => {
           <div className="modal__dialog">
             <div className="modal__content">
               <div className="modal__header">
-                <h3>{editingTerm ? 'Edit Term' : 'Add New Term'}</h3>
+                <h3>{editingTerm ? t('admin.terms.editTitle') : t('admin.terms.addTitle')}</h3>
                 <button 
                   className="modal__close"
                   onClick={() => {
@@ -250,14 +252,14 @@ const TermTable: React.FC = () => {
               </div>
               <form onSubmit={handleSubmit} className="student-form">
                 <div className="form-group">
-                  <label htmlFor="year_id">School Year *</label>
+                  <label htmlFor="year_id">{t('admin.terms.schoolYearLabel')}</label>
                   <select
                     id="year_id"
                     value={formData.year_id}
                     onChange={(e) => setFormData({ ...formData, year_id: e.target.value })}
                     required
                   >
-                    <option value="">Select School Year</option>
+                    <option value="">{t('admin.terms.selectSchoolYear')}</option>
                     {schoolYears.map((year) => (
                       <option key={year._id} value={year._id}>
                         {year.year_name}
@@ -267,22 +269,22 @@ const TermTable: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="term_number">Term Number *</label>
+                  <label htmlFor="term_number">{t('admin.terms.termNumberLabel')}</label>
                   <select
                     id="term_number"
                     value={formData.term_number}
                     onChange={(e) => setFormData({ ...formData, term_number: parseInt(e.target.value) })}
                     required
                   >
-                    <option value={1}>Term 1</option>
-                    <option value={2}>Term 2</option>
-                    <option value={3}>Term 3</option>
-                    <option value={4}>Term 4</option>
+                    <option value={1}>{t('admin.terms.term1')}</option>
+                    <option value={2}>{t('admin.terms.term2')}</option>
+                    <option value={3}>{t('admin.terms.term3')}</option>
+                    <option value={4}>{t('admin.terms.term4')}</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="start_date">Start Date *</label>
+                  <label htmlFor="start_date">{t('admin.terms.startDateLabel')}</label>
                   <input
                     type="date"
                     id="start_date"
@@ -293,7 +295,7 @@ const TermTable: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="end_date">End Date *</label>
+                  <label htmlFor="end_date">{t('admin.terms.endDateLabel')}</label>
                   <input
                     type="date"
                     id="end_date"
@@ -305,7 +307,7 @@ const TermTable: React.FC = () => {
 
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
-                    {editingTerm ? 'Update Term' : 'Create Term'}
+                    {editingTerm ? t('admin.terms.updateTerm') : t('admin.terms.createTerm')}
                   </button>
                   <button 
                     type="button" 
@@ -316,7 +318,7 @@ const TermTable: React.FC = () => {
                       setFormData({ year_id: '', term_number: 1, start_date: '', end_date: '' });
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </form>

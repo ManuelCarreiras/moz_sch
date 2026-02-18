@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface Mensality {
@@ -47,6 +48,7 @@ interface StaffSalary {
 type FinancialTab = 'mensality' | 'salary' | 'staff-salary';
 
 export function FinancialManagement() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<FinancialTab>('mensality');
   const [loading, setLoading] = useState(false);
   const [mensalityRecords, setMensalityRecords] = useState<Mensality[]>([]);
@@ -207,11 +209,11 @@ export function FinancialManagement() {
       if (response.success) {
         loadData();
       } else {
-        alert(response.error || 'Failed to update payment status');
+        alert(response.error || t('admin.financial.failedUpdatePayment'));
       }
     } catch (error) {
       console.error('Error updating payment status:', error);
-      alert('Error updating payment status');
+      alert(t('admin.financial.errorUpdatePayment'));
     }
   };
 
@@ -235,21 +237,21 @@ export function FinancialManagement() {
       if (response.success) {
         loadData();
       } else {
-        alert(response.error || 'Failed to update payment status');
+        alert(response.error || t('admin.financial.failedUpdatePayment'));
       }
     } catch (error) {
       console.error('Error updating payment status:', error);
-      alert('Error updating payment status');
+      alert(t('admin.financial.errorUpdatePayment'));
     }
   };
 
   const handleGenerate = async () => {
     if (activeTab === 'mensality' && !generateValue) {
-      alert('Please fill in all required fields');
+      alert(t('common.fillRequiredFields'));
       return;
     }
     if (!generateDueDate) {
-      alert('Please fill in all required fields');
+      alert(t('common.fillRequiredFields'));
       return;
     }
 
@@ -277,7 +279,7 @@ export function FinancialManagement() {
 
       if (response.success) {
         const data = response.data as any;
-        let message = `Successfully generated ${data.created || 0} records`;
+        let message = t('admin.financial.generateSuccess', { count: data.created || 0 });
         if (data.skipped_no_base_salary && data.skipped_no_base_salary.length > 0) {
           message += `\n\nNote: ${data.skipped_no_base_salary.length} teacher(s) skipped (no base salary set): ${data.skipped_no_base_salary.join(', ')}`;
         }
@@ -286,11 +288,11 @@ export function FinancialManagement() {
         setGenerateValue('');
         loadData();
       } else {
-        alert(response.error || 'Failed to generate records');
+        alert(response.error || t('admin.financial.failedGenerate'));
       }
     } catch (error) {
       console.error('Error generating records:', error);
-      alert('Error generating records');
+      alert(t('admin.financial.failedGenerate'));
     } finally {
       setLoading(false);
     }
@@ -363,15 +365,15 @@ export function FinancialManagement() {
 
       const response = await apiService.updateStaffSalaryGrid(salaries);
       if (response.success) {
-        alert(`Successfully updated ${(response.data as any).updated || 0} staff salaries`);
+        alert(t('admin.financial.staffSalarySuccess', { count: (response.data as any).updated || 0 }));
         setShowStaffSalaryGridModal(false);
         loadStaffSalaryGrid();
       } else {
-        alert(response.error || 'Failed to update salaries');
+        alert(response.error || t('admin.financial.failedUpdateSalaries'));
       }
     } catch (error) {
       console.error('Error saving staff salary grid:', error);
-      alert('Error saving staff salary grid');
+      alert(t('admin.financial.failedUpdateSalaries'));
     } finally {
       setLoading(false);
     }
@@ -387,15 +389,15 @@ export function FinancialManagement() {
 
       const response = await apiService.updateTeacherSalaryGrid(salaries);
       if (response.success) {
-        alert(`Successfully updated ${(response.data as any).updated || 0} teacher salaries`);
+        alert(t('admin.financial.teacherSalarySuccess', { count: (response.data as any).updated || 0 }));
         setShowSalaryGridModal(false);
         loadSalaryGrid();
       } else {
-        alert(response.error || 'Failed to update salaries');
+        alert(response.error || t('admin.financial.failedUpdateSalaries'));
       }
     } catch (error) {
       console.error('Error saving salary grid:', error);
-      alert('Error saving salary grid');
+      alert(t('admin.financial.failedUpdateSalaries'));
     } finally {
       setLoading(false);
     }
@@ -409,9 +411,9 @@ export function FinancialManagement() {
   };
 
   const getMonthName = (month: number) => {
-    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[month] || month.toString();
+    const monthKeys = ['', 'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'];
+    return t(`admin.financial.${monthKeys[month]}`) || month.toString();
   };
 
   const getCurrentRecords = () => {
@@ -428,7 +430,7 @@ export function FinancialManagement() {
   return (
     <div className="admin-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-        <h2>Financial Management</h2>
+        <h2>{t('admin.financial.title')}</h2>
         <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
           {(activeTab === 'salary' || activeTab === 'staff-salary') && (
             <button
@@ -446,14 +448,14 @@ export function FinancialManagement() {
                 }
               }}
             >
-              Manage Salary Grid
+              {t('admin.financial.manageSalaryGrid')}
             </button>
           )}
           <button
             className="btn btn--primary"
             onClick={() => setShowGenerateModal(true)}
           >
-            Generate {activeTab === 'mensality' ? 'Mensality' : 'Salaries'} for Month
+            {activeTab === 'mensality' ? t('admin.financial.generateMensalityForMonth') : t('admin.financial.generateSalariesForMonth')}
           </button>
         </div>
       </div>
@@ -464,19 +466,19 @@ export function FinancialManagement() {
           className={`btn ${activeTab === 'mensality' ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => setActiveTab('mensality')}
         >
-          📚 Student Mensality
+          📚 {t('admin.financial.studentMensality')}
         </button>
         <button
           className={`btn ${activeTab === 'salary' ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => setActiveTab('salary')}
         >
-          💰 Teacher Salaries
+          💰 {t('admin.financial.teacherSalaries')}
         </button>
         <button
           className={`btn ${activeTab === 'staff-salary' ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => setActiveTab('staff-salary')}
         >
-          👔 Staff Salaries
+          👔 {t('admin.financial.staffSalaries')}
         </button>
       </div>
 
@@ -488,17 +490,17 @@ export function FinancialManagement() {
         marginBottom: 'var(--space-lg)'
       }}>
         <div style={{ padding: 'var(--space-md)', background: 'var(--surface)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>Total Records</div>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>{t('admin.financial.totalRecords')}</div>
           <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold' }}>{totalRecords}</div>
         </div>
         <div style={{ padding: 'var(--space-md)', background: 'var(--surface)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>Total Paid</div>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>{t('admin.financial.totalPaid')}</div>
           <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: '#10b981' }}>
             {formatCurrency(totalPaid)}
           </div>
         </div>
         <div style={{ padding: 'var(--space-md)', background: 'var(--surface)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>Total Unpaid</div>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>{t('admin.financial.totalUnpaid')}</div>
           <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: '#ef4444' }}>
             {formatCurrency(totalUnpaid)}
           </div>
@@ -516,7 +518,7 @@ export function FinancialManagement() {
         borderRadius: 'var(--radius-md)'
       }}>
         <div>
-          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Month</label>
+          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('common.month')}</label>
           <select
             value={filterMonth}
             onChange={(e) => setFilterMonth(parseInt(e.target.value))}
@@ -528,7 +530,7 @@ export function FinancialManagement() {
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Year</label>
+          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('common.year')}</label>
           <input
             type="number"
             value={filterYear}
@@ -539,26 +541,26 @@ export function FinancialManagement() {
           />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Payment Status</label>
+          <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('admin.financial.paymentStatus')}</label>
           <select
             value={filterPaid}
             onChange={(e) => setFilterPaid(e.target.value)}
             style={{ width: '100%', padding: 'var(--space-sm)' }}
           >
-            <option value="all">All</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
+            <option value="all">{t('common.all')}</option>
+            <option value="paid">{t('admin.financial.paid')}</option>
+            <option value="unpaid">{t('admin.financial.unpaid')}</option>
           </select>
         </div>
         {activeTab === 'mensality' ? (
           <div>
-            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Student</label>
+            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('common.student')}</label>
             <select
               value={filterStudentId}
               onChange={(e) => setFilterStudentId(e.target.value)}
               style={{ width: '100%', padding: 'var(--space-sm)' }}
             >
-              <option value="">All Students</option>
+              <option value="">{t('common.allStudents')}</option>
               {students.map(s => (
                 <option key={s._id} value={s._id}>
                   {s.given_name} {s.surname}
@@ -568,13 +570,13 @@ export function FinancialManagement() {
           </div>
         ) : activeTab === 'salary' ? (
           <div>
-            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Teacher</label>
+            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('common.teacher')}</label>
             <select
               value={filterTeacherId}
               onChange={(e) => setFilterTeacherId(e.target.value)}
               style={{ width: '100%', padding: 'var(--space-sm)' }}
             >
-              <option value="">All Teachers</option>
+              <option value="">{t('common.allTeachers')}</option>
               {teachers.map(t => (
                 <option key={t._id} value={t._id}>
                   {t.given_name} {t.surname}
@@ -584,13 +586,13 @@ export function FinancialManagement() {
           </div>
         ) : (
           <div>
-            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>Staff</label>
+            <label style={{ display: 'block', marginBottom: 'var(--space-xs)', fontSize: 'var(--text-sm)' }}>{t('admin.financial.staffLabel')}</label>
             <select
               value={filterStaffId}
               onChange={(e) => setFilterStaffId(e.target.value)}
               style={{ width: '100%', padding: 'var(--space-sm)' }}
             >
-              <option value="">All Staff</option>
+              <option value="">{t('common.allStaff')}</option>
               {staff.map(s => (
                 <option key={s._id} value={s._id}>
                   {s.given_name} {s.surname} ({s.role})
@@ -603,20 +605,20 @@ export function FinancialManagement() {
 
       {/* Table */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>Loading...</div>
+        <div style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>{t('common.loading')}</div>
       ) : (
         <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--card)', borderBottom: '1px solid var(--border)' }}>
                 <th style={{ padding: 'var(--space-md)', textAlign: 'left' }}>
-                  {activeTab === 'mensality' ? 'Student' : activeTab === 'salary' ? 'Teacher' : 'Staff'}
+                  {activeTab === 'mensality' ? t('common.student') : activeTab === 'salary' ? t('common.teacher') : t('admin.financial.staffLabel')}
                 </th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'right' }}>Amount</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>Due Date</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>Payment Date</th>
-                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>Actions</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'right' }}>{t('admin.financial.amount')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>{t('admin.financial.dueDate')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>{t('admin.financial.status')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>{t('admin.financial.paymentDate')}</th>
+                <th style={{ padding: 'var(--space-md)', textAlign: 'center' }}>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -624,10 +626,10 @@ export function FinancialManagement() {
                 <tr key={record._id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: 'var(--space-md)' }}>
                     {activeTab === 'mensality'
-                      ? (record as Mensality).student_name || 'N/A'
+                      ? (record as Mensality).student_name || t('common.na')
                       : activeTab === 'salary'
-                      ? (record as Salary).teacher_name || 'N/A'
-                      : (record as StaffSalary).staff_name || 'N/A'}
+                      ? (record as Salary).teacher_name || t('common.na')
+                      : (record as StaffSalary).staff_name || t('common.na')}
                   </td>
                   <td style={{ padding: 'var(--space-md)', textAlign: 'right', fontWeight: 'bold' }}>
                     {formatCurrency(record.value)}
@@ -643,7 +645,7 @@ export function FinancialManagement() {
                       color: record.paid ? '#10b981' : '#ef4444',
                       fontWeight: 'bold'
                     }}>
-                      {record.paid ? '✓ Paid' : '✗ Unpaid'}
+                      {record.paid ? t('admin.financial.statusPaid') : t('admin.financial.statusUnpaid')}
                     </span>
                   </td>
                   <td style={{ padding: 'var(--space-md)', textAlign: 'center' }}>
@@ -655,14 +657,14 @@ export function FinancialManagement() {
                         className="btn btn--small btn--secondary"
                         onClick={() => handleMarkAsUnpaid(record._id, activeTab as 'mensality' | 'salary' | 'staff-salary')}
                       >
-                        Mark Unpaid
+                        {t('admin.financial.markUnpaid')}
                       </button>
                     ) : (
                       <button
                         className="btn btn--small btn--primary"
                         onClick={() => handleMarkAsPaid(record._id, activeTab as 'mensality' | 'salary' | 'staff-salary')}
                       >
-                        Mark Paid
+                        {t('admin.financial.markPaid')}
                       </button>
                     )}
                   </td>
@@ -672,7 +674,7 @@ export function FinancialManagement() {
           </table>
           {currentRecords.length === 0 && (
             <div style={{ padding: 'var(--space-xl)', textAlign: 'center', color: 'var(--muted)' }}>
-              No records found for the selected filters.
+              {t('admin.financial.noRecords')}
             </div>
           )}
         </div>
@@ -702,10 +704,14 @@ export function FinancialManagement() {
             overflowY: 'auto'
           }}>
             <h3 style={{ marginBottom: 'var(--space-lg)' }}>
-              Generate {activeTab === 'mensality' ? 'Mensality' : 'Salaries'} for {getMonthName(generateMonth)} {generateYear}
+              {t('admin.financial.generateFor', {
+                type: activeTab === 'mensality' ? t('admin.financial.mensalityType') : t('admin.financial.salariesType'),
+                month: getMonthName(generateMonth),
+                year: generateYear
+              })}
             </h3>
             <div style={{ marginBottom: 'var(--space-md)' }}>
-              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Month</label>
+              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('common.month')}</label>
               <select
                 value={generateMonth}
                 onChange={(e) => setGenerateMonth(parseInt(e.target.value))}
@@ -717,7 +723,7 @@ export function FinancialManagement() {
               </select>
             </div>
             <div style={{ marginBottom: 'var(--space-md)' }}>
-              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Year</label>
+              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('common.year')}</label>
               <input
                 type="number"
                 value={generateYear}
@@ -729,12 +735,12 @@ export function FinancialManagement() {
             </div>
             {activeTab === 'mensality' && (
               <div style={{ marginBottom: 'var(--space-md)' }}>
-                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Amount *</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('admin.financial.amountLabel')}</label>
                 <input
                   type="number"
                   value={generateValue}
                   onChange={(e) => setGenerateValue(e.target.value)}
-                  placeholder="0.00"
+                  placeholder={t('admin.financial.amountPlaceholder')}
                   step="0.01"
                   style={{ width: '100%', padding: 'var(--space-sm)' }}
                   required
@@ -742,7 +748,7 @@ export function FinancialManagement() {
               </div>
             )}
             <div style={{ marginBottom: 'var(--space-lg)' }}>
-              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Due Date *</label>
+              <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('admin.financial.dueDateLabel')}</label>
               <input
                 type="date"
                 value={generateDueDate}
@@ -756,14 +762,14 @@ export function FinancialManagement() {
                 className="btn btn--secondary"
                 onClick={() => setShowGenerateModal(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn--primary"
                 onClick={handleGenerate}
                 disabled={loading}
               >
-                {loading ? 'Generating...' : 'Generate'}
+                {loading ? t('admin.financial.generating') : t('admin.financial.generate')}
               </button>
             </div>
           </div>
@@ -819,15 +825,15 @@ export function FinancialManagement() {
             {/* Header section */}
             <div style={{ padding: 'var(--space-xl)', paddingBottom: 'var(--space-md)' }}>
               <h3 style={{ marginBottom: 'var(--space-md)' }}>
-                Manage Teacher Salary Grid
+                {t('admin.financial.manageSalaryGridTeacher')}
               </h3>
               <p style={{ marginBottom: 'var(--space-md)', color: 'var(--muted)' }}>
-                Set the base monthly salary for each teacher. These values will be used when generating monthly salary records.
+                {t('admin.financial.manageSalaryGridTeacherDesc')}
               </p>
               
               {/* Department Filter */}
               <div style={{ marginBottom: 'var(--space-md)' }}>
-                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Filter by Department</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('admin.financial.filterByDepartment')}</label>
                 <select
                   value={selectedDepartmentId}
                   onChange={(e) => {
@@ -835,7 +841,7 @@ export function FinancialManagement() {
                   }}
                   style={{ width: '100%', padding: 'var(--space-sm)', maxWidth: '300px' }}
                 >
-                  <option value="">All Departments</option>
+                  <option value="">{t('common.allDepartments')}</option>
                   {departments.map((dept) => (
                     <option key={dept._id} value={dept._id}>{dept.department_name}</option>
                   ))}
@@ -852,9 +858,9 @@ export function FinancialManagement() {
               <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '30%' }}>Teacher</th>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '35%' }}>Email</th>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'right', width: '35%' }}>Base Salary</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '30%' }}>{t('common.teacher')}</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '35%' }}>{t('common.email')}</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'right', width: '35%' }}>{t('admin.financial.baseSalary')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -891,7 +897,7 @@ export function FinancialManagement() {
                     ) : (
                       <tr>
                         <td colSpan={3} style={{ padding: 'var(--space-xl)', textAlign: 'center', color: 'var(--muted)' }}>
-                          No teachers found{selectedDepartmentId ? ' in this department' : ''}. (Debug: salaryGrid.length = {salaryGrid.length})
+                          {selectedDepartmentId ? t('admin.financial.noTeachersInDept') : t('admin.financial.noTeachers')}
                         </td>
                       </tr>
                     );
@@ -913,14 +919,14 @@ export function FinancialManagement() {
                 className="btn btn--secondary"
                 onClick={() => setShowSalaryGridModal(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn--primary"
                 onClick={handleSaveSalaryGrid}
                 disabled={loading}
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? t('admin.financial.saving') : t('admin.financial.saveChanges')}
               </button>
             </div>
           </div>
@@ -977,15 +983,15 @@ export function FinancialManagement() {
             {/* Header section */}
             <div style={{ padding: 'var(--space-xl)', paddingBottom: 'var(--space-md)' }}>
               <h3 style={{ marginBottom: 'var(--space-md)' }}>
-                Manage Staff Salary Grid
+                {t('admin.financial.manageSalaryGridStaff')}
               </h3>
               <p style={{ marginBottom: 'var(--space-md)', color: 'var(--muted)' }}>
-                Set the base monthly salary for each staff member. These values will be used when generating monthly salary records.
+                {t('admin.financial.manageSalaryGridStaffDesc')}
               </p>
               
               {/* Role Filter */}
               <div style={{ marginBottom: 'var(--space-md)' }}>
-                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Filter by Role</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>{t('admin.financial.filterByRole')}</label>
                 <select
                   value={selectedRoleFilter}
                   onChange={(e) => {
@@ -993,9 +999,9 @@ export function FinancialManagement() {
                   }}
                   style={{ width: '100%', padding: 'var(--space-sm)', maxWidth: '300px' }}
                 >
-                  <option value="">All Roles</option>
-                  <option value="financial">Financial</option>
-                  <option value="secretary">Secretary</option>
+                  <option value="">{t('admin.financial.allRolesOption')}</option>
+                  <option value="financial">{t('admin.financial.roleFinancial')}</option>
+                  <option value="secretary">{t('admin.financial.roleSecretary')}</option>
                 </select>
               </div>
             </div>
@@ -1009,10 +1015,10 @@ export function FinancialManagement() {
               <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>Staff</th>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>Email</th>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '20%' }}>Role</th>
-                    <th style={{ padding: 'var(--space-md)', textAlign: 'right', width: '30%' }}>Base Salary</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>{t('admin.financial.staffLabel')}</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '25%' }}>{t('common.email')}</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'left', width: '20%' }}>{t('common.role')}</th>
+                    <th style={{ padding: 'var(--space-md)', textAlign: 'right', width: '30%' }}>{t('admin.financial.baseSalary')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1042,7 +1048,7 @@ export function FinancialManagement() {
                   ) : (
                     <tr>
                       <td colSpan={4} style={{ padding: 'var(--space-xl)', textAlign: 'center', color: 'var(--muted)' }}>
-                        No staff members found{selectedRoleFilter ? ' with this role' : ''}.
+                        {selectedRoleFilter ? t('admin.financial.noStaffInRole') : t('admin.financial.noStaff')}
                       </td>
                     </tr>
                   )}
@@ -1063,14 +1069,14 @@ export function FinancialManagement() {
                 className="btn btn--secondary"
                 onClick={() => setShowStaffSalaryGridModal(false)}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 className="btn btn--primary"
                 onClick={handleSaveStaffSalaryGrid}
                 disabled={loading}
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? t('admin.financial.saving') : t('admin.financial.saveChanges')}
               </button>
             </div>
           </div>

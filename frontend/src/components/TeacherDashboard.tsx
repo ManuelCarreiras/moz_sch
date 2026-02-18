@@ -252,8 +252,8 @@ export function TeacherDashboard() {
         return (
           <div className="teacher-content">
             <div style={{ marginBottom: '1.5rem' }}>
-              <h2>Gradebook</h2>
-              <p>Enter and manage student grades for assignments.</p>
+              <h2>{t('teacher.gradebook.title')}</h2>
+              <p>{t('teacher.gradebook.subtitle')}</p>
               
               {/* Cascading Filters */}
               <div style={{ 
@@ -271,7 +271,7 @@ export function TeacherDashboard() {
                     color: 'var(--text)',
                     fontSize: '0.9rem'
                   }}>
-                    School Year:
+                    {t('teacher.gradebook.schoolYearLabel')}
                   </label>
                   <select
                     value={filterYear}
@@ -290,7 +290,7 @@ export function TeacherDashboard() {
                       minWidth: '150px'
                     }}
                   >
-                    <option value="">-- Select Year --</option>
+                    <option value="">{t('teacher.gradebook.selectYearPlaceholder')}</option>
                     {schoolYears.map(year => (
                       <option key={year._id} value={year._id}>
                         {year.year_name}
@@ -308,7 +308,7 @@ export function TeacherDashboard() {
                     color: 'var(--text)',
                     fontSize: '0.9rem'
                   }}>
-                    Term:
+                    {t('teacher.gradebook.termLabel')}
                   </label>
                   <select
                     value={filterTerm}
@@ -333,7 +333,7 @@ export function TeacherDashboard() {
                       cursor: (!filterYear || filteredTerms.length === 0) ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    <option value="">-- Select Term --</option>
+                    <option value="">{t('teacher.gradebook.selectTermPlaceholder')}</option>
                     {(() => {
                       console.log('[Gradebook] About to map filteredTerms, length:', filteredTerms?.length);
                       if (filteredTerms && filteredTerms.length > 0) {
@@ -349,13 +349,13 @@ export function TeacherDashboard() {
                                 display: 'block'
                               }}
                             >
-                              Term {term.term_number}
+                              {t('common.termNumber', { number: term.term_number })}
                             </option>
                           );
                         });
                       } else {
                         console.log('[Gradebook] NO TERMS TO RENDER!');
-                        return <option disabled>No terms available</option>;
+                        return <option disabled>{t('teacher.gradebook.noTermsAvailable')}</option>;
                       }
                     })()}
                   </select>
@@ -370,7 +370,7 @@ export function TeacherDashboard() {
                     color: 'var(--text)',
                     fontSize: '0.9rem'
                   }}>
-                    Subject:
+                    {t('teacher.gradebook.subjectLabel')}
                   </label>
                   <select
                     value={filterSubject}
@@ -388,7 +388,7 @@ export function TeacherDashboard() {
                       minWidth: '150px'
                     }}
                   >
-                    <option value="">-- Select Subject --</option>
+                    <option value="">{t('teacher.gradebook.selectSubjectPlaceholder')}</option>
                     {subjects.map(subject => (
                       <option key={subject._id} value={subject._id}>
                         {subject.subject_name}
@@ -406,7 +406,7 @@ export function TeacherDashboard() {
                     color: 'var(--text)',
                     fontSize: '0.9rem'
                   }}>
-                    Class:
+                    {t('teacher.gradebook.classLabel')}
                   </label>
                   <select
                     value={selectedClassId}
@@ -421,7 +421,7 @@ export function TeacherDashboard() {
                       minWidth: '200px'
                     }}
                   >
-                    <option value="">-- Select Class --</option>
+                    <option value="">{t('teacher.gradebook.selectClassPlaceholder')}</option>
                     {uniqueClasses.map((cls) => (
                       <option key={cls._id} value={cls._id}>
                         {cls.class_name}
@@ -443,10 +443,10 @@ export function TeacherDashboard() {
                 borderRadius: '8px',
                 color: 'var(--muted)'
               }}>
-                {!filterYear ? 'Please select a school year to begin' :
-                 !filterTerm ? 'Please select a term' :
-                 !filterSubject ? 'Please select a subject' :
-                 'Please select a class to view the gradebook'}
+                {!filterYear ? t('teacher.gradebook.selectYearToBegin') :
+                 !filterTerm ? t('teacher.gradebook.selectTerm') :
+                 !filterSubject ? t('teacher.gradebook.selectSubject') :
+                 t('teacher.gradebook.selectClassToView')}
               </div>
             )}
           </div>

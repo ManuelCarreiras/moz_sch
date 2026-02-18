@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface Period {
@@ -18,6 +19,7 @@ interface SchoolYear {
 }
 
 const PeriodTable: React.FC = () => {
+  const { t } = useTranslation();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,17 +75,17 @@ const PeriodTable: React.FC = () => {
       }
 
       if (response.success) {
-        alert(editingPeriod ? 'Period updated successfully!' : 'Period created successfully!');
+        alert(editingPeriod ? t('admin.periods.updateSuccess') : t('admin.periods.createSuccess'));
         setShowModal(false);
         setEditingPeriod(null);
         setFormData({ year_id: '', name: '', start_time: '', end_time: '' });
         fetchPeriods();
       } else {
-        alert('Error: ' + (response.error || 'Failed to save period'));
+        alert('Error: ' + (response.error || t('admin.periods.failedSave')));
       }
     } catch (error) {
       console.error('Error saving period:', error);
-      alert('Error saving period');
+      alert(t('admin.periods.failedSave'));
     }
   };
 
@@ -99,25 +101,25 @@ const PeriodTable: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this period?')) {
+    if (window.confirm(t('admin.periods.confirmDelete'))) {
       try {
         const response = await apiService.deletePeriod(id);
         if (response.success) {
-          alert('Period deleted successfully!');
+          alert(t('admin.periods.deleteSuccess'));
           fetchPeriods();
         } else {
-          alert('Error: ' + (response.error || 'Failed to delete period'));
+          alert('Error: ' + (response.error || t('admin.periods.failedDelete')));
         }
       } catch (error) {
         console.error('Error deleting period:', error);
-        alert('Error deleting period');
+        alert(t('admin.periods.failedDelete'));
       }
     }
   };
 
   const getSchoolYearName = (yearId: string) => {
     const year = schoolYears.find(y => y._id === yearId);
-    return year ? year.year_name : 'Unknown Year';
+    return year ? year.year_name : t('admin.periods.unknownYear');
   };
 
   const formatTime = (dateTime: string) => {
@@ -135,19 +137,19 @@ const PeriodTable: React.FC = () => {
     : periods;
 
   if (loading) {
-    return <div>Loading periods...</div>;
+    return <div>{t('admin.periods.loadingPeriods')}</div>;
   }
 
   return (
     <div className="period-management">
       <div className="management-header">
-        <h2>Period Management</h2>
-        <p>Manage class periods for school years. Periods define the daily schedule for classes (e.g., 1st Period: 08:00-09:00).</p>
+        <h2>{t('admin.periods.title')}</h2>
+        <p>{t('admin.periods.subtitle')}</p>
         <button 
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
         >
-          Add New Period
+          {t('admin.periods.addNew')}
         </button>
       </div>
 
@@ -159,7 +161,7 @@ const PeriodTable: React.FC = () => {
           fontSize: '0.875rem',
           fontWeight: 500 
         }}>
-          Filter by School Year:
+          {t('admin.periods.filterByYear')}
         </label>
         <select
           id="year_filter"
@@ -178,7 +180,7 @@ const PeriodTable: React.FC = () => {
             appearance: 'menulist'
           }}
         >
-          <option value="">-- All Years --</option>
+          <option value="">{t('common.selectAllYears')}</option>
           {schoolYears.map((year) => (
             <option 
               key={year._id} 
@@ -195,17 +197,17 @@ const PeriodTable: React.FC = () => {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Period Name</th>
-              <th>School Year</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Actions</th>
+              <th>{t('admin.periods.periodName')}</th>
+              <th>{t('common.schoolYear')}</th>
+              <th>{t('admin.periods.startTime')}</th>
+              <th>{t('admin.periods.endTime')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {filteredPeriods.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center">No periods found</td>
+                <td colSpan={5} className="text-center">{t('admin.periods.noPeriods')}</td>
               </tr>
             ) : (
               filteredPeriods.map((period) => (
@@ -219,13 +221,13 @@ const PeriodTable: React.FC = () => {
                       className="btn btn-sm btn-secondary"
                       onClick={() => handleEdit(period)}
                     >
-                      Edit
+                      {t('common.edit')}
                     </button>
                     <button 
                       className="btn btn-sm btn-danger"
                       onClick={() => handleDelete(period._id)}
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </td>
                 </tr>
@@ -240,7 +242,7 @@ const PeriodTable: React.FC = () => {
           <div className="modal__dialog">
             <div className="modal__content">
               <div className="modal__header">
-                <h3>{editingPeriod ? 'Edit Period' : 'Add New Period'}</h3>
+                <h3>{editingPeriod ? t('admin.periods.editTitle') : t('admin.periods.addTitle')}</h3>
                 <button 
                   className="modal__close"
                   onClick={() => {
@@ -254,14 +256,14 @@ const PeriodTable: React.FC = () => {
               </div>
               <form onSubmit={handleSubmit} className="student-form">
                 <div className="form-group">
-                  <label htmlFor="year_id">School Year *</label>
+                  <label htmlFor="year_id">{t('admin.periods.schoolYearLabel')}</label>
                   <select
                     id="year_id"
                     value={formData.year_id}
                     onChange={(e) => setFormData({ ...formData, year_id: e.target.value })}
                     required
                   >
-                    <option value="">Select School Year</option>
+                    <option value="">{t('admin.terms.selectSchoolYear')}</option>
                     {schoolYears.map((year) => (
                       <option key={year._id} value={year._id}>
                         {year.year_name}
@@ -271,19 +273,19 @@ const PeriodTable: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="name">Period Name *</label>
+                  <label htmlFor="name">{t('admin.periods.periodNameLabel')}</label>
                   <input
                     type="text"
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., 1st Period, Morning Break, Lunch"
+                    placeholder={t('admin.periods.periodNamePlaceholder')}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="start_time">Start Time *</label>
+                  <label htmlFor="start_time">{t('admin.periods.startTimeLabel')}</label>
                   <input
                     type="time"
                     id="start_time"
@@ -294,7 +296,7 @@ const PeriodTable: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="end_time">End Time *</label>
+                  <label htmlFor="end_time">{t('admin.periods.endTimeLabel')}</label>
                   <input
                     type="time"
                     id="end_time"
@@ -306,7 +308,7 @@ const PeriodTable: React.FC = () => {
 
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
-                    {editingPeriod ? 'Update Period' : 'Create Period'}
+                    {editingPeriod ? t('admin.periods.updatePeriod') : t('admin.periods.createPeriod')}
                   </button>
                   <button 
                     type="button" 
@@ -317,7 +319,7 @@ const PeriodTable: React.FC = () => {
                       setFormData({ year_id: '', name: '', start_time: '', end_time: '' });
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 </div>
               </form>

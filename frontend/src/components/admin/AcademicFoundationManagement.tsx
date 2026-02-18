@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TermTable from './TermTable';
 import PeriodTable from './PeriodTable';
 
 type AcademicFoundationTab = 'terms' | 'periods';
 
 const AcademicFoundationManagement: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<AcademicFoundationTab>('terms');
 
   const tabs = [
-    { id: 'terms' as const, label: 'Terms', description: 'Manage academic terms (semesters/quarters)' },
-    { id: 'periods' as const, label: 'Periods', description: 'Manage daily class periods and schedules' }
+    { id: 'terms' as const, labelKey: 'admin.academicFoundation.termsTab', descriptionKey: 'admin.academicFoundation.termsDesc' },
+    { id: 'periods' as const, labelKey: 'admin.academicFoundation.periodsTab', descriptionKey: 'admin.academicFoundation.periodsDesc' }
   ];
 
   const renderTabContent = () => {
@@ -26,8 +28,8 @@ const AcademicFoundationManagement: React.FC = () => {
   return (
     <div className="academic-foundation-management">
       <div className="management-header">
-        <h1>Academic Foundation Management</h1>
-        <p>Configure the fundamental academic structure including terms, periods, and grading systems.</p>
+        <h1>{t('admin.academicFoundation.title')}</h1>
+        <p>{t('admin.academicFoundation.subtitle')}</p>
       </div>
 
       {/* Tab Navigation */}
@@ -40,8 +42,8 @@ const AcademicFoundationManagement: React.FC = () => {
               onClick={() => setActiveTab(tab.id)}
             >
               <div className="tab-content">
-                <h3>{tab.label}</h3>
-                <p>{tab.description}</p>
+                <h3>{t(tab.labelKey)}</h3>
+                <p>{t(tab.descriptionKey)}</p>
               </div>
             </button>
           ))}
@@ -55,36 +57,36 @@ const AcademicFoundationManagement: React.FC = () => {
 
       {/* Setup Requirements */}
       <div className="setup-requirements">
-        <h3>Setup Requirements</h3>
+        <h3>{t('admin.academicFoundation.setupRequirements')}</h3>
         <div className="requirements-grid">
           <div className="requirement-card">
-            <h4>1. Terms</h4>
-            <p>Create academic terms (semesters or quarters) for each school year. Terms define the academic periods within a school year.</p>
+            <h4>{t('admin.academicFoundation.termsRequirement')}</h4>
+            <p>{t('admin.academicFoundation.termsRequirementDesc')}</p>
             <ul>
-              <li>Term 1, Term 2, Term 3, Term 4</li>
-              <li>Each term needs start and end dates</li>
-              <li>Terms must fall within school year dates</li>
+              <li>{t('admin.academicFoundation.termsExamples')}</li>
+              <li>{t('admin.academicFoundation.termsNeedDates')}</li>
+              <li>{t('admin.academicFoundation.termsWithinYear')}</li>
             </ul>
           </div>
           
           <div className="requirement-card">
-            <h4>2. Periods</h4>
-            <p>Define daily class periods and their schedules. Periods determine when classes are held throughout the day.</p>
+            <h4>{t('admin.academicFoundation.periodsRequirement')}</h4>
+            <p>{t('admin.academicFoundation.periodsRequirementDesc')}</p>
             <ul>
-              <li>1st Period: 08:00-09:00</li>
-              <li>Morning Break: 09:00-09:15</li>
-              <li>2nd Period: 09:15-10:15</li>
-              <li>Lunch: 12:00-13:00</li>
+              <li>{t('admin.academicFoundation.periodExample1')}</li>
+              <li>{t('admin.academicFoundation.periodExample2')}</li>
+              <li>{t('admin.academicFoundation.periodExample3')}</li>
+              <li>{t('admin.academicFoundation.periodExample4')}</li>
             </ul>
           </div>
           
           <div className="requirement-card">
-            <h4>3. Score Ranges (Now in Academic Setup)</h4>
-            <p>Score ranges are now managed within the Subject management section in Academic Setup. Create grading scales when defining subjects.</p>
+            <h4>{t('admin.academicFoundation.scoreRangesNote')}</h4>
+            <p>{t('admin.academicFoundation.scoreRangesDesc')}</p>
             <ul>
-              <li>Go to Academic Setup → Subjects & Score Ranges</li>
-              <li>Create score ranges (A: 90-100%, B: 80-89%, etc.)</li>
-              <li>Assign score ranges to subjects during creation</li>
+              <li>{t('admin.academicFoundation.goToSetup')}</li>
+              <li>{t('admin.academicFoundation.createScoreRanges')}</li>
+              <li>{t('admin.academicFoundation.assignScoreRanges')}</li>
             </ul>
           </div>
         </div>

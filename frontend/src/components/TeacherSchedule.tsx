@@ -213,8 +213,8 @@ export function TeacherSchedule() {
   if (error) {
     return (
       <div className="teacher-content">
-        <h2>My Classes</h2>
-        <p>View your assigned classes and teaching schedule.</p>
+        <h2>{t('teacher.schedule.title')}</h2>
+        <p>{t('teacher.schedule.subtitle')}</p>
         <div className="error-message" style={{ marginTop: 'var(--space-md)' }}>
           {error}
         </div>
@@ -224,15 +224,15 @@ export function TeacherSchedule() {
 
   const grid = organizeTimetableGrid();
   const daysOfWeek = [1, 2, 3, 4, 5];
-  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const dayNames = [t('common.monday'), t('common.tuesday'), t('common.wednesday'), t('common.thursday'), t('common.friday')];
 
   if (!timetable || !grid || grid.periods.length === 0) {
     return (
       <div className="teacher-content">
-        <h2>My Classes</h2>
-        <p>View your assigned classes and teaching schedule.</p>
+        <h2>{t('teacher.schedule.title')}</h2>
+        <p>{t('teacher.schedule.subtitle')}</p>
         <div className="placeholder-content" style={{ marginTop: 'var(--space-md)' }}>
-          <p>No classes assigned yet. Please contact your administrator.</p>
+          <p>{t('teacher.schedule.noClasses')}</p>
         </div>
       </div>
     );
@@ -240,8 +240,8 @@ export function TeacherSchedule() {
 
   return (
     <div className="teacher-content">
-      <h2>My Classes</h2>
-      <p>View your assigned classes and teaching schedule.</p>
+      <h2>{t('teacher.schedule.title')}</h2>
+      <p>{t('teacher.schedule.subtitle')}</p>
 
       {timetable && (
         <div style={{ marginTop: 'var(--space-lg)' }}>
@@ -260,7 +260,7 @@ export function TeacherSchedule() {
             {isAdmin && (
               <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
                 <label htmlFor="teacher-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                  Teacher:
+                  {t('teacher.schedule.teacherLabel')}
                 </label>
                 <select
                   id="teacher-filter"
@@ -277,7 +277,7 @@ export function TeacherSchedule() {
                     minWidth: '200px'
                   }}
                 >
-                  <option value="">All Teachers</option>
+                  <option value="">{t('common.allTeachers')}</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
                       {teacher.given_name} {teacher.surname}
@@ -289,7 +289,7 @@ export function TeacherSchedule() {
 
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
               <label htmlFor="year-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                Year:
+                {t('teacher.schedule.yearLabel')}
               </label>
               <select
                 id="year-filter"
@@ -305,7 +305,7 @@ export function TeacherSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="">All Years</option>
+                <option value="">{t('common.allYears')}</option>
                 {allAvailableYears.map((year) => (
                   <option key={year._id} value={year._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
                     {year.year_name}
@@ -316,7 +316,7 @@ export function TeacherSchedule() {
 
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
               <label htmlFor="term-filter" style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                Term:
+                {t('teacher.schedule.termLabel')}
               </label>
               <select
                 id="term-filter"
@@ -332,12 +332,12 @@ export function TeacherSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="">All Terms</option>
+                <option value="">{t('common.allTerms')}</option>
                 {allAvailableTerms
                   .filter(term => !selectedYearId || String(term.year_id) === String(selectedYearId))
                   .map((term) => (
                     <option key={term._id} value={term._id} style={{ background: 'var(--card)', color: 'var(--text)' }}>
-                      Term {term.term_number}
+                      {t('common.termNumber', { number: term.term_number })}
                     </option>
                   ))}
               </select>
@@ -360,7 +360,7 @@ export function TeacherSchedule() {
                   cursor: 'pointer'
                 }}
               >
-                Clear Filters
+                {t('common.clearFilters')}
               </button>
             )}
           </div>
@@ -376,7 +376,7 @@ export function TeacherSchedule() {
               <thead>
                 <tr style={{ background: 'var(--primary)', color: 'white' }}>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', minWidth: '120px', maxWidth: '120px' }}>
-                    Time
+                    {t('common.time')}
                   </th>
                   {dayNames.map((dayName, idx) => (
                     <th key={idx} style={{ padding: 'var(--space-md)', textAlign: 'center', minWidth: '150px', maxWidth: '150px' }}>
