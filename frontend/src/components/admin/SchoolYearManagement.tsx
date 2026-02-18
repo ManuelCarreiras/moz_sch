@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { YearLevelTable } from './YearLevelTable';
 import { SchoolYearTable } from './SchoolYearTable';
 
@@ -9,11 +10,12 @@ interface SchoolYearManagementProps {
 type SchoolYearTab = 'year-levels' | 'school-years';
 
 export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<SchoolYearTab>('year-levels');
 
   const tabs = [
-    { id: 'year-levels' as SchoolYearTab, label: 'Year Levels', description: 'Manage grade levels with letters (A, B, C) and grades (1st-9th Grade)' },
-    { id: 'school-years' as SchoolYearTab, label: 'School Years', description: 'Manage academic years (2026, 2027, etc.)' }
+    { id: 'year-levels' as SchoolYearTab, labelKey: 'admin.schoolYearManagement.yearLevels', descriptionKey: 'admin.schoolYearManagement.yearLevelsDesc' },
+    { id: 'school-years' as SchoolYearTab, labelKey: 'admin.schoolYearManagement.schoolYears', descriptionKey: 'admin.schoolYearManagement.schoolYearsDesc' }
   ];
 
   const renderTabContent = () => {
@@ -31,14 +33,14 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
     <div className="admin-content">
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
-          ← Back to Academic Setup
+          {t('admin.schoolYearManagement.backToSetup')}
         </button>
       </div>
 
       <div style={{ marginBottom: 'var(--space-xl)' }}>
-        <h2>School Year Management</h2>
+        <h2>{t('admin.schoolYearManagement.title')}</h2>
         <p className="table-description">
-          Complete academic structure management. Set up year levels and school years.
+          {t('admin.schoolYearManagement.subtitle')}
         </p>
       </div>
 
@@ -68,7 +70,7 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
               minWidth: '140px'
             }}
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -82,7 +84,7 @@ export function SchoolYearManagement({ onBack }: SchoolYearManagementProps) {
         borderLeft: '4px solid var(--primary)'
       }}>
         <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-          <strong>{tabs.find(t => t.id === activeTab)?.label}:</strong> {tabs.find(t => t.id === activeTab)?.description}
+          <strong>{tabs.find(t => t.id === activeTab) ? t(tabs.find(t => t.id === activeTab)!.labelKey) : ''}:</strong> {tabs.find(t => t.id === activeTab) ? t(tabs.find(t => t.id === activeTab)!.descriptionKey) : ''}
         </p>
       </div>
 

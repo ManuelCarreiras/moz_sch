@@ -58,15 +58,15 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
       console.log('Teacher creation response:', response);
       if (response.success) {
         console.log('Teacher created successfully, showing alert');
-        alert('Teacher created successfully!');
+        alert(t('admin.teacherWizard.createSuccess'));
         onSuccess();
         onClose();
       } else {
         console.log('Teacher creation failed:', response.error);
-        setError(response.error || 'Failed to create teacher');
+        setError(response.error || t('admin.teacherWizard.failedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating teacher:', err);
     } finally {
       setLoading(false);
@@ -77,15 +77,15 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Create New Teacher</h2>
-          <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
+          <h2>{t('admin.teacherWizard.title')}</h2>
+          <button className="icon-btn" aria-label={t('common.close')} onClick={onClose}>✕</button>
         </div>
 
         <div className="modal__content">
           <form onSubmit={handleSubmit} className="teacher-form">
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="given_name">Given Name *</label>
+                <label htmlFor="given_name">{t('common.givenName')} *</label>
                 <input
                   type="text"
                   id="given_name"
@@ -93,14 +93,14 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                   value={formData.given_name}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter given name"
+                  placeholder={t('common.enterGivenName')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="surname">Surname *</label>
+                <label htmlFor="surname">{t('common.surname')} *</label>
                 <input
                   type="text"
                   id="surname"
@@ -108,14 +108,14 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                   value={formData.surname}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter surname"
+                  placeholder={t('common.enterSurname')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="gender">Gender *</label>
+                <label htmlFor="gender">{t('common.gender')} *</label>
                 <select
                   id="gender"
                   name="gender"
@@ -123,16 +123,16 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                  <option value="Male">{t('common.male')}</option>
+                  <option value="Female">{t('common.female')}</option>
+                  <option value="Other">{t('common.other')}</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="email_address">Email Address *</label>
+                <label htmlFor="email_address">{t('common.email')} *</label>
                 <input
                   type="email"
                   id="email_address"
@@ -140,14 +140,14 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                   value={formData.email_address}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter email address"
+                  placeholder={t('common.enterEmail')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="phone_number">Phone Number *</label>
+                <label htmlFor="phone_number">{t('common.phone')} *</label>
                 <input
                   type="tel"
                   id="phone_number"
@@ -155,7 +155,7 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                   value={formData.phone_number}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter phone number"
+                  placeholder={t('common.enterPhone')}
                 />
               </div>
             </div>
@@ -225,14 +225,14 @@ export function TeacherWizard({ onClose, onSuccess }: TeacherWizardProps) {
                 className="btn btn--secondary"
                 disabled={loading}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading || !formData.given_name || !formData.surname || !formData.email_address || !formData.phone_number || !formData.year_start || !formData.academic_level || formData.years_of_experience === ''}
                 className="btn btn--primary"
               >
-                {loading ? 'Creating...' : 'Create Teacher'}
+                {loading ? t('common.creating') : t('admin.teacherWizard.createTeacher')}
               </button>
             </div>
           </form>

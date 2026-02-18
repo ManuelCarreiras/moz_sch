@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface SchoolYearTableProps {
@@ -13,6 +14,7 @@ interface SchoolYear {
 }
 
 export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
+  const { t } = useTranslation();
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -151,22 +153,22 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
     <div className="admin-content">
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
-          ← Back to School Year Management
+          {t('admin.schoolYears.backToManagement')}
         </button>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
         <div>
-          <h2>School Years Management</h2>
+          <h2>{t('admin.schoolYears.title')}</h2>
           <p className="table-description">
-            Manage academic years with their start and end dates (e.g., 2026, 2027).
+            {t('admin.schoolYears.subtitle')}
           </p>
         </div>
         <button
           onClick={() => setShowForm(true)}
           className="btn btn--primary"
         >
-          Add School Year
+          {t('admin.schoolYears.addNew')}
         </button>
       </div>
 
@@ -180,14 +182,14 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
         <div className="modal" role="dialog" aria-modal="true" onClick={handleCancel}>
           <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>{editingSchoolYear ? 'Edit School Year' : 'Add New School Year'}</h2>
+              <h2>{editingSchoolYear ? t('admin.schoolYears.editTitle') : t('admin.schoolYears.addTitle')}</h2>
               <button onClick={handleCancel} className="icon-btn" aria-label="Close">✕</button>
             </div>
 
             <div className="modal__content">
               <form onSubmit={handleSubmit} className="student-form">
                 <div className="form-group">
-                  <label htmlFor="year_name">Year Name *</label>
+                  <label htmlFor="year_name">{t('admin.schoolYears.yearNameLabel')}</label>
                   <input
                     type="text"
                     id="year_name"
@@ -195,12 +197,12 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
                     value={formData.year_name}
                     onChange={handleInputChange}
                     required
-                    placeholder="e.g., 2026, 2027"
+                    placeholder={t('admin.schoolYears.yearNamePlaceholder')}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="start_date">Start Date *</label>
+                  <label htmlFor="start_date">{t('admin.schoolYears.startDateLabel')}</label>
                   <input
                     type="date"
                     id="start_date"
@@ -210,12 +212,12 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
                     required
                   />
                   <small style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-                    Typically January for your school system
+                    {t('admin.schoolYears.startDateHint')}
                   </small>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="end_date">End Date *</label>
+                  <label htmlFor="end_date">{t('admin.schoolYears.endDateLabel')}</label>
                   <input
                     type="date"
                     id="end_date"
@@ -225,7 +227,7 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
                     required
                   />
                   <small style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-                    Typically November for your school system
+                    {t('admin.schoolYears.endDateHint')}
                   </small>
                 </div>
 
@@ -235,13 +237,13 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
                   onClick={handleCancel}
                   className="btn btn--secondary"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="btn btn--primary"
                 >
-                  {editingSchoolYear ? 'Update' : 'Create'} School Year
+                  {editingSchoolYear ? t('admin.schoolYears.updateSchoolYear') : t('admin.schoolYears.createSchoolYear')}
                 </button>
               </div>
               </form>
@@ -252,18 +254,18 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
 
       {schoolYears.length === 0 ? (
         <div className="no-data">
-          <p>No school years found. Create your first school year to get started.</p>
+          <p>{t('admin.schoolYears.noYears')}</p>
         </div>
       ) : (
         <div className="table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Year Name</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Duration</th>
-                <th>Actions</th>
+                <th>{t('admin.schoolYears.yearName')}</th>
+                <th>{t('common.startDate')}</th>
+                <th>{t('common.endDate')}</th>
+                <th>{t('admin.schoolYears.duration')}</th>
+                <th>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -279,20 +281,20 @@ export function SchoolYearTable({ onBack }: SchoolYearTableProps) {
                       <td>{schoolYear.year_name}</td>
                       <td>{formatDate(schoolYear.start_date)}</td>
                       <td>{formatDate(schoolYear.end_date)}</td>
-                      <td>{duration} months</td>
+                      <td>{t('admin.schoolYears.durationMonths', { count: duration })}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
                           <button
                             onClick={() => handleEdit(schoolYear)}
                             className="btn btn--primary btn--sm"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(schoolYear._id)}
                             className="btn btn--danger btn--sm"
                           >
-                            Delete
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface YearLevelTableProps {
@@ -12,6 +13,7 @@ interface YearLevel {
 }
 
 export function YearLevelTable({ onBack }: YearLevelTableProps) {
+  const { t } = useTranslation();
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,22 +132,22 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
     <div className="admin-content">
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
-          ← Back to School Year Management
+          {t('admin.yearLevels.backToManagement')}
         </button>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
         <div>
-          <h2>Year Levels Management</h2>
+          <h2>{t('admin.yearLevels.title')}</h2>
           <p className="table-description">
-            Manage grade levels with letters (A, B, C) and grade levels (1st Grade to 9th Grade) for academic organization.
+            {t('admin.yearLevels.subtitle')}
           </p>
         </div>
         <button
           onClick={() => setShowForm(true)}
           className="btn btn--primary"
         >
-          Add Year Level
+          {t('admin.yearLevels.addNew')}
         </button>
       </div>
 
@@ -159,14 +161,14 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
         <div className="modal" role="dialog" aria-modal="true" onClick={handleCancel}>
           <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>{editingYearLevel ? 'Edit Year Level' : 'Add New Year Level'}</h2>
+              <h2>{editingYearLevel ? t('admin.yearLevels.editTitle') : t('admin.yearLevels.addTitle')}</h2>
               <button onClick={handleCancel} className="icon-btn" aria-label="Close">✕</button>
             </div>
 
             <div className="modal__content">
               <form onSubmit={handleSubmit} className="student-form">
               <div className="form-group">
-                <label htmlFor="level_name">Level Name *</label>
+                <label htmlFor="level_name">{t('admin.yearLevels.levelNameLabel')}</label>
                 <input
                   type="text"
                   id="level_name"
@@ -174,17 +176,17 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
                   value={formData.level_name}
                   onChange={handleInputChange}
                   required
-                  placeholder="e.g., A, B, C"
+                  placeholder={t('admin.yearLevels.levelNamePlaceholder')}
                   maxLength={1}
                   style={{ textTransform: 'uppercase' }}
                 />
                 <small style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-                  Single letter (A, B, C, D, etc.)
+                  {t('admin.yearLevels.levelNameHint')}
                 </small>
               </div>
 
               <div className="form-group">
-                <label htmlFor="level_order">Grade Level *</label>
+                <label htmlFor="level_order">{t('admin.yearLevels.gradeLevelLabel')}</label>
                 <select
                   id="level_order"
                   name="level_order"
@@ -192,19 +194,19 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Select Grade</option>
-                  <option value="1">1st Grade</option>
-                  <option value="2">2nd Grade</option>
-                  <option value="3">3rd Grade</option>
-                  <option value="4">4th Grade</option>
-                  <option value="5">5th Grade</option>
-                  <option value="6">6th Grade</option>
-                  <option value="7">7th Grade</option>
-                  <option value="8">8th Grade</option>
-                  <option value="9">9th Grade</option>
+                  <option value="">{t('admin.yearLevels.selectGrade')}</option>
+                  <option value="1">{t('admin.yearLevels.grade1')}</option>
+                  <option value="2">{t('admin.yearLevels.grade2')}</option>
+                  <option value="3">{t('admin.yearLevels.grade3')}</option>
+                  <option value="4">{t('admin.yearLevels.grade4')}</option>
+                  <option value="5">{t('admin.yearLevels.grade5')}</option>
+                  <option value="6">{t('admin.yearLevels.grade6')}</option>
+                  <option value="7">{t('admin.yearLevels.grade7')}</option>
+                  <option value="8">{t('admin.yearLevels.grade8')}</option>
+                  <option value="9">{t('admin.yearLevels.grade9')}</option>
                 </select>
                 <small style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-                  Select the grade level (1st Grade to 9th Grade)
+                  {t('admin.yearLevels.gradeLevelHint')}
                 </small>
               </div>
 
@@ -214,13 +216,13 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
                   onClick={handleCancel}
                   className="btn btn--secondary"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="btn btn--primary"
                 >
-                  {editingYearLevel ? 'Update' : 'Create'} Year Level
+                  {editingYearLevel ? t('admin.yearLevels.updateYearLevel') : t('admin.yearLevels.createYearLevel')}
                 </button>
               </div>
               </form>
@@ -231,24 +233,24 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
 
       {yearLevels.length === 0 ? (
         <div className="no-data">
-          <p>No year levels found. Create your first year level to get started.</p>
+          <p>{t('admin.yearLevels.noYearLevels')}</p>
         </div>
       ) : (
         <div className="table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Level Name</th>
-                <th>Grade Level</th>
-                <th>Actions</th>
+                <th>{t('admin.yearLevels.levelName')}</th>
+                <th>{t('admin.yearLevels.gradeLevel')}</th>
+                <th>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
               {yearLevels
                 .sort((a, b) => a.level_order - b.level_order)
                 .map((yearLevel) => {
-                  const gradeNames = ['', '1st Grade', '2nd Grade', '3rd Grade', '4th Grade', '5th Grade', '6th Grade', '7th Grade', '8th Grade', '9th Grade'];
-                  const gradeName = gradeNames[yearLevel.level_order] || `${yearLevel.level_order}th Grade`;
+                  const gradeKeys = ['', 'admin.yearLevels.grade1', 'admin.yearLevels.grade2', 'admin.yearLevels.grade3', 'admin.yearLevels.grade4', 'admin.yearLevels.grade5', 'admin.yearLevels.grade6', 'admin.yearLevels.grade7', 'admin.yearLevels.grade8', 'admin.yearLevels.grade9'];
+                  const gradeName = gradeKeys[yearLevel.level_order] ? t(gradeKeys[yearLevel.level_order]) : `${yearLevel.level_order}th Grade`;
                   
                   return (
                     <tr key={yearLevel._id}>
@@ -260,13 +262,13 @@ export function YearLevelTable({ onBack }: YearLevelTableProps) {
                             onClick={() => handleEdit(yearLevel)}
                             className="btn btn--primary btn--sm"
                           >
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDelete(yearLevel._id)}
                             className="btn btn--danger btn--sm"
                           >
-                            Delete
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>

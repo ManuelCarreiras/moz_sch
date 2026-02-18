@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 export interface Subject {
@@ -33,6 +34,7 @@ interface SubjectTableProps {
 }
 
 export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
+  const { t } = useTranslation();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [scoreRanges, setScoreRanges] = useState<ScoreRange[]>([]);
@@ -65,10 +67,10 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
         setSubjects(Array.isArray(subjectData) ? subjectData : []);
         setError(null);
       } else {
-        setError(response.error || 'Failed to fetch subjects');
+        setError(response.error || t('admin.subjects.failedFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error fetching subjects:', err);
     } finally {
       setLoading(false);
@@ -119,17 +121,17 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
       const response = await apiService.createSubject(subjectData);
 
       if (response.success) {
-        alert('Subject created successfully!');
+        alert(t('admin.subjects.createSuccess'));
         setNewSubjectName('');
         setSelectedDepartmentId('');
         setSelectedScoreRangeId('');
         fetchSubjects();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to create subject');
+        setError(response.error || t('admin.subjects.failedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating subject:', err);
     } finally {
       setIsCreating(false);
@@ -137,7 +139,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this subject?')) {
+    if (!window.confirm(t('admin.subjects.confirmDelete'))) {
       return;
     }
 
@@ -145,14 +147,14 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
       const response = await apiService.deleteSubject(id);
       
       if (response.success) {
-        alert('Subject deleted successfully!');
+        alert(t('admin.subjects.deleteSuccess'));
         fetchSubjects();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to delete subject');
+        setError(response.error || t('admin.subjects.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting subject:', err);
     }
   };
@@ -163,22 +165,22 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
       const response = await apiService.createScoreRange(newScoreRange);
       
       if (response.success) {
-        alert('Score range created successfully!');
+        alert(t('admin.subjects.scoreRangeSuccess'));
         setShowScoreRangeModal(false);
         setNewScoreRange({ grade: '', min_score: 0, max_score: 100 });
         fetchScoreRanges();
       } else {
-        setError(response.error || 'Failed to create score range');
+        setError(response.error || t('admin.subjects.scoreRangeFailed'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating score range:', err);
     }
   };
 
 
   if (loading) {
-    return <div className="loading">Loading subjects...</div>;
+    return <div className="loading">{t('admin.subjects.loadingSubjects')}</div>;
   }
 
   return (
@@ -190,12 +192,12 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
               className="btn btn--secondary"
               onClick={onBack}
             >
-              ← Back to Academic Setup
+              {t('admin.subjects.backToSetup')}
             </button>
           )}
           <div>
-            <h3>Subjects & Score Ranges</h3>
-            <p className="table-description">Define individual subjects and their grading scales. Create score ranges on-demand when creating subjects.</p>
+            <h3>{t('admin.subjects.title')}</h3>
+            <p className="table-description">{t('admin.subjects.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -209,22 +211,22 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
 
       {/* Create Subject Form */}
       <div className="form-section">
-        <h4>Add New Subject</h4>
+        <h4>{t('admin.subjects.addNew')}</h4>
         <form onSubmit={handleCreate} className="form-inline">
           <div className="form-group">
-            <label htmlFor="subjectName">Subject Name *</label>
+            <label htmlFor="subjectName">{t('admin.subjects.nameLabel')}</label>
             <input
               type="text"
               id="subjectName"
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
               required
-              placeholder="e.g., Algebra, Biology, Portuguese"
+              placeholder={t('admin.subjects.namePlaceholder')}
               disabled={isCreating}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="department">Department *</label>
+            <label htmlFor="department">{t('admin.subjects.departmentLabel')}</label>
             <select
               id="department"
               value={selectedDepartmentId}
@@ -232,7 +234,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
               required
               disabled={isCreating}
             >
-              <option value="">Select Department</option>
+              <option value="">{t('admin.subjects.selectDepartment')}</option>
               {departments.map((department) => (
                 <option key={department._id} value={department._id}>
                   {department.department_name}
@@ -241,7 +243,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="scoreRange">Score Range (Optional)</label>
+            <label htmlFor="scoreRange">{t('admin.subjects.scoreRangeLabel')}</label>
             <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
               <select
                 id="scoreRange"
@@ -250,7 +252,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                 disabled={isCreating}
                 style={{ flex: 1 }}
               >
-                <option value="">No Score Range</option>
+                <option value="">{t('admin.subjects.noScoreRange')}</option>
                 {scoreRanges.map((scoreRange) => (
                   <option key={scoreRange._id} value={scoreRange._id}>
                     {scoreRange.grade}: {scoreRange.min_score}-{scoreRange.max_score}%
@@ -263,7 +265,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                 onClick={() => setShowScoreRangeModal(true)}
                 disabled={isCreating}
               >
-                + Create New
+                {t('admin.subjects.createNew')}
               </button>
             </div>
           </div>
@@ -272,38 +274,38 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
             className="btn btn--primary"
             disabled={isCreating || !newSubjectName.trim() || !selectedDepartmentId}
           >
-            {isCreating ? 'Adding...' : 'Add Subject'}
+            {isCreating ? t('common.adding') : t('admin.subjects.addSubject')}
           </button>
         </form>
       </div>
 
       {/* Subjects List */}
       <div className="table-container">
-        <h4>Existing Subjects</h4>
+        <h4>{t('admin.subjects.existing')}</h4>
         {subjects.length === 0 ? (
-          <p className="no-data">No subjects found. Add one above!</p>
+          <p className="no-data">{t('admin.subjects.noSubjects')}</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Subject Name</th>
-                <th>Department</th>
-                <th>Score Range</th>
-                <th>Actions</th>
+                <th>{t('admin.subjects.subjectName')}</th>
+                <th>{t('common.department')}</th>
+                <th>{t('admin.subjects.scoreRange')}</th>
+                <th>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
               {subjects.map((subject) => (
                 <tr key={subject._id}>
                   <td>{subject.subject_name}</td>
-                  <td>{subject.department_name || 'Unknown'}</td>
+                  <td>{subject.department_name || t('common.unknown')}</td>
                   <td>
                     {subject.score_range ? (
                       <span className="grade-badge">
                         {subject.score_range.grade}: {subject.score_range.min_score}-{subject.score_range.max_score}%
                       </span>
                     ) : (
-                      <span className="text-muted">No score range</span>
+                      <span className="text-muted">{t('admin.subjects.noScoreRangeAssigned')}</span>
                     )}
                   </td>
                   <td>
@@ -311,7 +313,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                       onClick={() => handleDelete(subject._id)}
                       className="btn btn--danger btn--small"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </td>
                 </tr>
@@ -328,7 +330,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
             <div className="modal__dialog">
               <div className="modal__content">
                 <div className="modal__header">
-                  <h3>Create New Score Range</h3>
+                  <h3>{t('admin.subjects.createScoreRange')}</h3>
                   <button 
                     className="modal__close"
                     onClick={() => {
@@ -341,20 +343,20 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                 </div>
                 <form onSubmit={handleCreateScoreRange} className="student-form">
                   <div className="form-group">
-                    <label htmlFor="newGrade">Grade *</label>
+                    <label htmlFor="newGrade">{t('admin.subjects.gradeLabel')}</label>
                     <input
                       type="text"
                       id="newGrade"
                       value={newScoreRange.grade}
                       onChange={(e) => setNewScoreRange({ ...newScoreRange, grade: e.target.value.toUpperCase() })}
-                      placeholder="e.g., A, B+, C, F"
+                      placeholder={t('admin.subjects.gradePlaceholder')}
                       maxLength={2}
                       required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="newMinScore">Minimum Score *</label>
+                    <label htmlFor="newMinScore">{t('admin.subjects.minScoreLabel')}</label>
                     <input
                       type="number"
                       id="newMinScore"
@@ -368,7 +370,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="newMaxScore">Maximum Score *</label>
+                    <label htmlFor="newMaxScore">{t('admin.subjects.maxScoreLabel')}</label>
                     <input
                       type="number"
                       id="newMaxScore"
@@ -383,7 +385,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
 
                   <div className="form-actions">
                     <button type="submit" className="btn btn-primary">
-                      Create Score Range
+                      {t('admin.subjects.createScoreRangeBtn')}
                     </button>
                     <button 
                       type="button" 
@@ -393,7 +395,7 @@ export function SubjectTable({ onSuccess, onBack }: SubjectTableProps) {
                         setNewScoreRange({ grade: '', min_score: 0, max_score: 100 });
                       }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </form>

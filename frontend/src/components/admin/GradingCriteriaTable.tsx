@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface GradingCriteria {
@@ -36,6 +37,7 @@ interface Props {
 }
 
 const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
+  const { t } = useTranslation();
   const [criteria, setCriteria] = useState<GradingCriteria[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
@@ -222,11 +224,11 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
     <div className="admin-content">
       <div style={{ marginBottom: '2rem' }}>
         <button onClick={onBack} className="btn btn--secondary" style={{ marginBottom: '1rem' }}>
-          ← Back to Academic Setup
+          {t('admin.gradingCriteria.backToSetup')}
         </button>
         
-        <h2>⚖️ Grading Criteria</h2>
-        <p>Define the weight of Tests, Homework, and Attendance for each subject and year level. Weights must total 100%.</p>
+        <h2>⚖️ {t('admin.gradingCriteria.title')}</h2>
+        <p>{t('admin.gradingCriteria.subtitle')}</p>
       </div>
 
       {error && (
@@ -261,7 +263,7 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
           onClick={() => setShowForm(!showForm)}
           className="btn btn--primary"
         >
-          {showForm ? 'Cancel' : '+ Add Grading Criteria'}
+          {showForm ? t('common.cancel') : t('admin.gradingCriteria.addNew')}
         </button>
       </div>
 
@@ -439,29 +441,29 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
         <table className="data-table">
           <thead>
             <tr>
-              <th>School Year</th>
-              <th>Subject</th>
-              <th>Year Level</th>
-              <th style={{ textAlign: 'right' }}>📝 Tests (%)</th>
-              <th style={{ textAlign: 'right' }}>📚 Homework (%)</th>
-              <th style={{ textAlign: 'right' }}>✅ Attendance (%)</th>
-              <th style={{ textAlign: 'right' }}>Total</th>
-              <th>Description</th>
-              <th>Actions</th>
+              <th>{t('common.schoolYear')}</th>
+              <th>{t('common.subject')}</th>
+              <th>{t('admin.gradingCriteria.yearLevelLabel')}</th>
+              <th style={{ textAlign: 'right' }}>📝 {t('admin.gradingCriteria.testsPercent')}</th>
+              <th style={{ textAlign: 'right' }}>📚 {t('admin.gradingCriteria.homeworkPercent')}</th>
+              <th style={{ textAlign: 'right' }}>✅ {t('admin.gradingCriteria.attendancePercent')}</th>
+              <th style={{ textAlign: 'right' }}>{t('admin.gradingCriteria.total')}</th>
+              <th>{t('common.description')}</th>
+              <th>{t('common.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
                 <td colSpan={9} style={{ textAlign: 'center', padding: '2rem' }}>
-                  Loading...
+                  {t('common.loading')}
                 </td>
               </tr>
             )}
             {!loading && criteria.length === 0 && (
               <tr>
                 <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                  No grading criteria found. Add your first one!
+                  {t('admin.gradingCriteria.noCriteria')}
                 </td>
               </tr>
             )}
@@ -489,13 +491,13 @@ const GradingCriteriaTable: React.FC<Props> = ({ onBack }) => {
                     className="btn btn--small"
                     style={{ marginRight: '0.5rem' }}
                   >
-                    Edit
+                    {t('common.edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(criterion._id)}
                     className="btn btn--small btn--danger"
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 </td>
               </tr>

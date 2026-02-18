@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/apiService';
 
 interface AssessmentType {
@@ -9,6 +10,7 @@ interface AssessmentType {
 }
 
 const AssessmentTypeTable: React.FC = () => {
+  const { t } = useTranslation();
   const [assessmentTypes, setAssessmentTypes] = useState<AssessmentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -88,35 +90,35 @@ const AssessmentTypeTable: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading assessment types...</div>;
+    return <div>{t('admin.assessmentTypes.loadingTypes')}</div>;
   }
 
   return (
     <div className="assessment-type-management">
       <div className="management-header">
-        <h2>Assessment Type Management</h2>
-        <p>Manage types of assignments and evaluations (Homework, Quiz, Test, Project, etc.).</p>
+        <h2>{t('admin.assessmentTypes.title')}</h2>
+        <p>{t('admin.assessmentTypes.subtitle')}</p>
         <button 
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
         >
-          Add New Assessment Type
+          {t('admin.assessmentTypes.addNew')}
         </button>
       </div>
 
       <table className="data-table">
         <thead>
           <tr>
-            <th>Type Name</th>
-            <th>Description</th>
-            <th>Actions</th>
+            <th>{t('admin.assessmentTypes.typeName')}</th>
+            <th>{t('common.description')}</th>
+            <th>{t('common.actions')}</th>
           </tr>
         </thead>
         <tbody>
           {assessmentTypes.length === 0 ? (
             <tr>
               <td colSpan={3} style={{ textAlign: 'center', padding: 'var(--space-lg)' }}>
-                No assessment types found. Click "Add New Assessment Type" to create one.
+                {t('admin.assessmentTypes.noTypes')}
               </td>
             </tr>
           ) : (
@@ -130,13 +132,13 @@ const AssessmentTypeTable: React.FC = () => {
                       className="btn btn-secondary btn-sm"
                       onClick={() => handleEdit(type)}
                     >
-                      Edit
+                      {t('common.edit')}
                     </button>
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleDelete(type._id, type.type_name)}
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </div>
                 </td>
@@ -150,7 +152,7 @@ const AssessmentTypeTable: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingType ? 'Edit Assessment Type' : 'Add New Assessment Type'}</h3>
+              <h3>{editingType ? t('admin.assessmentTypes.editTitle') : t('admin.assessmentTypes.addTitle')}</h3>
               <button 
                 className="modal-close"
                 onClick={() => {
@@ -165,22 +167,22 @@ const AssessmentTypeTable: React.FC = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Type Name *</label>
+                <label>{t('admin.assessmentTypes.typeNameLabel')}</label>
                 <input
                   type="text"
                   value={formData.type_name}
                   onChange={(e) => setFormData({ ...formData, type_name: e.target.value })}
-                  placeholder="e.g., Homework, Quiz, Test, Project"
+                  placeholder={t('admin.assessmentTypes.typeNamePlaceholder')}
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('admin.assessmentTypes.descriptionLabel')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Brief description of this assessment type (optional)"
+                  placeholder={t('admin.assessmentTypes.descriptionPlaceholder')}
                   rows={3}
                 />
               </div>
@@ -195,10 +197,10 @@ const AssessmentTypeTable: React.FC = () => {
                     setFormData({ type_name: '', description: '' });
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingType ? 'Update' : 'Create'} Assessment Type
+                  {editingType ? t('admin.assessmentTypes.updateAssessmentType') : t('admin.assessmentTypes.createAssessmentType')}
                 </button>
               </div>
             </form>

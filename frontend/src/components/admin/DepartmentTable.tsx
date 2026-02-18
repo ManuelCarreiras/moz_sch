@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 export interface Department {
@@ -12,6 +13,7 @@ interface DepartmentTableProps {
 }
 
 export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,10 +34,10 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
         setDepartments(Array.isArray(departmentData) ? departmentData : []);
         setError(null);
       } else {
-        setError(response.error || 'Failed to fetch departments');
+        setError(response.error || t('admin.departments.failedFetch'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error fetching departments:', err);
     } finally {
       setLoading(false);
@@ -55,15 +57,15 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
       });
 
       if (response.success) {
-        alert('Department created successfully!');
+        alert(t('admin.departments.createSuccess'));
         setNewDepartmentName('');
         fetchDepartments();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to create department');
+        setError(response.error || t('admin.departments.failedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating department:', err);
     } finally {
       setIsCreating(false);
@@ -71,7 +73,7 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this department?')) {
+    if (!window.confirm(t('admin.departments.confirmDelete'))) {
       return;
     }
 
@@ -79,20 +81,20 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
       const response = await apiService.deleteDepartment(id);
       
       if (response.success) {
-        alert('Department deleted successfully!');
+        alert(t('admin.departments.deleteSuccess'));
         fetchDepartments();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to delete department');
+        setError(response.error || t('admin.departments.failedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting department:', err);
     }
   };
 
   if (loading) {
-    return <div className="loading">Loading departments...</div>;
+    return <div className="loading">{t('admin.departments.loadingDepartments')}</div>;
   }
 
   return (
@@ -104,12 +106,12 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
               className="btn btn--secondary"
               onClick={onBack}
             >
-              ← Back to Academic Setup
+              {t('admin.departments.backToSetup')}
             </button>
           )}
           <div>
-            <h3>Departments</h3>
-            <p className="table-description">Organize subjects into departments for better management.</p>
+            <h3>{t('admin.departments.title')}</h3>
+            <p className="table-description">{t('admin.departments.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -122,17 +124,17 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
 
       {/* Create Department Form */}
       <div className="form-section">
-        <h4>Add New Department</h4>
+        <h4>{t('admin.departments.addNew')}</h4>
         <form onSubmit={handleCreate} className="form-inline">
           <div className="form-group">
-            <label htmlFor="departmentName">Department Name *</label>
+            <label htmlFor="departmentName">{t('admin.departments.nameLabel')}</label>
             <input
               type="text"
               id="departmentName"
               value={newDepartmentName}
               onChange={(e) => setNewDepartmentName(e.target.value)}
               required
-              placeholder="e.g., Mathematics, Science, Languages"
+              placeholder={t('admin.departments.namePlaceholder')}
               disabled={isCreating}
             />
           </div>
@@ -141,22 +143,22 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
             className="btn btn--primary"
             disabled={isCreating || !newDepartmentName.trim()}
           >
-            {isCreating ? 'Adding...' : 'Add Department'}
+            {isCreating ? t('common.adding') : t('admin.departments.addDepartment')}
           </button>
         </form>
       </div>
 
       {/* Departments List */}
       <div className="table-container">
-        <h4>Existing Departments</h4>
+        <h4>{t('admin.departments.existing')}</h4>
         {departments.length === 0 ? (
-          <p className="no-data">No departments found. Add one above!</p>
+          <p className="no-data">{t('admin.departments.noDepartments')}</p>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Department Name</th>
-                <th>Actions</th>
+                <th>{t('admin.departments.departmentName')}</th>
+                <th>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -168,7 +170,7 @@ export function DepartmentTable({ onSuccess, onBack }: DepartmentTableProps) {
                       onClick={() => handleDelete(department._id)}
                       className="btn btn--danger btn--small"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </td>
                 </tr>

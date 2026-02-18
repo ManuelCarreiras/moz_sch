@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface SimpleGuardianWizardProps {
@@ -14,6 +15,7 @@ interface GuardianFormData {
 }
 
 export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizardProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<GuardianFormData>({
@@ -44,15 +46,15 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
         console.log('Guardian created successfully, showing alert'); // Debug log
         const guardianData = (response.data as any).message || response.data;
         const guardianId = guardianData._id || guardianData.id;
-        alert('Guardian created successfully!'); // Success alert
+        alert(t('admin.simpleGuardianWizard.createSuccess'));
         onSuccess(guardianId);
         onClose();
       } else {
         console.log('Guardian creation failed:', response.error); // Debug log
-        setError(response.error || 'Failed to create guardian');
+        setError(response.error || t('admin.simpleGuardianWizard.failedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating guardian:', err);
     } finally {
       setLoading(false);
@@ -63,15 +65,15 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Create New Guardian</h2>
-          <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
+          <h2>{t('admin.simpleGuardianWizard.title')}</h2>
+          <button className="icon-btn" aria-label={t('common.close')} onClick={onClose}>✕</button>
         </div>
 
         <div className="modal__content">
           <form onSubmit={handleSubmit} className="guardian-form">
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="given_name">Given Name *</label>
+                <label htmlFor="given_name">{t('common.givenName')} *</label>
                 <input
                   type="text"
                   id="given_name"
@@ -79,14 +81,14 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
                   value={formData.given_name}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter given name"
+                  placeholder={t('common.enterGivenName')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="surname">Surname *</label>
+                <label htmlFor="surname">{t('common.surname')} *</label>
                 <input
                   type="text"
                   id="surname"
@@ -94,14 +96,14 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
                   value={formData.surname}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter surname"
+                  placeholder={t('common.enterSurname')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="email_address">Email Address *</label>
+                <label htmlFor="email_address">{t('common.email')} *</label>
                 <input
                   type="email"
                   id="email_address"
@@ -109,14 +111,14 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
                   value={formData.email_address}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter email address"
+                  placeholder={t('common.enterEmail')}
                 />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="phone_number">Phone Number *</label>
+                <label htmlFor="phone_number">{t('common.phone')} *</label>
                 <input
                   type="tel"
                   id="phone_number"
@@ -124,7 +126,7 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
                   value={formData.phone_number}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter phone number"
+                  placeholder={t('common.enterPhone')}
                 />
               </div>
             </div>
@@ -142,14 +144,14 @@ export function SimpleGuardianWizard({ onClose, onSuccess }: SimpleGuardianWizar
                 className="btn btn--secondary"
                 disabled={loading}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading || !formData.given_name || !formData.surname || !formData.email_address || !formData.phone_number}
                 className="btn btn--primary"
               >
-                {loading ? 'Creating...' : 'Create Guardian'}
+                {loading ? t('common.creating') : t('admin.simpleGuardianWizard.createGuardian')}
               </button>
             </div>
           </form>

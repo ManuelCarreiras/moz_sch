@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 interface TeacherDepartmentAssignmentProps {
@@ -20,6 +21,7 @@ interface Department {
 }
 
 export function TeacherDepartmentAssignment({ onBack }: TeacherDepartmentAssignmentProps) {
+  const { t } = useTranslation();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,13 +132,13 @@ export function TeacherDepartmentAssignment({ onBack }: TeacherDepartmentAssignm
     <div className="admin-content">
       <div style={{ marginBottom: 'var(--space-lg)' }}>
         <button onClick={onBack} className="btn btn--secondary">
-          ← Back to Academic Setup
+          {t('admin.teacherDeptAssignment.backToSetup')}
         </button>
       </div>
 
-      <h2>Teacher Department Assignment</h2>
+      <h2>{t('admin.teacherDeptAssignment.title')}</h2>
       <p className="table-description">
-        Assign teachers to departments. Teachers can be assigned to multiple departments simultaneously.
+        {t('admin.teacherDeptAssignment.subtitle')}
       </p>
 
       {error && (
@@ -147,7 +149,7 @@ export function TeacherDepartmentAssignment({ onBack }: TeacherDepartmentAssignm
 
       {teachers.length === 0 ? (
         <div className="no-data">
-          <p>No teachers found. Create teachers first before assigning departments.</p>
+          <p>{t('admin.teacherDeptAssignment.noTeachers')}</p>
         </div>
       ) : (
         <div className="table-container">

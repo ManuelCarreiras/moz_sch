@@ -560,11 +560,11 @@ export function AdminDashboard() {
                   className="btn btn--secondary"
                   onClick={() => setActiveGuardianTab('overview')}
                 >
-                  ← Back to Guardian Management
+                  {t('guardian.backToManagement')}
                 </button>
                 <div>
-                  <h2>Create New Guardian</h2>
-                  <p>Add a new guardian to the system.</p>
+                  <h2>{t('guardian.createGuardian')}</h2>
+                  <p>{t('guardian.creationSubtitle')}</p>
                 </div>
               </div>
               <SimpleGuardianWizard 
@@ -585,11 +585,11 @@ export function AdminDashboard() {
                   className="btn btn--secondary"
                   onClick={() => setActiveGuardianTab('overview')}
                 >
-                  ← Back to Guardian Management
+                  {t('guardian.backToManagement')}
                 </button>
                 <div>
-                  <h2>Assign Guardian to Student</h2>
-                  <p>Link guardians with students and define their relationships.</p>
+                  <h2>{t('guardian.assignGuardian')}</h2>
+                  <p>{t('guardian.assignmentSubtitle')}</p>
                 </div>
               </div>
               <StudentGuardianAssignment 
@@ -604,29 +604,29 @@ export function AdminDashboard() {
         
         return (
           <div className="admin-content">
-            <h2>Guardian Management</h2>
-            <p>Manage guardians and their relationships with students.</p>
+            <h2>{t('guardian.managementTitle')}</h2>
+            <p>{t('guardian.managementDesc')}</p>
             
             <div className="features-grid">
               <div className="feature-card">
-                <h3>👨‍👩‍👧‍👦 Guardian Creation</h3>
-                <p>Create new guardians with personal information and contact details</p>
+                <h3>👨‍👩‍👧‍👦 {t('guardian.creationCardTitle')}</h3>
+                <p>{t('guardian.creationCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveGuardianTab('guardian-creation')}
                 >
-                  Create New Guardian
+                  {t('guardian.createGuardian')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>🔗 Student Assignment</h3>
-                <p>Assign guardians to students and define relationship types (Parent, Grandparent, etc.)</p>
+                <h3>🔗 {t('guardian.assignmentCardTitle')}</h3>
+                <p>{t('guardian.assignmentCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveGuardianTab('student-assignment')}
                 >
-                  Assign Guardian to Student
+                  {t('guardian.assignGuardian')}
                 </button>
               </div>
 
@@ -666,7 +666,7 @@ export function AdminDashboard() {
                 onClick={() => setActiveAcademicTab('overview')}
                 style={{ marginBottom: 'var(--space-lg)' }}
               >
-                ← Back to Academic Setup
+                {t('admin.departments.backToSetup')}
               </button>
               <AssessmentTypeTable />
             </div>
@@ -675,84 +675,84 @@ export function AdminDashboard() {
         
         return (
           <div className="admin-content">
-            <h2>Academic Setup</h2>
-            <p>Configure the foundational academic infrastructure for your school.</p>
+            <h2>{t('admin.academicSetupOverview.title')}</h2>
+            <p>{t('admin.academicSetupOverview.subtitle')}</p>
             
             <div className="features-grid">
               <div className="feature-card">
-                <h3>🏢 Departments</h3>
-                <p>Organize subjects into departments (Mathematics, Science, Languages, Arts, etc.)</p>
+                <h3>🏢 {t('admin.academicSetupOverview.departmentsCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.departmentsCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('departments')}
                 >
-                  Manage Departments
+                  {t('admin.academicSetupOverview.manageDepartments')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>📚 Subjects & Score Ranges</h3>
-                <p>Define individual subjects, courses, and their grading scales. Create score ranges and assign them to subjects.</p>
+                <h3>📚 {t('admin.academicSetupOverview.subjectsCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.subjectsCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('subjects')}
                 >
-                  Manage Subjects & Score Ranges
+                  {t('admin.academicSetupOverview.manageSubjects')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>🏫 Classroom Management</h3>
-                <p>Manage classroom types and physical classroom spaces with capacity planning</p>
+                <h3>🏫 {t('admin.academicSetupOverview.classroomsCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.classroomsCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('classrooms')}
                 >
-                  Manage Classrooms
+                  {t('admin.academicSetupOverview.manageClassrooms')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>👨‍🏫 Teacher Department Assignment</h3>
-                <p>Assign teachers to departments for better organization and class management</p>
+                <h3>👨‍🏫 {t('admin.academicSetupOverview.teacherDeptCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.teacherDeptCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('teacher-departments')}
                 >
-                  Assign Teachers to Departments
+                  {t('admin.academicSetupOverview.assignTeachersToDepts')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>⚖️ Grading Criteria</h3>
-                <p>Define how grades are calculated for each subject and year level (Tests, Homework, Attendance)</p>
+                <h3>⚖️ {t('admin.academicSetupOverview.gradingCriteriaCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.gradingCriteriaCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('grading-criteria')}
                 >
-                  Manage Grading Criteria
+                  {t('admin.academicSetupOverview.manageGradingCriteria')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>📝 Assessment Types</h3>
-                <p>Define types of assignments and evaluations (Homework, Quiz, Test, Project, etc.)</p>
+                <h3>📝 {t('admin.academicSetupOverview.assessmentTypesCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.assessmentTypesCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('assessment-types')}
                 >
-                  Manage Assessment Types
+                  {t('admin.academicSetupOverview.manageAssessmentTypes')}
                 </button>
               </div>
 
               <div className="feature-card">
-                <h3>📅 School Year Management</h3>
-                <p>Complete academic structure: year levels, school years, and student assignments</p>
+                <h3>📅 {t('admin.academicSetupOverview.schoolYearsCardTitle')}</h3>
+                <p>{t('admin.academicSetupOverview.schoolYearsCardDesc')}</p>
                 <button 
                   className="btn btn--primary"
                   onClick={() => setActiveAcademicTab('school-year-management')}
                 >
-                  Manage School Years
+                  {t('admin.academicSetupOverview.manageSchoolYears')}
                 </button>
               </div>
             </div>

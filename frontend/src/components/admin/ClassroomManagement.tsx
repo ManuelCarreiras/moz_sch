@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/apiService';
 
 export interface Classroom {
@@ -22,6 +23,7 @@ interface ClassroomManagementProps {
 type ManagementTab = 'types' | 'classrooms';
 
 export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ManagementTab>('types');
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [classroomTypes, setClassroomTypes] = useState<ClassroomType[]>([]);
@@ -92,15 +94,15 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       });
 
       if (response.success) {
-        alert('Classroom type created successfully!');
+        alert(t('admin.classrooms.typeCreateSuccess'));
         setNewTypeName('');
         fetchClassroomTypes();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to create classroom type');
+        setError(response.error || t('admin.classrooms.typeFailedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating classroom type:', err);
     } finally {
       setIsCreatingType(false);
@@ -108,7 +110,7 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
   };
 
   const handleDeleteType = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this classroom type?')) {
+    if (!window.confirm(t('admin.classrooms.typeConfirmDelete'))) {
       return;
     }
 
@@ -116,14 +118,14 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       const response = await apiService.deleteClassroomType(id);
       
       if (response.success) {
-        alert('Classroom type deleted successfully!');
+        alert(t('admin.classrooms.typeDeleteSuccess'));
         fetchClassroomTypes();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to delete classroom type');
+        setError(response.error || t('admin.classrooms.typeFailedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting classroom type:', err);
     }
   };
@@ -144,17 +146,17 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       });
 
       if (response.success) {
-        alert('Classroom created successfully!');
+        alert(t('admin.classrooms.classroomCreateSuccess'));
         setNewRoomName('');
         setSelectedRoomTypeId('');
         setNewCapacity(1);
         fetchClassrooms();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to create classroom');
+        setError(response.error || t('admin.classrooms.classroomFailedCreate'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error creating classroom:', err);
     } finally {
       setIsCreatingClassroom(false);
@@ -162,7 +164,7 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
   };
 
   const handleDeleteClassroom = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this classroom?')) {
+    if (!window.confirm(t('admin.classrooms.classroomConfirmDelete'))) {
       return;
     }
 
@@ -170,20 +172,20 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       const response = await apiService.deleteClassroom(id);
       
       if (response.success) {
-        alert('Classroom deleted successfully!');
+        alert(t('admin.classrooms.classroomDeleteSuccess'));
         fetchClassrooms();
         if (onSuccess) onSuccess();
       } else {
-        setError(response.error || 'Failed to delete classroom');
+        setError(response.error || t('admin.classrooms.classroomFailedDelete'));
       }
     } catch (err) {
-      setError('Network error occurred');
+      setError(t('common.networkError'));
       console.error('Error deleting classroom:', err);
     }
   };
 
   if (loading) {
-    return <div className="loading">Loading classroom data...</div>;
+    return <div className="loading">{t('admin.classrooms.loadingData')}</div>;
   }
 
   return (
@@ -195,12 +197,12 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
               className="btn btn--secondary"
               onClick={onBack}
             >
-              ← Back to Academic Setup
+              {t('admin.classrooms.backToSetup')}
             </button>
           )}
           <div>
-            <h3>Classroom Management</h3>
-            <p className="table-description">Manage classroom types and physical classroom spaces.</p>
+            <h3>{t('admin.classrooms.title')}</h3>
+            <p className="table-description">{t('admin.classrooms.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -211,13 +213,13 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
           className={`btn ${activeTab === 'types' ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => setActiveTab('types')}
         >
-          Classroom Types
+          {t('admin.classrooms.typesTab')}
         </button>
         <button
           className={`btn ${activeTab === 'classrooms' ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => setActiveTab('classrooms')}
         >
-          Classrooms
+          {t('admin.classrooms.classroomsTab')}
         </button>
       </div>
 
@@ -231,17 +233,17 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       {activeTab === 'types' && (
         <div>
           <div className="form-section">
-            <h4>Add New Classroom Type</h4>
+            <h4>{t('admin.classrooms.addNewType')}</h4>
             <form onSubmit={handleCreateType} className="form-inline">
               <div className="form-group">
-                <label htmlFor="typeName">Classroom Type Name *</label>
+                <label htmlFor="typeName">{t('admin.classrooms.typeNameLabel')}</label>
                 <input
                   type="text"
                   id="typeName"
                   value={newTypeName}
                   onChange={(e) => setNewTypeName(e.target.value)}
                   required
-                  placeholder="e.g., Lab, Lecture Hall, Computer Room, Library"
+                  placeholder={t('admin.classrooms.typeNamePlaceholder')}
                   disabled={isCreatingType}
                 />
               </div>
@@ -250,21 +252,21 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
                 className="btn btn--primary"
                 disabled={isCreatingType || !newTypeName.trim()}
               >
-                {isCreatingType ? 'Adding...' : 'Add Classroom Type'}
+                {isCreatingType ? t('common.adding') : t('admin.classrooms.addType')}
               </button>
             </form>
           </div>
 
           <div className="table-container">
-            <h4>Existing Classroom Types</h4>
+            <h4>{t('admin.classrooms.existingTypes')}</h4>
             {classroomTypes.length === 0 ? (
-              <p className="no-data">No classroom types found. Add one above!</p>
+              <p className="no-data">{t('admin.classrooms.noTypes')}</p>
             ) : (
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Type Name</th>
-                    <th>Actions</th>
+                    <th>{t('admin.classrooms.typeName')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,7 +278,7 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
                           onClick={() => handleDeleteType(type._id)}
                           className="btn btn--danger btn--small"
                         >
-                          Delete
+                          {t('common.delete')}
                         </button>
                       </td>
                     </tr>
@@ -292,22 +294,22 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
       {activeTab === 'classrooms' && (
         <div>
           <div className="form-section">
-            <h4>Add New Classroom</h4>
+            <h4>{t('admin.classrooms.addNewClassroom')}</h4>
             <form onSubmit={handleCreateClassroom} className="form-inline">
               <div className="form-group">
-                <label htmlFor="roomName">Room Name *</label>
+                <label htmlFor="roomName">{t('admin.classrooms.roomNameLabel')}</label>
                 <input
                   type="text"
                   id="roomName"
                   value={newRoomName}
                   onChange={(e) => setNewRoomName(e.target.value)}
                   required
-                  placeholder="e.g., Room 101, Lab A, Library"
+                  placeholder={t('admin.classrooms.roomNamePlaceholder')}
                   disabled={isCreatingClassroom}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="roomType">Room Type *</label>
+                <label htmlFor="roomType">{t('admin.classrooms.roomTypeLabel')}</label>
                 <select
                   id="roomType"
                   value={selectedRoomTypeId}
@@ -315,7 +317,7 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
                   required
                   disabled={isCreatingClassroom}
                 >
-                  <option value="">Select Room Type</option>
+                  <option value="">{t('admin.classrooms.selectRoomType')}</option>
                   {classroomTypes.map((type) => (
                     <option key={type._id} value={type._id}>
                       {type.name}
@@ -324,7 +326,7 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
                 </select>
               </div>
               <div className="form-group">
-                <label htmlFor="capacity">Capacity *</label>
+                <label htmlFor="capacity">{t('admin.classrooms.capacityLabel')}</label>
                 <input
                   type="number"
                   id="capacity"
@@ -340,37 +342,37 @@ export function ClassroomManagement({ onSuccess, onBack }: ClassroomManagementPr
                 className="btn btn--primary"
                 disabled={isCreatingClassroom || !newRoomName.trim() || !selectedRoomTypeId || newCapacity < 1}
               >
-                {isCreatingClassroom ? 'Adding...' : 'Add Classroom'}
+                {isCreatingClassroom ? t('common.adding') : t('admin.classrooms.addClassroom')}
               </button>
             </form>
           </div>
 
           <div className="table-container">
-            <h4>Existing Classrooms</h4>
+            <h4>{t('admin.classrooms.existingClassrooms')}</h4>
             {classrooms.length === 0 ? (
-              <p className="no-data">No classrooms found. Add one above!</p>
+              <p className="no-data">{t('admin.classrooms.noClassrooms')}</p>
             ) : (
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Room Name</th>
-                    <th>Room Type</th>
-                    <th>Capacity</th>
-                    <th>Actions</th>
+                    <th>{t('admin.classrooms.roomName')}</th>
+                    <th>{t('admin.classrooms.roomType')}</th>
+                    <th>{t('common.capacity')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {classrooms.map((classroom) => (
                     <tr key={classroom._id}>
                       <td>{classroom.room_name}</td>
-                      <td>{classroom.room_type_name || 'Unknown'}</td>
+                      <td>{classroom.room_type_name || t('common.unknown')}</td>
                       <td>{classroom.capacity}</td>
                       <td>
                         <button
                           onClick={() => handleDeleteClassroom(classroom._id)}
                           className="btn btn--danger btn--small"
                         >
-                          Delete
+                          {t('common.delete')}
                         </button>
                       </td>
                     </tr>
