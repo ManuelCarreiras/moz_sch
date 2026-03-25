@@ -11,6 +11,27 @@ import { StudentDashboard } from './components/StudentDashboard'
 import { TeacherDashboard } from './components/TeacherDashboard'
 import { GuardianDashboard } from './components/GuardianDashboard'
 import { AdminDashboard } from './components/admin/AdminDashboard'
+import { MarketingFeatures } from './components/marketing/MarketingFeatures'
+import { SchoolManagementSystemPage } from './components/marketing/SchoolManagementSystemPage'
+import { GradebookMarketingPage } from './components/marketing/GradebookMarketingPage'
+import { TimetableMarketingPage } from './components/marketing/TimetableMarketingPage'
+import { FinancialMarketingPage } from './components/marketing/FinancialMarketingPage'
+import { RoleBasedAccessMarketingPage } from './components/marketing/RoleBasedAccessMarketingPage'
+import {
+  FINANCIAL_MANAGEMENT_CANONICAL,
+  FINANCIAL_MANAGEMENT_FEATURE_ALIASES,
+  FINANCIAL_MANAGEMENT_ROOT_ALIASES,
+} from './components/marketing/financialManagementSeoRoutes'
+import {
+  GRADEBOOK_CANONICAL,
+  GRADEBOOK_FEATURE_ALIASES,
+  GRADEBOOK_ROOT_ALIASES,
+} from './components/marketing/gradebookMarketingSeoRoutes'
+import {
+  TIMETABLE_CANONICAL,
+  TIMETABLE_FEATURE_ALIASES,
+  TIMETABLE_ROOT_ALIASES,
+} from './components/marketing/timetableMarketingSeoRoutes'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()
@@ -65,6 +86,55 @@ function AppContent() {
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/landing" replace />} />
+        {/* Marketing / SEO pages (public) */}
+        <Route path="/school-management-system" element={<SchoolManagementSystemPage />} />
+        <Route path="/features" element={<MarketingFeatures />} />
+        <Route path="/features/gradebook" element={<GradebookMarketingPage />} />
+        {GRADEBOOK_FEATURE_ALIASES.map((slug) => (
+          <Route
+            key={`gb-${slug}`}
+            path={`/features/${slug}`}
+            element={<Navigate to={GRADEBOOK_CANONICAL} replace />}
+          />
+        ))}
+        {GRADEBOOK_ROOT_ALIASES.map((slug) => (
+          <Route
+            key={`gb-root-${slug}`}
+            path={`/${slug}`}
+            element={<Navigate to={GRADEBOOK_CANONICAL} replace />}
+          />
+        ))}
+        <Route path="/features/school-timetable" element={<TimetableMarketingPage />} />
+        {TIMETABLE_FEATURE_ALIASES.map((slug) => (
+          <Route
+            key={`tt-${slug}`}
+            path={`/features/${slug}`}
+            element={<Navigate to={TIMETABLE_CANONICAL} replace />}
+          />
+        ))}
+        {TIMETABLE_ROOT_ALIASES.map((slug) => (
+          <Route
+            key={`tt-root-${slug}`}
+            path={`/${slug}`}
+            element={<Navigate to={TIMETABLE_CANONICAL} replace />}
+          />
+        ))}
+        <Route path="/features/financial-management" element={<FinancialMarketingPage />} />
+        {FINANCIAL_MANAGEMENT_FEATURE_ALIASES.map((slug) => (
+          <Route
+            key={slug}
+            path={`/features/${slug}`}
+            element={<Navigate to={FINANCIAL_MANAGEMENT_CANONICAL} replace />}
+          />
+        ))}
+        {FINANCIAL_MANAGEMENT_ROOT_ALIASES.map((slug) => (
+          <Route
+            key={`root-${slug}`}
+            path={`/${slug}`}
+            element={<Navigate to={FINANCIAL_MANAGEMENT_CANONICAL} replace />}
+          />
+        ))}
+        <Route path="/features/role-based-access" element={<RoleBasedAccessMarketingPage />} />
         <Route 
           path="/landing" 
           element={

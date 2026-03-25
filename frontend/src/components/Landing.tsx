@@ -47,6 +47,13 @@ export function Landing() {
             {screenSize !== 'mobile' && (
               <>
                 <a className="nav__link" href="#features">{t('landing.features')}</a>
+                <button
+                  className="nav__link marketingLinkButton"
+                  type="button"
+                  onClick={() => navigate('/features')}
+                >
+                  Solutions
+                </button>
                 <a className="nav__link" href="#docs">{t('landing.docs')}</a>
                 <a className="nav__link" href="#contact">{t('landing.contact')}</a>
               </>
@@ -79,6 +86,21 @@ export function Landing() {
             <h3>{t('landing.feature3Title')}</h3>
             <p>{t('landing.feature3Desc')}</p>
           </div>
+        </section>
+
+        <section className="features">
+          <button className="feature marketingCardButton" onClick={() => navigate('/features/gradebook')}>
+            <h3>Gradebook & grading</h3>
+            <p>Fast grade entry and consistent calculations with weighting and year grades.</p>
+          </button>
+          <button className="feature marketingCardButton" onClick={() => navigate('/features/school-timetable')}>
+            <h3>School timetable</h3>
+            <p>Clear schedules for students and teachers, organized by school year and term.</p>
+          </button>
+          <button className="feature marketingCardButton" onClick={() => navigate('/features/financial-management')}>
+            <h3>Financial management</h3>
+            <p>Track student fees and manage teacher/staff salaries with paid/unpaid status.</p>
+          </button>
         </section>
 
         <footer className="footer">
