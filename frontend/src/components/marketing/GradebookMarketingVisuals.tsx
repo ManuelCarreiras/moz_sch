@@ -13,12 +13,12 @@ export function GradebookMarketingVisuals() {
   const student = useMarketingImage(STUDENT_SHOT)
 
   return (
-    <div className="marketingVisuals">
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+    <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <figure>
+        <div>
           {teacher === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={TEACHER_SHOT}
               alt="Teacher gradebook: filters for year, term, subject, class, and a list of students with grades for one assignment"
             />
@@ -26,16 +26,16 @@ export function GradebookMarketingVisuals() {
             <GradebookModulePreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Teacher online gradebook: pick class and assignment, enter marks, apply weights and rules your school configured.
         </figcaption>
       </figure>
 
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+      <figure>
+        <div>
           {student === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={STUDENT_SHOT}
               alt="Student view of grades showing assignment marks and term average for one subject"
             />
@@ -43,7 +43,7 @@ export function GradebookMarketingVisuals() {
             <GradebookStudentViewPreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Student view: assignment results and averages so families see the same picture the school uses.
         </figcaption>
       </figure>

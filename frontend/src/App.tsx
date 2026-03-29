@@ -17,6 +17,7 @@ import { GradebookMarketingPage } from './components/marketing/GradebookMarketin
 import { TimetableMarketingPage } from './components/marketing/TimetableMarketingPage'
 import { FinancialMarketingPage } from './components/marketing/FinancialMarketingPage'
 import { RoleBasedAccessMarketingPage } from './components/marketing/RoleBasedAccessMarketingPage'
+import { ContactPage } from './components/marketing/ContactPage'
 import {
   FINANCIAL_MANAGEMENT_CANONICAL,
   FINANCIAL_MANAGEMENT_FEATURE_ALIASES,
@@ -135,6 +136,7 @@ function AppContent() {
           />
         ))}
         <Route path="/features/role-based-access" element={<RoleBasedAccessMarketingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route 
           path="/landing" 
           element={

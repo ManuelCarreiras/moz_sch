@@ -16,12 +16,12 @@ export function FinancialMarketingVisuals() {
   const salaryGrid = useMarketingImage(SALARY_GRID_SRC)
 
   return (
-    <div className="marketingVisuals">
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+    <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <figure>
+        <div>
           {mensality === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={MENSALITY_SRC}
               alt="School fee screen with month filters and a list of students showing paid and unpaid monthly fees"
             />
@@ -29,16 +29,16 @@ export function FinancialMarketingVisuals() {
             <FinancialModulePreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Monthly fees (mensality): filters and paid/unpaid list.
         </figcaption>
       </figure>
 
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+      <figure>
+        <div>
           {salaryGrid === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={SALARY_GRID_SRC}
               alt="Teacher salary grid showing base salaries before generating monthly payroll"
             />
@@ -46,7 +46,7 @@ export function FinancialMarketingVisuals() {
             <SalaryGridPreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Salary grid: base amounts, then generate monthly salary lines.
         </figcaption>
       </figure>

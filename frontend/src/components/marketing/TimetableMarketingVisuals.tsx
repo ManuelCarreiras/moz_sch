@@ -11,12 +11,12 @@ export function TimetableMarketingVisuals() {
   const student = useMarketingImage(STUDENT_SHOT)
 
   return (
-    <div className="marketingVisuals">
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+    <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <figure>
+        <div>
           {teacher === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={TEACHER_SHOT}
               alt="Teacher school timetable showing weekly periods, subjects, classes, and rooms"
             />
@@ -24,16 +24,16 @@ export function TimetableMarketingVisuals() {
             <TimetableTeacherPreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Teacher timetable: weekly view with periods, classes, subjects, and rooms for the selected term.
         </figcaption>
       </figure>
 
-      <figure className="marketingVisuals__figure">
-        <div className="marketingVisuals__frame">
+      <figure>
+        <div>
           {student === 'ok' ? (
             <img
-              className="marketingScreenshot"
+              className="w-full rounded-2xl border border-border/50 shadow-lg"
               src={STUDENT_SHOT}
               alt="Student class schedule online for the school week with subjects and teachers"
             />
@@ -41,7 +41,7 @@ export function TimetableMarketingVisuals() {
             <TimetableStudentPreview />
           )}
         </div>
-        <figcaption className="marketingVisuals__caption">
+        <figcaption className="mt-3 text-center text-sm text-muted">
           Student schedule online: same structure, filtered to the logged-in student’s classes.
         </figcaption>
       </figure>
