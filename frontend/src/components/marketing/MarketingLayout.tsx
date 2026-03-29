@@ -180,7 +180,7 @@ export function MarketingLayout({ children }: MarketingLayoutProps) {
                 <span className="text-base font-bold text-text">Santa Isabel</span>
               </Link>
               <p className="text-sm leading-relaxed text-muted">
-                School management platform built for Mozambique. Gradebook, timetable, finances, and more in one system.
+                All-in-one school management platform. Gradebook, timetable, finances, and more in one system.
               </p>
             </div>
 

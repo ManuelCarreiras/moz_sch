@@ -524,12 +524,12 @@ const StudentOverview: React.FC = () => {
         gap: '1rem', 
         marginBottom: '2rem',
         padding: '1rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '4px'
       }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.schoolYear')}
           </label>
           <select
@@ -540,7 +540,7 @@ const StudentOverview: React.FC = () => {
               setFilterSubject('');
               setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
@@ -550,7 +550,7 @@ const StudentOverview: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.term')}
           </label>
           <select
@@ -561,7 +561,7 @@ const StudentOverview: React.FC = () => {
               setFilterClass('');
             }}
             disabled={!filterYear}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allTerms')}</option>
             {terms.map((term) => (
@@ -571,7 +571,7 @@ const StudentOverview: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.subject')}
           </label>
           <select
@@ -580,7 +580,7 @@ const StudentOverview: React.FC = () => {
               setFilterSubject(e.target.value);
               setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
@@ -590,7 +590,7 @@ const StudentOverview: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.class')}
           </label>
           <select
@@ -600,7 +600,7 @@ const StudentOverview: React.FC = () => {
               setSelectedStudent(null);
             }}
             disabled={!filterYear || (!filterTerm && !filterSubject)}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allClasses')}</option>
             {classes.map((cls) => (
@@ -612,7 +612,7 @@ const StudentOverview: React.FC = () => {
         {/* Student Selection (for admin/secretary) */}
         {isAdminOrSecretary && (
           <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.student')}
           </label>
           <select
@@ -623,7 +623,7 @@ const StudentOverview: React.FC = () => {
               setSelectedStudent(student || null);
             }}
             disabled={!filterClass || students.length === 0}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.selectStudent')}</option>
             {students.map((student) => (

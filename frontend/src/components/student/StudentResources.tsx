@@ -200,7 +200,7 @@ const StudentResources: React.FC = () => {
         flexWrap: 'wrap',
       }}>
         <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: 'var(--text)' }}>
             {t('common.schoolYear')}
           </label>
           <select
@@ -209,9 +209,9 @@ const StudentResources: React.FC = () => {
             style={{
               width: '100%',
               padding: '8px',
-              backgroundColor: '#2a2a3a',
-              color: '#fff',
-              border: '1px solid #444',
+              backgroundColor: 'var(--card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
               borderRadius: '5px',
               fontSize: '14px',
             }}
@@ -226,7 +226,7 @@ const StudentResources: React.FC = () => {
         </div>
 
         <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: 'var(--text)' }}>
             {t('common.subject')}
           </label>
           <select
@@ -235,9 +235,9 @@ const StudentResources: React.FC = () => {
             style={{
               width: '100%',
               padding: '8px',
-              backgroundColor: '#2a2a3a',
-              color: '#fff',
-              border: '1px solid #444',
+              backgroundColor: 'var(--card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
               borderRadius: '5px',
               fontSize: '14px',
             }}
@@ -252,7 +252,7 @@ const StudentResources: React.FC = () => {
         </div>
 
         <div style={{ flex: '1', minWidth: '200px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#ccc' }}>
+          <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: 'var(--text)' }}>
             {t('common.grade')}
           </label>
           <select
@@ -261,9 +261,9 @@ const StudentResources: React.FC = () => {
             style={{
               width: '100%',
               padding: '8px',
-              backgroundColor: '#2a2a3a',
-              color: '#fff',
-              border: '1px solid #444',
+              backgroundColor: 'var(--card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
               borderRadius: '5px',
               fontSize: '14px',
             }}
@@ -288,15 +288,15 @@ const StudentResources: React.FC = () => {
 
       {/* Resources List */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#ccc' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--muted)' }}>
           {t('student.resources.loadingResources')}
         </div>
       ) : resources.length === 0 ? (
         <div style={{ 
           textAlign: 'center', 
           padding: '40px', 
-          color: '#888',
-          backgroundColor: '#2a2a3a',
+          color: 'var(--muted)',
+          backgroundColor: 'var(--surface)',
           borderRadius: '8px',
         }}>
           {t('student.resources.noResources')}
@@ -310,19 +310,19 @@ const StudentResources: React.FC = () => {
             <div
               key={resource._id}
               style={{
-                backgroundColor: '#2a2a3a',
+                backgroundColor: 'var(--card)',
                 padding: '20px',
                 borderRadius: '8px',
-                border: '1px solid #444',
+                border: '1px solid var(--border)',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                 <div style={{ flex: '1' }}>
-                  <h3 style={{ margin: '0 0 10px 0', color: '#fff', fontSize: '18px' }}>
+                  <h3 style={{ margin: '0 0 10px 0', color: 'var(--text)', fontSize: '18px' }}>
                     {resource.title}
                   </h3>
                   {resource.description && (
-                    <p style={{ margin: '0 0 10px 0', color: '#aaa', fontSize: '14px' }}>
+                    <p style={{ margin: '0 0 10px 0', color: 'var(--muted)', fontSize: '14px' }}>
                       {resource.description}
                     </p>
                   )}
@@ -331,7 +331,7 @@ const StudentResources: React.FC = () => {
                     gap: '15px', 
                     flexWrap: 'wrap',
                     fontSize: '13px',
-                    color: '#888',
+                    color: 'var(--muted)',
                     marginTop: '10px',
                   }}>
                     <span>📄 {resource.file_name}</span>

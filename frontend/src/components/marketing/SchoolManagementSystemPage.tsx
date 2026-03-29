@@ -84,7 +84,7 @@ export function SchoolManagementSystemPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-text sm:text-3xl">What makes this different</h2>
           <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted">
-            Most school tools are either too simple (a spreadsheet replacement) or too complex (enterprise ERP). This platform sits in between: purpose-built for K-12 school operations in Mozambique, with modules that share data so your team does not re-enter the same information across disconnected tools.
+            Most school tools are either too simple (a spreadsheet replacement) or too complex (enterprise ERP). This platform sits in between: purpose-built for K-12 school operations, with modules that share data so your team does not re-enter the same information across disconnected tools.
           </p>
         </div>
       </section>
@@ -167,7 +167,7 @@ export function SchoolManagementSystemPage() {
               </p>
               <div className="mt-4 border-t border-border/30 pt-4">
                 <p className="text-sm font-semibold text-text">Head of Department</p>
-                <p className="text-xs text-muted">Secondary school, Mozambique</p>
+                <p className="text-xs text-muted">Secondary school</p>
               </div>
             </div>
             <div className="rounded-2xl border border-border/50 bg-card p-6">
@@ -176,7 +176,7 @@ export function SchoolManagementSystemPage() {
               </p>
               <div className="mt-4 border-t border-border/30 pt-4">
                 <p className="text-sm font-semibold text-text">School Director</p>
-                <p className="text-xs text-muted">Primary school, Mozambique</p>
+                <p className="text-xs text-muted">Primary school</p>
               </div>
             </div>
           </div>

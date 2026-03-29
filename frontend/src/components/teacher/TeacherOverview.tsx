@@ -302,8 +302,8 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
       <div style={{ 
         textAlign: 'center',
         padding: '1.5rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '8px',
         transition: 'transform 0.2s ease',
       }}
@@ -318,7 +318,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
               cy="80"
               r={radius}
               fill="none"
-              stroke="rgba(255, 255, 255, 0.1)"
+              stroke="var(--border)"
               strokeWidth="12"
             />
             {/* Progress circle */}
@@ -353,7 +353,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             </div>
             <div style={{ 
               fontSize: '0.75rem', 
-              color: '#aaa',
+              color: 'var(--muted)',
               marginTop: '0.25rem'
             }}>
               {isTermGrade ? `${percentage.toFixed(0)}%` : `of ${max}%`}
@@ -363,7 +363,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         <div style={{ 
           fontSize: '1rem', 
           fontWeight: 500,
-          color: '#fff',
+          color: 'var(--text)',
           marginTop: '0.5rem'
         }}>
           {label}
@@ -394,13 +394,13 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         gap: '1rem', 
         marginBottom: '2rem',
         padding: '1rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '4px'
       }}>
         {isAdminOrSecretary && (
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
               {t('common.teacher')}
             </label>
             <select
@@ -425,7 +425,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         )}
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.schoolYear')}
           </label>
           <select
@@ -446,7 +446,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.term')}
           </label>
           <select
@@ -467,7 +467,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.subject')}
           </label>
           <select
@@ -486,7 +486,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.class')}
           </label>
           <select
@@ -523,14 +523,14 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
           {/* Test Score Distribution */}
           {testScores.length > 0 && (
             <div style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '2rem',
               marginBottom: '1.5rem',
               overflow: 'visible'
             }}>
-              <h3 style={{ marginBottom: '1.5rem', color: '#fff', fontSize: '1.5rem' }}>{t('teacher.overview.testScoreDistribution')}</h3>
+              <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)', fontSize: '1.5rem' }}>{t('teacher.overview.testScoreDistribution')}</h3>
               
               {/* Enhanced Statistics */}
               <div style={{ 
@@ -539,35 +539,35 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
                 gap: '1.5rem', 
                 marginBottom: '2rem',
                 padding: '1rem',
-                background: 'rgba(255, 255, 255, 0.03)',
+                background: 'var(--card)',
                 borderRadius: '6px'
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mean (μ)</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mean (μ)</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#4a9eff' }}>
                     {testScoreStats.mean.toFixed(1)}%
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Median</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Median</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#9b59b6' }}>
                     {testScoreStats.median.toFixed(1)}%
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Std Dev (σ)</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Std Dev (σ)</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f39c12' }}>
                     {testScoreStats.stdDev.toFixed(1)}%
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Range</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#fff' }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Range</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text)' }}>
                     {testScoreStats.min.toFixed(1)} - {testScoreStats.max.toFixed(1)}%
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Count</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Count</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#2ecc71' }}>
                     {testScoreStats.count}
                   </div>
@@ -575,7 +575,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
               </div>
 
               {/* Score Distribution Chart */}
-              <div style={{ position: 'relative', padding: '1.5rem 1rem 3rem 1rem', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', overflow: 'visible' }}>
+              <div style={{ position: 'relative', padding: '1.5rem 1rem 3rem 1rem', background: 'var(--card)', borderRadius: '8px', overflow: 'visible' }}>
                 {/* Histogram */}
                 <div style={{ 
                   display: 'flex', 
@@ -642,7 +642,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
                               bottom: `${barHeight + 8}px`,
                               fontSize: '0.85rem',
                               fontWeight: '600',
-                              color: '#fff',
+                              color: 'var(--text)',
                               background: 'rgba(0, 0, 0, 0.8)',
                               padding: '0.2rem 0.5rem',
                               borderRadius: '4px',
@@ -689,7 +689,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
                         <div style={{ 
                           marginTop: '0.5rem', 
                           fontSize: '0.75rem', 
-                          color: '#aaa',
+                          color: 'var(--muted)',
                           textAlign: 'center',
                           fontWeight: 500
                         }}>
@@ -703,7 +703,7 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
             </div>
           )}
 
-          <div style={{ color: '#aaa', fontSize: '0.9rem' }}>
+          <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
             {t('teacher.overview.showingMetrics', { count: students.length })}
           </div>
         </>
@@ -711,11 +711,11 @@ const TeacherOverview: React.FC<TeacherOverviewProps> = ({ isAdmin = false, isSe
         <div style={{ 
           textAlign: 'center', 
           padding: '3rem', 
-          background: 'rgba(255, 255, 255, 0.05)', 
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'var(--surface)', 
+          border: '1px solid var(--border)',
           borderRadius: '4px' 
         }}>
-          <p style={{ fontSize: '1.1rem', color: '#666' }}>
+          <p style={{ fontSize: '1.1rem', color: 'var(--muted)' }}>
             {loading ? t('common.loadingData') : t('teacher.overview.noStudents')}
           </p>
         </div>

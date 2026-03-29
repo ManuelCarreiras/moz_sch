@@ -269,13 +269,13 @@ const TeacherStudents: React.FC = () => {
         gap: '1rem', 
         marginBottom: '1.5rem',
         padding: '1rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '4px'
       }}>
         {isAdmin && (
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
               {t('common.teacher')}
             </label>
             <select
@@ -287,7 +287,7 @@ const TeacherStudents: React.FC = () => {
                 setFilterSubject('');
                 setFilterClass('');
               }}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
             >
               <option value="">{t('common.allTeachers')}</option>
               {teachers.map((teacher) => (
@@ -300,7 +300,7 @@ const TeacherStudents: React.FC = () => {
         )}
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.schoolYear')}
           </label>
           <select
@@ -311,7 +311,7 @@ const TeacherStudents: React.FC = () => {
               setFilterSubject('');
               setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
@@ -321,7 +321,7 @@ const TeacherStudents: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.term')}
           </label>
           <select
@@ -332,7 +332,7 @@ const TeacherStudents: React.FC = () => {
               setFilterClass('');
             }}
             disabled={!filterYear}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allTerms')}</option>
             {terms.map((term) => (
@@ -342,7 +342,7 @@ const TeacherStudents: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.subject')}
           </label>
           <select
@@ -351,7 +351,7 @@ const TeacherStudents: React.FC = () => {
               setFilterSubject(e.target.value);
               setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
@@ -361,14 +361,14 @@ const TeacherStudents: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>
             {t('common.class')}
           </label>
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             disabled={!filterYear || (!filterTerm && !filterSubject)}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allClasses')}</option>
             {classes.map((cls) => (
@@ -400,17 +400,17 @@ const TeacherStudents: React.FC = () => {
         <div style={{ 
           textAlign: 'center', 
           padding: '3rem', 
-          background: 'rgba(255, 255, 255, 0.05)', 
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'var(--surface)', 
+          border: '1px solid var(--border)',
           borderRadius: '4px' 
         }}>
-          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '1rem' }}>
+          <p style={{ fontSize: '1.1rem', color: 'var(--muted)', marginBottom: '1rem' }}>
             {loading ? t('teacher.students.loadingStudents') : t('teacher.students.noStudents')}
           </p>
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: '1rem', color: '#fff', fontSize: '0.9rem' }}>
+          <div style={{ marginBottom: '1rem', color: 'var(--text)', fontSize: '0.9rem' }}>
             {t('teacher.students.showingStudents', { count: students.length })}
           </div>
           <div style={{ overflowX: 'auto' }}>
@@ -432,14 +432,14 @@ const TeacherStudents: React.FC = () => {
                     <td>
                       <strong>{student.student_name}</strong>
                     </td>
-                    <td style={{ fontSize: '0.9rem', color: '#aaa' }}>
+                    <td style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
                       {student.email || '-'}
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ 
-                            background: 'rgba(255, 255, 255, 0.1)', 
+                            background: 'var(--border)', 
                             borderRadius: '4px', 
                             height: '20px',
                             position: 'relative',
@@ -461,7 +461,7 @@ const TeacherStudents: React.FC = () => {
                         }}>
                           {student.homework_completion_ratio.toFixed(1)}%
                         </span>
-                        <span style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
                           ({student.homework_completed}/{student.homework_total})
                         </span>
                       </div>
@@ -470,7 +470,7 @@ const TeacherStudents: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ 
-                            background: 'rgba(255, 255, 255, 0.1)', 
+                            background: 'var(--border)', 
                             borderRadius: '4px', 
                             height: '20px',
                             position: 'relative',
@@ -492,7 +492,7 @@ const TeacherStudents: React.FC = () => {
                         }}>
                           {student.attendance_ratio.toFixed(1)}%
                         </span>
-                        <span style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
                           ({student.attendance_present}/{student.attendance_total})
                         </span>
                       </div>
@@ -507,7 +507,7 @@ const TeacherStudents: React.FC = () => {
                         }}>
                           {student.test_average.toFixed(1)}%
                         </span>
-                        <span style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
                           ({student.test_count}/{student.test_total} tests)
                         </span>
                       </div>
@@ -520,8 +520,8 @@ const TeacherStudents: React.FC = () => {
                               <span 
                                 key={idx}
                                 style={{
-                                  background: 'rgba(59, 130, 246, 0.2)',
-                                  color: '#93c5fd',
+                                  background: 'var(--primary-light)',
+                                  color: 'var(--primary)',
                                   padding: '0.2rem 0.5rem',
                                   borderRadius: '4px',
                                   fontSize: '0.85rem'
@@ -535,7 +535,7 @@ const TeacherStudents: React.FC = () => {
                       </div>
                     </td>
                     <td>
-                      <div style={{ fontSize: '0.9rem', color: '#aaa' }}>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
                         {student.classes.length > 0 
                           ? student.classes.slice(0, 2).join(', ') + (student.classes.length > 2 ? '...' : '')
                           : '-'}

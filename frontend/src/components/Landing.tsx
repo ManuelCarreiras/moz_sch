@@ -11,7 +11,7 @@ export function Landing() {
     <MarketingLayout>
       <Seo
         title="Escola Santa Isabel — School Management Platform"
-        description="School management platform for Mozambique: gradebook, timetable, financial management, and role-based access in one system."
+        description="All-in-one school management platform: gradebook, timetable, financial management, and role-based access in one system."
         canonicalPath="/"
       />
 
@@ -144,7 +144,7 @@ export function Landing() {
       {/* Social proof placeholder */}
       <section className="border-t border-border/30 bg-surface/30 py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted">Trusted by schools in Mozambique</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-muted">Trusted by schools worldwide</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             <div className="text-center">
               <p className="text-3xl font-bold text-text">500+</p>

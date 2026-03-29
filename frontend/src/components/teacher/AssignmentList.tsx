@@ -285,8 +285,8 @@ const AssignmentList: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, React.CSSProperties> = {
       draft: { background: '#ffc107', color: '#000' },
-      published: { background: '#28a745', color: '#fff' },
-      closed: { background: '#6c757d', color: '#fff' }
+      published: { background: '#28a745', color: 'var(--text)' },
+      closed: { background: '#6c757d', color: 'var(--text)' }
     };
 
     return (
@@ -328,12 +328,12 @@ const AssignmentList: React.FC = () => {
         gap: '1rem', 
         marginBottom: '1.5rem',
         padding: '1rem',
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '4px'
       }}>
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.schoolYear')}</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>{t('common.schoolYear')}</label>
           <select
             value={filterYear}
             onChange={(e) => {
@@ -341,7 +341,7 @@ const AssignmentList: React.FC = () => {
               // Reset class filter when year changes
               if (filterClass) setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allYears')}</option>
             {schoolYears.map((year) => (
@@ -351,7 +351,7 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.subject')}</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>{t('common.subject')}</label>
           <select
             value={filterSubject}
             onChange={(e) => {
@@ -359,7 +359,7 @@ const AssignmentList: React.FC = () => {
               // Reset class filter when subject changes
               if (filterClass) setFilterClass('');
             }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allSubjects')}</option>
             {subjects.map((subject) => (
@@ -369,11 +369,11 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.class')}</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>{t('common.class')}</label>
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allClasses')}</option>
             {getUniqueClasses().map(({ id, name }) => (
@@ -383,11 +383,11 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.type')}</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>{t('common.type')}</label>
           <select
             value={filterAssessmentType}
             onChange={(e) => setFilterAssessmentType(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allTypes')}</option>
             {assessmentTypes.map((type) => (
@@ -397,11 +397,11 @@ const AssignmentList: React.FC = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: '#fff' }}>{t('common.status')}</label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, color: 'var(--text)' }}>{t('common.status')}</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
           >
             <option value="">{t('common.allStatuses')}</option>
             <option value="draft">{t('teacher.assignments.statusDraft')}</option>
@@ -434,11 +434,11 @@ const AssignmentList: React.FC = () => {
         <div style={{ 
           textAlign: 'center', 
           padding: '3rem', 
-          background: 'rgba(255, 255, 255, 0.05)', 
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'var(--surface)', 
+          border: '1px solid var(--border)',
           borderRadius: '4px' 
         }}>
-          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '1rem' }}>
+          <p style={{ fontSize: '1.1rem', color: 'var(--muted)', marginBottom: '1rem' }}>
             {assignments.length === 0 
               ? t('teacher.assignments.noAssignmentsYet')
               : t('teacher.assignments.noAssignmentsFilter')}
@@ -472,7 +472,7 @@ const AssignmentList: React.FC = () => {
                 <td>
                   <strong>{assignment.title}</strong>
                   {assignment.description && (
-                    <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.25rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
                       {assignment.description.substring(0, 60)}
                       {assignment.description.length > 60 && '...'}
                     </div>
@@ -506,7 +506,7 @@ const AssignmentList: React.FC = () => {
         </table>
       )}
 
-      <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
+      <div style={{ marginTop: '1rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
         {t('teacher.assignments.showingAssignments', { count: filteredAssignments.length, total: assignments.length })}
       </div>
 
